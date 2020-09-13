@@ -633,11 +633,6 @@
               <FilePath>..\HARDWARE\adc.c</FilePath>
             </File>
             <File>
-              <FileName>eo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\eo.c</FilePath>
-            </File>
-            <File>
               <FileName>led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\led.c</FilePath>

@@ -239,7 +239,7 @@ namespace NickelBird
 					mat.Transform(buff, 0, buff, 14);
 					logmat.TransformLog(buff, 0, buff, 14);
 					for (int i = 14; i < buff.Count; i++)
-						sensorDatas[i].SetRawValue((float)buff[i]);
+						sensorDatas[i].SetRawValue((float)buff[i]);					
 					if (isLogging)
 					{
 						isWritingFile = true;
@@ -292,7 +292,7 @@ namespace NickelBird
 							graphSum[i] += sensorDatas[config.PlotData[i]].LpfValue;
 							
 						}						
-						for(int i=0;i<1;i++)
+						for(int i=0;i<2;i++)
 						{
 							flightState.TableData[i] = sensorDatas[config.TableData[i]].LpfValue;
 						}
@@ -502,6 +502,14 @@ namespace NickelBird
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
+			saveConfig();
+			//StreamWriter sw = new StreamWriter(Environment.CurrentDirectory + "\\config\\configFile.txt");
+			//sw.WriteLine("config.xml");
+			//sw.Close();
+		}
+
+		private void saveConfig()
+		{
 			for (int i = 0; i < config.Offsets.Length; i++)
 			{
 				config.Names[i] = sensorDatas[i].Name;
@@ -524,12 +532,9 @@ namespace NickelBird
 			config.LogNameBackup[5] = nameText.Text;
 
 			XmlSerializer xs = new XmlSerializer(typeof(Config));
-			Stream s = new FileStream(Environment.CurrentDirectory + "\\config\\"+config.ConfigName, FileMode.Create, FileAccess.Write, FileShare.None);
+			Stream s = new FileStream(Environment.CurrentDirectory + "\\config\\" + config.ConfigName, FileMode.Create, FileAccess.Write, FileShare.None);
 			xs.Serialize(s, config);
 			s.Close();
-			//StreamWriter sw = new StreamWriter(Environment.CurrentDirectory + "\\config\\configFile.txt");
-			//sw.WriteLine("config.xml");
-			//sw.Close();
 		}
 
 		private void LogBtn_Click(object sender, RoutedEventArgs e)
@@ -578,6 +583,7 @@ namespace NickelBird
 			}
 			else
 			{
+				saveConfig();
 				logBtn.Content = "停止采集";
 				sensorDataList.IsEnabled = false;
 				configTab.IsEnabled = false;

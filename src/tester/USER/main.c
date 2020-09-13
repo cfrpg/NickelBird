@@ -82,6 +82,7 @@ int main(void)
 	Sdp3xInit(SDP3X_ADDR1);
 	Sdp3xSetMode(SDP3X_ADDR1,0x3615);
 	Sdp3xCali(SDP3X_ADDR1,200);
+	SeneorsInit();
 	delay_ms(100);
 	while(1)
 	{	

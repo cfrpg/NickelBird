@@ -70,16 +70,16 @@ namespace SharpBladeDAS
 			port.BaudRate = br;
 			port.DataBits = 8;
 			port.StopBits = StopBits.One;
-			port.ReceivedBytesThreshold = 16;
+			port.ReceivedBytesThreshold = 45;
 			port.DataReceived += Port_DataReceived;			
 			buffer = new byte[1048576];//1M
 			isUpdatingBuffer = false;
 			isParsingBuffer = false;
 			lastPackageTime = DateTime.Now;
 			receiveTimeOut = 5000;
-			backgroundListener = new Thread(backgroundWorker);
-			backgroundListener.IsBackground = true;
-			backgroundListener.Start();
+			//backgroundListener = new Thread(backgroundWorker);
+			//backgroundListener.IsBackground = true;
+			//backgroundListener.Start();
 			connectTime = DateTime.Now;
 			sw = new Stopwatch();
 			enqueueHandler = new EnqueuePackage(receivedPackageQueue.Enqueue);
