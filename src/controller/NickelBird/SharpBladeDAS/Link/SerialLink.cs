@@ -176,11 +176,12 @@ namespace SharpBladeDAS
 						receivePackage.TimeStamp = this.ConnectedTime;
 						//lock (ReceivedPackageQueue)
 						{
-							enqueueHandler.BeginInvoke(receivePackage.Clone(), null, null);
-							//receivedPackageQueue.Enqueue(receivePackage.Clone());
+							//enqueueHandler.BeginInvoke(receivePackage.Clone(), null, null);
+							receivedPackageQueue.Enqueue(receivePackage.Clone());
+							
 						}
 						received = true;
-						lea.Package.Add(receivePackage.Clone());
+						//lea.Package.Add(receivePackage.Clone());
 						break;
 				}
 				if (flag)

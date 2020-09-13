@@ -22,6 +22,7 @@ using Microsoft.Research.DynamicDataDisplay;
 using Microsoft.Research.DynamicDataDisplay.DataSources;
 using Microsoft.Research.DynamicDataDisplay.ViewportRestrictions;
 using SharpBladeDAS;
+using System.Threading;
 
 namespace NickelBird
 {
@@ -78,6 +79,9 @@ namespace NickelBird
 
 		List<double> buff;
 
+		Thread dataListenerThread;
+		bool linkAvilable;
+
 		public ObservableCollection<string> LogNameElements
 		{
 			get => logNameElements;
@@ -113,9 +117,7 @@ namespace NickelBird
 			filterGrid.DataContext = config;			
 			configGrid.DataContext = config;
 
-			portScanner = new AdvancedPortScanner(921600, 256, 3);
-			portScanner.OnFindPort += PortScanner_OnFindPort;
-			portScanner.Start();
+			
 
 			plotters = new List<ChartPlotter>();
 			plotters.Add(Plotter1);
@@ -191,6 +193,16 @@ namespace NickelBird
 			tableDataGrid.DataContext = flightState;
 
 			timerText.DataContext = flightState;
+
+			linkAvilable = false;
+			dataListenerThread = new Thread(dataListenerWorker);
+			dataListenerThread.IsBackground = true;
+			dataListenerThread.Priority = ThreadPriority.AboveNormal;
+			dataListenerThread.Start();			
+
+			portScanner = new AdvancedPortScanner(921600, 256, 3);
+			portScanner.OnFindPort += PortScanner_OnFindPort;
+			portScanner.Start();
 		}
 
 
@@ -202,15 +214,24 @@ namespace NickelBird
 			link.OnReceivePackage += Link_OnReceivePackage;
 			link.OpenPort();
 			portScanner.Stop();
+			linkAvilable = true;
+		}
+
+		private void dataListenerWorker()
+		{
+			while (true)
+			{
+				while (linkAvilable && link.ReceivedPackageQueue.TryDequeue(out LinkPackage package))
+				{
+					analyzePackage((SBLinkPackage)package);					
+					//Debug.WriteLine("[Link] Recevie package size= {0} function={1} remain={2}", package.DataSize,package.Function,link.ReceivedPackageQueue.Count);
+				}
+			}
 		}
 
 		private void Link_OnReceivePackage(CommLink sender, LinkEventArgs e)
 		{
-			while (link.ReceivedPackageQueue.TryDequeue(out LinkPackage package))
-			{
-				analyzePackage((SBLinkPackage)package);
-				//Debug.WriteLine("[Link] Recevie package size= {0} function={1} remain={2}", package.DataSize,package.Function,link.ReceivedPackageQueue.Count);
-			}
+			
 		}
 		void analyzePackage(SBLinkPackage package)
 		{
