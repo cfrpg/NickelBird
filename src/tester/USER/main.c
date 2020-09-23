@@ -52,10 +52,12 @@ int main(void)
 	u8 key;
 	delay_init(168);
 	uart_init(115200);
+	
 	MainClockInit();
 	SPIInit();
 	LEDInit();
 	//initTestGPIO();
+	delay_ms(100);
 	LinkInit();	
 	ADCInit();
 	AD7606FSMCInit();		
