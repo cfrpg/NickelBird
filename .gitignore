@@ -355,9 +355,15 @@ MigrationBackup/
 
 /hardware/
 
-pcb/
+/pcb/*
 
-!pcb/NickelBird/
+!/pcb/NickelBird/
+
+/pcb/NickelBird/*
+
+!/pcb/NickelBird/PCB1.PcbDoc
+
+!/pcb/NickelBird/Sheet1.SchDoc
 
 testWing/
 
