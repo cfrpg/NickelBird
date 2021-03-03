@@ -26,6 +26,7 @@ namespace SharpBladeDAS
 		double filterFs;
 		int filterOrder;
 		int logSkip;
+		int baudrate;
 			
 		int[] plotData;
 		int[] tableData;
@@ -146,6 +147,15 @@ namespace SharpBladeDAS
 		}
 
 		public int[] TableData { get => tableData; set => tableData = value; }
+		public int Baudrate 
+		{
+			get => baudrate;
+			set
+			{
+				baudrate = value;
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Baudrate"));
+			}
+		}
 
 		public static Config Default(int ch)
 		{
@@ -155,7 +165,7 @@ namespace SharpBladeDAS
 			string[] n = new string[ch];			
 			bool[] f = new bool[ch];
 			double[] fa = new double[ch];
-			int[] pd = new int[] { 14, 15, 16, 17, 18, 19 };
+			int[] pd = new int[] { 16, 17, 18, 19, 20, 21 };
 			//double[] pds = new double[] { 1000, 1000, 1000, 1 };
 			//string[] pdn = new string[] { "Fy", "Fx", "M", "I" };
 			for (int i = 0; i < ch; i++)
@@ -168,13 +178,14 @@ namespace SharpBladeDAS
 				n[i] = "Sensor " + i.ToString();
 				if (i < 8)
 					fa[i] = 10.0 / 65535;
-				else if (i < 10)
+				else if (i < 12)
 					fa[i] = 3.3 / 4096;
 				else
 					fa[i] = 1;
 				//fa[i] = i < 8 ? 10.0 / 65535 : 3.3 / 4096;
 			}
 			return new Config() {
+				Baudrate=921600,
 				LogEnabled = b,
 				FilterEnabled = f,
 				FilterFc = 25,

@@ -200,7 +200,7 @@ namespace NickelBird
 			dataListenerThread.Priority = ThreadPriority.AboveNormal;
 			dataListenerThread.Start();			
 
-			portScanner = new AdvancedPortScanner(921600, 256, 3);
+			portScanner = new AdvancedPortScanner(2000000, 256, 3);
 			portScanner.OnFindPort += PortScanner_OnFindPort;
 			portScanner.Start();
 		}
@@ -245,21 +245,21 @@ namespace NickelBird
 			{
 				case 1:
 					syncFlag.UpdateFlag();
-					for (int i = 0; i < 10; i++)
+					for (int i = 0; i < 12; i++)
 					{
 						sensorDatas[i].SetRawValue(package.NextShort());
 						buff[i] = sensorDatas[i].LpfValue;
 					}
 					for (int i = 0; i < 4; i++)
 					{
-						sensorDatas[i + 10].SetRawValue(package.NextSingle());
-						buff[i + 10] = sensorDatas[i + 10].LpfValue;
+						sensorDatas[i + 12].SetRawValue(package.NextSingle());
+						buff[i + 12] = sensorDatas[i + 12].LpfValue;
 					}
 					for (int i = 14; i < buff.Count; i++)
 						buff[i] = 0;
 					mat.Transform(buff, 0, buff, 14);
 					logmat.TransformLog(buff, 0, buff, 14);
-					for (int i = 14; i < buff.Count; i++)
+					for (int i = 16; i < buff.Count; i++)
 						sensorDatas[i].SetRawValue((float)buff[i]);					
 					if (isLogging)
 					{
@@ -392,7 +392,7 @@ namespace NickelBird
 			{
 				s.Close();
 				s = new FileStream(path + "\\config\\config.xml", FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-				config = Config.Default(21);
+				config = Config.Default(23);
 				xs.Serialize(s, config);
 				s.Close();
 
