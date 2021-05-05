@@ -24,6 +24,8 @@ namespace SharpBladeDAS
 		public delegate void FindPortEvent(AdvancedPortScanner sender, PortScannerEventArgs e);
 		public event FindPortEvent OnFindPort;
 
+		int[] baudSet = new int[3] { 115200, 921600, 2000000 };
+
 		public AdvancedPortScanner(int br, int md, int to)
 		{
 			baudRate = br;
@@ -91,10 +93,11 @@ namespace SharpBladeDAS
 						try
 						{
 							//ports[i].port.BaudRate = baudRate;
+							//ports[i].port.BaudRate = baudSet[ports[i].baudNum];
 							ports[i].port.Open();
 							ports[i].lastCheckTime = DateTime.Now;
 							ports[i].state = PortScannerState.Scanning;
-							Debug.WriteLine("[port scanner]start scanning:" + ports[i].name);
+							Debug.WriteLine("[port scanner]start scanning:" + ports[i].name+"-" + baudSet[ports[i].baudNum].ToString());
 						}
 						catch
 						{
@@ -116,16 +119,20 @@ namespace SharpBladeDAS
 					case PortScannerState.Available:
 						ports[i].port.Close();
 						portFound = true;
-						SerialLink link = new SerialLink(ports[i].name, ports[i].protocol, baudRate);
+						SerialLink link = new SerialLink(ports[i].name, ports[i].protocol, ports[i].port.BaudRate);
 						Debug.WriteLine("[port scanner]find port:" + ports[i].name + ports[i].protocol.ToString());
 						OnFindPort?.Invoke(this, new PortScannerEventArgs(link));
 						break;
 					case PortScannerState.Unavailable:
 						if (ports[i].port.IsOpen)
+						{
 							ports[i].port.Close();
+							ports[i].port.DiscardInBuffer();
+						}
 						if (DateTime.Now.Subtract(ports[i].lastCheckTime).TotalSeconds > 1.0)
 						{
-							ports[i].state = PortScannerState.NewPort;
+							//ports[i].baudNum = (ports[i].baudNum + 1) % baudSet.Length;
+							ports[i].state = PortScannerState.NewPort;							
 						}
 						break;
 				}
@@ -139,6 +146,7 @@ namespace SharpBladeDAS
 			public SerialPort port;
 			public DateTime lastCheckTime;
 			public LinkProtocol protocol;
+			public int baudNum;
 			int buffersize;
 			public PortData(string pn, int br, int md)
 			{
@@ -152,6 +160,7 @@ namespace SharpBladeDAS
 				buffersize = md + 64;
 				protocol = LinkProtocol.NoLink;
 				state = PortScannerState.NewPort;
+				baudNum = 0;
 			}
 
 			private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)

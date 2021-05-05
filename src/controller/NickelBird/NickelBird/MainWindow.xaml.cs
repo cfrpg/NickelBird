@@ -200,7 +200,8 @@ namespace NickelBird
 			dataListenerThread.Priority = ThreadPriority.AboveNormal;
 			dataListenerThread.Start();			
 
-			portScanner = new AdvancedPortScanner(2000000, 256, 3);
+			// portScanner = new AdvancedPortScanner(2000000, 256, 3);
+			portScanner = new AdvancedPortScanner(config.Baudrate, 256, 3);
 			portScanner.OnFindPort += PortScanner_OnFindPort;
 			portScanner.Start();
 		}
@@ -241,127 +242,134 @@ namespace NickelBird
 			if (logStartTime < 0)
 				logStartTime = package.Time;
 			currentTime = (package.Time - logStartTime) * 0.001;
-			switch (package.Function)
+
+			if (package.Function == 1 || package.Function == 2)
 			{
-				case 1:
-					syncFlag.UpdateFlag();
-					for (int i = 0; i < 12; i++)
+				int pos = 0;
+				syncFlag.UpdateFlag();
+				for (pos = 0; pos < 10; pos++)
+				{
+					sensorDatas[pos].SetRawValue(package.NextShort());
+					buff[pos] = sensorDatas[pos].LpfValue;
+				}
+				if (package.Function == 2)
+				{
+					for (; pos < 12; pos++)
 					{
-						sensorDatas[i].SetRawValue(package.NextShort());
-						buff[i] = sensorDatas[i].LpfValue;
+						sensorDatas[pos].SetRawValue(package.NextShort());
+						buff[pos] = sensorDatas[pos].LpfValue;
 					}
-					for (int i = 0; i < 4; i++)
+				}
+
+				for (pos = 12; pos < 16; pos++)
+				{
+					sensorDatas[pos].SetRawValue(package.NextSingle());
+					buff[pos] = sensorDatas[pos].LpfValue;
+				}
+				for (int i = pos; i < buff.Count; i++)
+					buff[i] = 0;
+				mat.Transform(buff, 0, buff, pos);
+				logmat.TransformLog(buff, 0, buff, pos);
+				for (; pos < buff.Count; pos++)
+					sensorDatas[pos].SetRawValue((float)buff[pos]);
+				if (isLogging)
+				{
+					isWritingFile = true;
+					if (((!flightState.SSEanbled) || (flightState.SSEanbled && sscnt > 0)) && logcnt >= config.LogSkip)
 					{
-						sensorDatas[i + 12].SetRawValue(package.NextSingle());
-						buff[i + 12] = sensorDatas[i + 12].LpfValue;
-					}
-					for (int i = 14; i < buff.Count; i++)
-						buff[i] = 0;
-					mat.Transform(buff, 0, buff, 14);
-					logmat.TransformLog(buff, 0, buff, 14);
-					for (int i = 16; i < buff.Count; i++)
-						sensorDatas[i].SetRawValue((float)buff[i]);					
-					if (isLogging)
-					{
-						isWritingFile = true;
-						if (((!flightState.SSEanbled) || (flightState.SSEanbled && sscnt > 0)) && logcnt >= config.LogSkip)
+						logWriter.Write(currentTime.ToString());
+						for (int i = 0; i < sensorDatas.Count; i++)
 						{
-							logWriter.Write(currentTime.ToString());
-							for (int i = 0; i < sensorDatas.Count; i++)
+							if (sensorDatas[i].LogEnabled)
 							{
-								if (sensorDatas[i].LogEnabled)
+								logWriter.Write(sepChar + sensorDatas[i].ScaledValue);
+								logWriter.Write(sepChar + sensorDatas[i].RawValue);
+								if (sensorDatas[i].FilterEnabled)
 								{
-									logWriter.Write(sepChar + sensorDatas[i].ScaledValue);
-									logWriter.Write(sepChar + sensorDatas[i].RawValue);
-									if (sensorDatas[i].FilterEnabled)
-									{
-										logWriter.Write(sepChar + sensorDatas[i].LpfValue);
-									}
+									logWriter.Write(sepChar + sensorDatas[i].LpfValue);
 								}
 							}
-							if (config.IsCsv)
-								logWriter.Write(",");
-							logWriter.Write(Environment.NewLine);
-							logWriter.Flush();
-							isWritingFile = false;
-							if (flightState.SSEanbled)
-							{
-								sscnt--;
-								if (sscnt <= 0)
-								{
-									sscnt = 0;
-									flightState.SSCount++;
-								}
-							}
-							logcnt = 0;
 						}
-						logcnt++;
-						flightState.Timer += 0.001;
+						if (config.IsCsv)
+							logWriter.Write(",");
+						logWriter.Write(Environment.NewLine);
+						logWriter.Flush();
+						isWritingFile = false;
+						if (flightState.SSEanbled)
+						{
+							sscnt--;
+							if (sscnt <= 0)
+							{
+								sscnt = 0;
+								flightState.SSCount++;
+							}
+						}
+						logcnt = 0;
 					}
+					logcnt++;
+					flightState.Timer += 0.001;
+				}
+				for (int i = 0; i < plotters.Count; i++)
+				{
+					if (Math.Abs(sensorDatas[config.PlotData[i]].ScaledValue) > Math.Abs(graphMax[i]))
+					{
+						graphMax[i] = sensorDatas[config.PlotData[i]].ScaledValue;
+					}
+				}
+				if (graphSkipCnt >= 10)
+				{
 					for (int i = 0; i < plotters.Count; i++)
 					{
-						if (Math.Abs(sensorDatas[config.PlotData[i]].ScaledValue) > Math.Abs(graphMax[i]))
-						{
-							graphMax[i] = sensorDatas[config.PlotData[i]].ScaledValue;
-						}
+						graphData[i].AppendAsync(Dispatcher, new Point(plotTime, sensorDatas[config.PlotData[i]].LpfValue));
+						graphSum[i] += sensorDatas[config.PlotData[i]].LpfValue;
+
 					}
-					if (graphSkipCnt >= 10)
+					for (int i = 0; i < 2; i++)
 					{
-						for (int i = 0; i < plotters.Count; i++)
-						{							
-							graphData[i].AppendAsync(Dispatcher, new Point(plotTime, sensorDatas[config.PlotData[i]].LpfValue));
-							graphSum[i] += sensorDatas[config.PlotData[i]].LpfValue;
-							
-						}						
-						for(int i=0;i<2;i++)
+						flightState.TableData[i] = sensorDatas[config.TableData[i]].LpfValue;
+					}
+					graphcnt++;
+					if (plotTime > 2)
+					{
+						plotTime = 0;
+						Dispatcher.Invoke(new Action(() =>
 						{
-							flightState.TableData[i] = sensorDatas[config.TableData[i]].LpfValue;
-						}
-						graphcnt++;
-						if (plotTime > 2)
-						{
-							plotTime = 0;
-							Dispatcher.Invoke(new Action(() => {
-								for (int i = 0; i < plotters.Count; i++)
-									graphData[i].Collection.Clear();
-							}));
 							for (int i = 0; i < plotters.Count; i++)
-							{
-								flightState.GraphData[i] = graphSum[i] / graphcnt;
-								flightState.GraphMaxData[i] = graphMax[i];
-								graphSum[i] = 0;
-								graphMax[i] = 0;
-							}
-							graphcnt = 0;
-						}
-
-						graphSkipCnt = 0;
-					}
-					
-					if (trim >= 0)
-					{
-						trimsum += sensorDatas[trim].Value;
-						trimcnt++;
-						if (trimcnt >= 100)
+								graphData[i].Collection.Clear();
+						}));
+						for (int i = 0; i < plotters.Count; i++)
 						{
-							sensorDatas[trim].Offset = -trimsum / trimcnt;
-							if (trimList.Count == 0)
-							{
-								trim = -1;
-							}
-							else
-							{
-								trimsum = 0;
-								trimcnt = 0;
-								trim = trimList.Dequeue();
-							}
+							flightState.GraphData[i] = graphSum[i] / graphcnt;
+							flightState.GraphMaxData[i] = graphMax[i];
+							graphSum[i] = 0;
+							graphMax[i] = 0;
+						}
+						graphcnt = 0;
+					}
+
+					graphSkipCnt = 0;
+				}
+
+				if (trim >= 0)
+				{
+					trimsum += sensorDatas[trim].Value;
+					trimcnt++;
+					if (trimcnt >= 100)
+					{
+						sensorDatas[trim].Offset = -trimsum / trimcnt;
+						if (trimList.Count == 0)
+						{
+							trim = -1;
+						}
+						else
+						{
+							trimsum = 0;
+							trimcnt = 0;
+							trim = trimList.Dequeue();
 						}
 					}
-					syncFlag.UpdateUI = false;
-					break;
-				default:
-
-					break;
+				}
+				syncFlag.UpdateUI = false;
 			}
 		}
 		void initConfig()
