@@ -2,11 +2,11 @@
 #define __I2C_H
 #include "sys.h"
 
-#define I2C_IN() {GPIOB->MODER&=~(3<<(7*2));GPIOB->MODER|=0<<(7*2);delay_us(1);}
-#define I2C_OUT() {GPIOB->MODER&=~(3<<(7*2));GPIOB->MODER|=1<<(7*2);delay_us(1);}
-#define I2C_SCL_OUT PBout(6)
-#define I2C_SDA_IN PBin(7)
-#define I2C_SDA_OUT PBout(7)
+#define I2C_IN() {GPIOB->MODER&=~(3<<(9*2));GPIOB->MODER|=0<<(9*2);delay_us(1);}
+#define I2C_OUT() {GPIOB->MODER&=~(3<<(9*2));GPIOB->MODER|=1<<(9*2);delay_us(1);}
+#define I2C_SCL_OUT PBout(8)
+#define I2C_SDA_IN PBin(9)
+#define I2C_SDA_OUT PBout(9)
 
 #define I2C_WR 0
 #define I2C_RD 1

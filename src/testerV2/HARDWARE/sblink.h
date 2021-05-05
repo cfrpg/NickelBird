@@ -8,6 +8,7 @@
 
 #define HEARTBEAT 0x00
 #define SENSOR_DATA 0x01
+#define SENSOR_DATA_V2 0x02
 
 extern const u8 DataLen[];
 extern u8 recBuff[2][256];

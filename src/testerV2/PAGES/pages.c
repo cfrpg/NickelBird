@@ -1,20 +1,21 @@
 #include "pages.h"
-
+#include "oled.h"
+#include "keyboard.h"
+#include "parameter.h"
 
 void PagesInit(void)
 {	
 	sys.adcEn=0;
-	sys.pwm[0]=0;
-	sys.pwm[1]=0;
-	sys.pwm[2]=0;
-	sys.pwm[3]=0;
+	sys.pwm[0]=params.pwm_min;
+	sys.pwm[1]=params.pwm_min;
 	
 	sys.sensors.header.stx=LINKSTX;
-	sys.sensors.header.len=DataLen[SENSOR_DATA];
-	sys.sensors.header.fun=SENSOR_DATA;	
+	sys.sensors.header.len=DataLen[SENSOR_DATA_V2];
+	sys.sensors.header.fun=SENSOR_DATA_V2;	
+	sys.sensors.header.time=0;
 	
-	PageInit_main(1);
-	PageInit_ADC(1);
+	//PageInit_main(1);
+	//PageInit_ADC(1);
 	currpage=-1;
 }
 
@@ -29,7 +30,7 @@ void PagesChangeTo(u8 p)
 				PageInit_main(0);
 			break;
 			case ADCPage:
-				PageInit_ADC(0);
+				//PageInit_ADC(0);
 			break;
 
 			default:
@@ -56,25 +57,29 @@ void PagesNext(s8 d)
 
 void PagesDrawStatusBar(void)
 {	
-	RTCReadTime();
-	OledDispString(0,0,"  -  -     :  :      ",0);
-	OledDispInt(0,0,time.year,2,0);
-	OledDispInt(3,0,time.month,2,0);
-	OledDispInt(6,0,time.day,2,0);
-	OledDispInt(9,0,time.hour,2,0);
-	OledDispInt(12,0,time.min,2,0);
-	OledDispInt(15,0,time.sec,2,0);
+//	RTCReadTime();
+//	OledDispString(0,0,"  -  -     :  :      ",0);
+//	OledDispInt(0,0,time.year,2,0);
+//	OledDispInt(3,0,time.month,2,0);
+//	OledDispInt(6,0,time.day,2,0);
+//	OledDispInt(9,0,time.hour,2,0);
+//	OledDispInt(12,0,time.min,2,0);
+//	OledDispInt(15,0,time.sec,2,0);
 }
 
 void PagesUpdate(void)
 {	
+	currKey=GPGetData();
+	currWheel=WheelGetValue();
+	currWheelPush<<=1;
+	currWheelPush|=KeyGetState();
 	switch(currpage)
 	{
 		case MainPage:
 			PageUpdate_main();
 		break;
 		case ADCPage:
-			PageUpdate_ADC();
+			//PageUpdate_ADC();
 		break;
 		default:
 			currpage=MainPage;
@@ -82,6 +87,8 @@ void PagesUpdate(void)
 			PageUpdate_main();
 		break;
 	}
+	lastKey=currKey;
+	lastWheel=currWheel;
 }
 
 void PagesDrawHeader(u8 n,s8 *name)

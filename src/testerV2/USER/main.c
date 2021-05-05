@@ -36,6 +36,8 @@ u16 tick[3]={0,0,0};
 u16 cpucnt=0;
 u8 lastKey=0;
 u8 currKey=0;
+u8 lastWheelPush=0;
+u8 currWheelPush=0;
 s32 lastWheel=0;
 s32 currWheel=0;
 
@@ -50,22 +52,36 @@ s16 adraw[8];
 int main(void)
 {
 	s16 i;
+	s16 tmp[2];
 	u8 key;
 	delay_init(168);
 	uart_init(115200);
 	OledInit();
 	MainClockInit();
-	//SPIInit();
 	LEDInit();
-	initTestGPIO();
+	OledClear(0x00);
+
+	OledDispBitmap(0,0,128,128,gImage_logo);
+	FRAMInit();
+	ParamRead();
+	if(params.headFlag!=0xCFCFCFCF||params.tailFlag!=0xFCFCFCFC)
+	{
+		OledDispString(0,0,"Reset Parameters.",0);
+		ParamReset();
+		ParamWrite();
+	}
+	PWMInit();
+	//SPIInit();
 	
+//	initTestGPIO();
+	PagesInit();
 //	delay_ms(100);
 	LinkInit();	
 	ADCInit();
 	AD7606FSMCInit();
 //	BMPInit();
 //	MS4525DOInit();
-//	I2CInit();
+	I2CInit();
 //	ExtinInit();
 //	
 //	while(tick[0]<200);
@@ -74,34 +90,13 @@ int main(void)
 //	lastKey=0xFF;	
 
 	KeyInit();
-	sys.sensors.header.stx=LINKSTX;
-	sys.sensors.header.len=DataLen[SENSOR_DATA];
-	sys.sensors.header.fun=SENSOR_DATA;	
-	sys.sensors.header.time=0;
+
 	printf("NickelBird\r\n");
-	OledClear(0x00);
-	OledDispString(0,0,"===  NickelBird  ===",0);
-	OledDispString(5,4,"Loading...",0);
-//	delay_ms(100);
-//	MS4525DOCali(200);
-//	sys.temperature=BMPReadTemperature();
-//	sys.pressure=BMPReadPressure();
-//	sys.rho=BMPReadAverageRho(200);
-//	Sdp3xInit(SDP3X_ADDR1);
-//	Sdp3xSetMode(SDP3X_ADDR1,0x3615);
-//	Sdp3xCali(SDP3X_ADDR1,200);
-//	SeneorsInit();
-//	delay_ms(100);
 	
-	FRAMInit();
-	u8 data[11]={1,2,3,4,5,6,7,8,9,10,0};
-	TEST0=1;
-	FRAMWrite(0,10,data);
-	FRAMRead(0,10,data);
-	for(i=0;i<10;i++)
-	printf("%d ",data[i]);
-	printf("\r\n");
-	OledDispBitmap(0,0,128,128,gImage_logo);
+	SeneorsInit();
+	
+	delay_ms(500);
+	delay_ms(500);
 	while(1)
 	{	
 //		LEDFlip();	
@@ -122,39 +117,46 @@ int main(void)
 		{
 			tick[0]=0;
 			LEDFlip();
+//			Sdp3xReadOut(SDP3X_ADDR1,2,tmp);
+//			printf("%d,%d,",tmp[0],tmp[1]);
+//			Sdp3xReadOut(SDP3X_ADDR2,2,tmp);
+//			printf("%d,%d,",tmp[0],tmp[1]);
+//			Sdp3xReadOut(SDP3X_ADDR3,2,tmp);
+//			printf("%d,%d\r\n",tmp[0],tmp[1]);
 		}
-//		if(tick[1]>=2)
-//		{
-//			tick[1]=0;
-//			if(sblinkReady)
-//			{
-//				//memcpy(package,recBuff[currBuff],recBuffLen[currBuff]);
-//				//sblinkReady=0;
-//				//printf("Rec Fun=%d,Len=%d\r\n",package[1],package[2]);
-//				LEDFlip();
-//				delay_ms(200);
-//				LEDFlip();
-//				delay_ms(200);
-//				LEDFlip();
-//				
-//				MS4525DOCali(200);
-//				sys.temperature=BMPReadTemperature();
-//				sys.pressure=BMPReadPressure();
-//				sys.rho=BMPReadAverageRho(200);
-//				LEDFlip();
-//				delay_ms(200);
-//				LEDFlip();
-//				delay_ms(200);
-//				LEDFlip();
-//				sblinkReady=0;
-//			}
-//			SensorsFastUpdate();
-//		}
-//		if(tick[2]>=50)
-//		{
-//			tick[2]=0;		
-//			SensorsSlowUpdate();			
-//		}
+		if(tick[1]>=2)
+		{
+			tick[1]=0;
+			if(sblinkReady)
+			{
+				//memcpy(package,recBuff[currBuff],recBuffLen[currBuff]);
+				//sblinkReady=0;
+				//printf("Rec Fun=%d,Len=%d\r\n",package[1],package[2]);
+				LEDFlip();
+				delay_ms(200);
+				LEDFlip();
+				delay_ms(200);
+				LEDFlip();
+				
+				MS4525DOCali(200);
+				sys.temperature=BMPReadTemperature();
+				sys.pressure=BMPReadPressure();
+				sys.rho=BMPReadAverageRho(200);
+				LEDFlip();
+				delay_ms(200);
+				LEDFlip();
+				delay_ms(200);
+				LEDFlip();
+				sblinkReady=0;
+			}
+			SensorsFastUpdate();
+		}
+		if(tick[2]>=50)
+		{
+			tick[2]=0;
+			SensorsSlowUpdate();
+			PagesUpdate();
+		}
 	}
 }
 
@@ -219,7 +221,7 @@ void TIM3_IRQHandler(void)
 		ADCStartConv();
 //		ADCReadVol(sys.sensors.ADCData+8);
 //		SensorsIntUpdate();
-//		sys.sensors.header.time++;
+		sys.sensors.header.time++;
 		//TEST0=0;
 	}
 }

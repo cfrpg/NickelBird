@@ -827,6 +827,16 @@
               <FileType>5</FileType>
               <FilePath>..\PAGES\logo.h</FilePath>
             </File>
+            <File>
+              <FileName>pages.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PAGES\pages.c</FilePath>
+            </File>
+            <File>
+              <FileName>MainPage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PAGES\MainPage.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

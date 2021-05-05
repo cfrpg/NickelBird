@@ -6,7 +6,7 @@ void I2CInit(void)
 	GPIO_InitTypeDef gi;
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
-	gi.GPIO_Pin=GPIO_Pin_6|GPIO_Pin_7;
+	gi.GPIO_Pin=GPIO_Pin_8|GPIO_Pin_9;
 	gi.GPIO_Mode=GPIO_Mode_OUT;
 	gi.GPIO_OType=GPIO_OType_OD;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;

@@ -9,7 +9,7 @@
 #define MainPage 0
 #define ADCPage 1
 
-#define PageNum 2
+#define PageNum 1
 
 typedef struct
 {
@@ -17,7 +17,7 @@ typedef struct
 	float AuxADCData[2];
 	SensorDataPackage sensors;
 	s32 rpm;
-	u16 pwm[4];
+	u16 pwm[2];
 	u8 adcEn;
 	float temperature;
 	float pressure;
@@ -33,6 +33,8 @@ extern u8 lastKey;
 extern u8 currKey;
 extern s32 lastWheel;
 extern s32 currWheel;
+extern u8 lastWheelPush;
+extern u8 currWheelPush;
 
 extern s8 currpage;
 extern u16 cpucnt;
@@ -49,10 +51,10 @@ void UpdateSensors(void);
 void PageInit_main(u8 f);
 void PageUpdate_main(void);
 
-void PageInit_ADC(u8 f);
-void PageUpdate_ADC(void);
+//void PageInit_ADC(u8 f);
+//void PageUpdate_ADC(void);
 
-void PageInit_Motor(u8 f);
-void PageUpdate_Motor(void);
+//void PageInit_Motor(u8 f);
+//void PageUpdate_Motor(void);
 
 #endif

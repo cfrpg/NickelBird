@@ -88,3 +88,44 @@ void Sdp3xCali(u8 addr,u8 n)
 	printf("sdp3x offset:%f\r\n",sdp3xOffset);
 }
 
+void Sdp3xReadDevID(u8 addr)
+{
+	u8 b,i,j;
+	u8 buf[18];
+	I2CStart();
+	I2CSendByte(addr);
+	I2CWaitAck();
+	I2CSendByte(0x36);
+	I2CWaitAck();
+	I2CSendByte(0x7C);
+	I2CWaitAck();
+	I2CStop();
+	
+	I2CStart();
+	I2CSendByte(addr);
+	I2CWaitAck();
+	I2CSendByte(0xE1);
+	I2CWaitAck();
+	I2CSendByte(0x02);
+	I2CWaitAck();
+	I2CStop();
+	I2CStart();
+	I2CSendByte(addr+1);
+	I2CWaitAck();
+	for(i=0;i<18;i++)
+	{
+		if(i!=0)
+			I2CAck();
+		buf[i]=I2CReadByte();		
+	}
+	I2CNAck();
+	I2CStop();
+	for(i=0;i<18;i++)
+	{
+		//if(i%3!=2)
+		{
+			printf("%x ",buf[i]);
+		}
+	}
+	printf("\r\n");
+}

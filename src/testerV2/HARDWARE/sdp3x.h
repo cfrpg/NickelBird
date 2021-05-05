@@ -12,5 +12,6 @@ void Sdp3xSetMode(u8 addr,u16 cmd);
 void Sdp3xReadOut(u8 addr,u8 n,s16 data[]);
 float Sdp3xReadAirspeed(u8 addr,float temp,float pre,float *dpre);
 void Sdp3xCali(u8 addr,u8 n);
+void Sdp3xReadDevID(u8 addr);
 
 #endif
