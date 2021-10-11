@@ -2,7 +2,10 @@
 #include "usart.h"	
 
 #if 1
-#pragma import(__use_no_semihosting)             
+#pragma import(__use_no_semihosting)        
+
+u8 USART_RX_BUF[USART_REC_LEN]; 
+u16 USART_RX_STA=0;
             
 struct __FILE 
 { 
@@ -29,6 +32,8 @@ void uart_init(u32 baud)
 	GPIO_InitTypeDef gi;
 	USART_InitTypeDef ui;	
 	
+	NVIC_InitTypeDef ni;
+	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
 
@@ -41,6 +46,12 @@ void uart_init(u32 baud)
 	gi.GPIO_OType = GPIO_OType_PP;
 	gi.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(GPIOA,&gi);
+	
+	ni.NVIC_IRQChannel=USART2_IRQn;
+	ni.NVIC_IRQChannelPreemptionPriority=3;
+	ni.NVIC_IRQChannelSubPriority=3;
+	ni.NVIC_IRQChannelCmd=ENABLE;
+	NVIC_Init(&ni);
 
 	ui.USART_BaudRate = baud;
 	ui.USART_WordLength = USART_WordLength_8b;
@@ -49,9 +60,44 @@ void uart_init(u32 baud)
 	ui.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	ui.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_Init(USART2, &ui);
+	USART_ITConfig(USART2,USART_IT_RXNE,ENABLE);
 	
 	USART_Cmd(USART2, ENABLE);
+	
 	
 	USART_ClearFlag(USART2, USART_FLAG_TC);
 		
 }
+
+void USART2_IRQHandler(void)
+{
+	u8 Res;
+	
+	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
+	{
+		Res =USART_ReceiveData(USART2);
+		USART_ClearITPendingBit(USART2,USART_IT_RXNE);
+		
+		if((USART_RX_STA&0x8000)==0)
+		{
+			if(USART_RX_STA&0x4000)
+			{
+				if(Res=='/')
+				{
+					USART_RX_STA|=0x8000;
+				}
+				else 
+				{
+					USART_RX_BUF[USART_RX_STA&0X3FFF]=Res ;
+					USART_RX_STA++;
+					if((USART_RX_STA&0X3FFF)>(USART_REC_LEN-1))USART_RX_STA=0;
+				}
+			}
+			else
+			{	
+				if(Res=='*')USART_RX_STA=0x4000;				
+			}
+		}
+		//printf("rx %c %d\r\n",Res,USART_RX_STA>>13);		
+    } 
+} 

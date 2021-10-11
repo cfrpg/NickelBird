@@ -91,6 +91,54 @@ namespace SharpBladeDAS
 
 		}
 
-		
+		private static List<double> corrBuff;
+		public static double CorrFreq(List<double> val,int offset,int n)
+		{
+			if (corrBuff == null)
+			{
+				corrBuff = new List<double>(1024);
+				for (int i = 0; i < 1024; i++)
+					corrBuff.Add(0);
+			}
+			//calc corr
+			double divider=1;
+			double min = 2;
+			int minpos = 0;
+			double aver = 0;
+			for(int i=0;i<n;i++)
+			{
+				aver += val[(i + offset) % val.Count];
+			}
+			aver /= n;
+			for (int i=0; i < n;i++)
+			{				
+				double sum = 0;
+				for (int j = i; j < n; j++)
+				{
+					sum += (val[(j + offset) % (val.Count)]-aver) * (val[(j - i + offset) % (val.Count)]-aver);
+				}
+				if(i==0)
+				{
+					divider = sum;
+				}
+				corrBuff[i] = sum / divider;
+				if(corrBuff[i]<min)
+				{
+					min = corrBuff[i];
+					minpos = i;
+				}
+			}
+			double max = -2;
+			int maxpos = 0;
+			for (int i = minpos; i < n; i++)
+			{
+				if(max<corrBuff[i])
+				{
+					max = corrBuff[i];
+					maxpos = i;
+				}
+			}
+			return 1000.0 / maxpos;
+		}		
 	}
 }

@@ -5,16 +5,22 @@
 
 void PagesInit(void)
 {	
+	const s32* t=ParamGetFromName("PWM_MIN");
+	
 	sys.adcEn=0;
-	sys.pwm[0]=params.pwm_min;
-	sys.pwm[1]=params.pwm_min;
+	sys.pwm[0]=*t;
+	sys.pwm[1]=*t;
 	
 	sys.sensors.header.stx=LINKSTX;
 	sys.sensors.header.len=DataLen[SENSOR_DATA_V2];
 	sys.sensors.header.fun=SENSOR_DATA_V2;	
 	sys.sensors.header.time=0;
+	sys.slowUpdate=0;
+	sys.fastUpdate=0;
+	sys.intUpdate=0;
 	
-	//PageInit_main(1);
+	PageInit_main(1);
+	PageInit_falcon(1);
 	//PageInit_ADC(1);
 	currpage=-1;
 }
@@ -29,8 +35,8 @@ void PagesChangeTo(u8 p)
 			case MainPage:
 				PageInit_main(0);
 			break;
-			case ADCPage:
-				//PageInit_ADC(0);
+			case FalconPage:
+				PageInit_falcon(0);
 			break;
 
 			default:
@@ -78,8 +84,8 @@ void PagesUpdate(void)
 		case MainPage:
 			PageUpdate_main();
 		break;
-		case ADCPage:
-			//PageUpdate_ADC();
+		case FalconPage:
+			PageUpdate_falcon();
 		break;
 		default:
 			currpage=MainPage;

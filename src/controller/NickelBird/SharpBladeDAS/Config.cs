@@ -14,27 +14,29 @@ namespace SharpBladeDAS
 		bool[] logEnabled;
 		bool[] filterEnabled;
 		double[] offsets;
-		double[] scales;		
+		double[] scales;
 		string[] names;
 		double[] factors;
 
 		string logPath;
 		string matrixName;
 		string configName;
-		
+
 		double filterFc;
 		double filterFs;
 		int filterOrder;
 		int logSkip;
 		int baudrate;
-			
+	
 		int[] plotData;
 		int[] tableData;
+		int freqData;
 
 		string[] logName;
 		string[] logNameBackup;
 
 		bool isCsv;
+		bool freqEnabled;
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -54,20 +56,20 @@ namespace SharpBladeDAS
 		}
 
 		public string[] Names 
-		{ 
+		{
 			get => names;
-			set 
+			set
 			{
 				names = value;
 				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Names"));
 			}
 		}
-	
+
 
 		public bool[] FilterEnabled { get => filterEnabled; set => filterEnabled = value; }
-		
+
 		public double[] Factors { get => factors; set => factors = value; }
-		
+
 		public double FilterFs
 		{
 			get => filterFs;
@@ -99,7 +101,7 @@ namespace SharpBladeDAS
 			}
 		}
 
-		
+
 
 		public int[] PlotData { get => plotData; set => plotData = value; }
 		//public double[] PlotDataScale { get => plotDataScale; set => plotDataScale = value; }
@@ -157,22 +159,39 @@ namespace SharpBladeDAS
 			}
 		}
 
+		public bool FreqEnabled
+		{
+			get => freqEnabled;
+			set
+			{
+				freqEnabled = value;
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FreqEnabled"));
+			}
+		}
+		public int FreqData
+		{
+			get => freqData;
+			set
+			{
+				freqData = value;
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FreqData"));
+			}
+		}
+
 		public static Config Default(int ch)
 		{
 			bool[] b = new bool[ch];
 			double[] o = new double[ch];
 			double[] s = new double[ch];
-			string[] n = new string[ch];			
+			string[] n = new string[ch];
 			bool[] f = new bool[ch];
 			double[] fa = new double[ch];
 			int[] pd = new int[] { 16, 17, 18, 19, 20, 21 };
-			//double[] pds = new double[] { 1000, 1000, 1000, 1 };
-			//string[] pdn = new string[] { "Fy", "Fx", "M", "I" };
 			for (int i = 0; i < ch; i++)
 			{
 				b[i] = true;
 				f[i] = false;
-				
+
 				o[i] = 0;
 				s[i] = 1;
 				n[i] = "Sensor " + i.ToString();
@@ -185,7 +204,7 @@ namespace SharpBladeDAS
 				//fa[i] = i < 8 ? 10.0 / 65535 : 3.3 / 4096;
 			}
 			return new Config() {
-				Baudrate=921600,
+				Baudrate = 921600,
 				LogEnabled = b,
 				FilterEnabled = f,
 				FilterFc = 25,
@@ -206,7 +225,9 @@ namespace SharpBladeDAS
 				LogNameBackup = new string[6],
 				isCsv = true,
 				LogSkip = 1,
-				TableData = new int[] { 8, 10 }
+				TableData = new int[] { 8, 10 },
+				FreqData = 18,
+				FreqEnabled = false
 			};
 
 		}

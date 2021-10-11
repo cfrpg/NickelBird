@@ -792,6 +792,11 @@
               <FileType>5</FileType>
               <FilePath>..\HARDWARE\mb85rs.h</FilePath>
             </File>
+            <File>
+              <FileName>parameterList.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\parameterList.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -836,6 +841,11 @@
               <FileName>MainPage.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\PAGES\MainPage.c</FilePath>
+            </File>
+            <File>
+              <FileName>FalconPage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PAGES\FalconPage.c</FilePath>
             </File>
           </Files>
         </Group>

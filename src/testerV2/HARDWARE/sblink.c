@@ -108,13 +108,15 @@ void LinkSendData(void* buff,u8 len)
 	{
 		printf("dma %d\r\n",DMA_GetCurrDataCounter(DMA2_Stream7));
 	}
-	
-	while(DMA_GetCurrDataCounter(DMA2_Stream7));		
-	DMA_Cmd(DMA2_Stream7,DISABLE);	
-	while (DMA_GetCmdStatus(DMA2_Stream7) != DISABLE);	
-	DMA_SetCurrDataCounter(DMA2_Stream7,len+1);
-	DMA_Cmd(DMA2_Stream7,ENABLE);
-	//PGout(13)=1;
+	else
+	{
+		while(DMA_GetCurrDataCounter(DMA2_Stream7));		
+		DMA_Cmd(DMA2_Stream7,DISABLE);	
+		while (DMA_GetCmdStatus(DMA2_Stream7) != DISABLE);	
+		DMA_SetCurrDataCounter(DMA2_Stream7,len+1);
+		DMA_Cmd(DMA2_Stream7,ENABLE);
+		//PGout(13)=1;
+	}
 }
 
 u32 LinkPackTime()

@@ -56,6 +56,7 @@ namespace SharpBladeDAS
 				{
 					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ScaledValue"));
 					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value"));
+					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LpfValue"));
 				}
 			}
 

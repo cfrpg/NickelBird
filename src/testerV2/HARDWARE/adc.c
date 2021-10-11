@@ -104,7 +104,11 @@ void ADCReadVol(short res[])
 
 void ADCStartConv()
 {
-	
+//	if(aux_adc_ready==1)
+//	{
+//		printf("aux adc\r\n");
+//		return;
+//	}
 	while(aux_adc_ready==0);
 	aux_adc_ready=0;
 	//printf("a\r\n");

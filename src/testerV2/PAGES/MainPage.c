@@ -3,7 +3,13 @@
 #include "pwm.h"
 
 void mainpage_showData(u8 f);
-	
+
+void mainpage_fastUpdate(void);
+
+const s32* pwm_min;
+const s32* pwm_max;
+const s32* pwm_disarmed;
+
 struct
 {
 	u8 state;
@@ -17,6 +23,11 @@ void PageInit_main(u8 f)
 		mainp.state=0;
 		mainp.currch=0;
 		mainp.bind=0;
+		pwm_min=ParamGetFromName("PWM_MIN");
+		pwm_max=ParamGetFromName("PWM_MAX");
+		
+		pwm_disarmed=ParamGetFromName("PWM_DISARMED");
+		printf("%d %d %d\r\n",*pwm_min,*pwm_max,*pwm_disarmed);
 		return;
 	}
 	OledClear(0);
@@ -35,8 +46,9 @@ void PageInit_main(u8 f)
 	OledDispString(17,15,"CALI",0);
 	
 	mainpage_showData(0xFF);
-	
-	
+	sys.fastUpdate=mainpage_fastUpdate;
+	sys.slowUpdate=0;
+	sys.intUpdate=0;	
 }
 
 void PageUpdate_main(void)
@@ -66,8 +78,8 @@ void PageUpdate_main(void)
 			if(wheelpush)
 			{
 				PWMDisarm();
-				sys.pwm[0]=params.pwm_disarmed;
-				sys.pwm[1]=params.pwm_disarmed;
+				sys.pwm[0]=*pwm_disarmed;
+				sys.pwm[1]=*pwm_disarmed;
 				draw|=0x06;
 				OledDispString(0,2,"      ",0);
 			}
@@ -113,10 +125,10 @@ void PageUpdate_main(void)
 			
 			for(i=0;i<2;i++)
 			{
-				if(sys.pwm[i]<params.pwm_min)
-					sys.pwm[i]=params.pwm_min;
-				if(sys.pwm[i]>params.pwm_max)
-					sys.pwm[i]=params.pwm_max;
+				if(sys.pwm[i]<*pwm_min)
+					sys.pwm[i]=*pwm_min;
+				if(sys.pwm[i]>*pwm_max)
+					sys.pwm[i]=*pwm_max;
 			}
 			PWMSet(sys.pwm[0],sys.pwm[1]);
 			
@@ -126,8 +138,8 @@ void PageUpdate_main(void)
 			if(wheelpush)
 			{
 				PWMArm();
-				sys.pwm[0]=params.pwm_min;
-				sys.pwm[1]=params.pwm_min;
+				sys.pwm[0]=*pwm_min;
+				sys.pwm[1]=*pwm_min;
 				draw|=0x06;
 				OledDispString(0,2,"ARMED",0);
 			}
@@ -177,4 +189,12 @@ void mainpage_showData(u8 f)
 		OledDispInt(4,6,sys.pwm[1],4,0);
 		OledDispInt(11,6,(sys.pwm[1]-1000)/10,4,0);
 	}
+}
+
+void mainpage_fastUpdate(void)
+{
+	sys.sensors.SensorData[0]=sys.pwm[0];
+	if(sys.pwm[0]==0)
+		sys.sensors.SensorData[2]++;
+	sys.sensors.SensorData[1]=sys.pwm[1];
 }

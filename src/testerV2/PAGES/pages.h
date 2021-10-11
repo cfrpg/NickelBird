@@ -7,9 +7,9 @@
 #include "rtc.h"
 
 #define MainPage 0
-#define ADCPage 1
+#define FalconPage 1
 
-#define PageNum 1
+#define PageNum 2
 
 typedef struct
 {
@@ -24,8 +24,12 @@ typedef struct
 	float rho;
 	float airspeed;
 	float freq[2];
+	void (*slowUpdate)(void);
+	void (*fastUpdate)(void);
+	void (*intUpdate)(void);
 	u8 intFlag[2];
-	s8 intEnabled[2];
+	u32 intTime[2];
+
 } systemState;
 
 extern systemState sys;
@@ -50,6 +54,10 @@ void UpdateSensors(void);
 
 void PageInit_main(u8 f);
 void PageUpdate_main(void);
+
+void PageInit_falcon(u8 f);
+void PageUpdate_falcon(void);
+
 
 //void PageInit_ADC(u8 f);
 //void PageUpdate_ADC(void);

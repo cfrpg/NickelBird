@@ -31,6 +31,7 @@
 
 
 void initTestGPIO(void);
+void AnalyzePkg(void);
 
 u16 tick[3]={0,0,0};
 u16 cpucnt=0;
@@ -49,6 +50,7 @@ u8 package[256];
 s16 adraw[8];
 
 
+
 int main(void)
 {
 	s16 i;
@@ -56,6 +58,7 @@ int main(void)
 	u8 key;
 	delay_init(168);
 	uart_init(115200);
+	printf("%x\r\n",SCB->VTOR);
 	OledInit();
 	MainClockInit();
 	LEDInit();
@@ -64,7 +67,7 @@ int main(void)
 	OledDispBitmap(0,0,128,128,gImage_logo);
 	FRAMInit();
 	ParamRead();
-	if(params.headFlag!=0xCFCFCFCF||params.tailFlag!=0xFCFCFCFC)
+	if(params.headFlag!=0xCFCF||params.tailFlag!=0xFCFC)
 	{
 		OledDispString(0,0,"Reset Parameters.",0);
 		ParamReset();
@@ -82,7 +85,7 @@ int main(void)
 //	BMPInit();
 //	MS4525DOInit();
 	I2CInit();
-//	ExtinInit();
+	ExtinInit();
 //	
 //	while(tick[0]<200);
 //	LEDSet(1);
@@ -117,6 +120,11 @@ int main(void)
 		{
 			tick[0]=0;
 			LEDFlip();
+			if(USART_RX_STA&0x8000)
+			{				
+				AnalyzePkg();
+				USART_RX_STA=0;
+			}
 //			Sdp3xReadOut(SDP3X_ADDR1,2,tmp);
 //			printf("%d,%d,",tmp[0],tmp[1]);
 //			Sdp3xReadOut(SDP3X_ADDR2,2,tmp);
@@ -151,12 +159,64 @@ int main(void)
 			}
 			SensorsFastUpdate();
 		}
-		if(tick[2]>=50)
+		if(tick[2]>=200)
 		{
 			tick[2]=0;
 			SensorsSlowUpdate();
 			PagesUpdate();
 		}
+	}
+}
+
+void AnalyzePkg(void)
+{
+	u8 len=USART_RX_STA&0x3FFF;
+	u8 t,i;
+	s32 v;
+	
+	if(USART_RX_BUF[0]=='s'&&USART_RX_BUF[1]=='e'&&USART_RX_BUF[2]=='t')
+	{
+		printf("SET CMD\r\n");
+		if(len!=14)
+		{
+			printf("Invalid length:%d.\r\n",len);		
+			return;
+		}
+		t=(USART_RX_BUF[3]-'0')*10+(USART_RX_BUF[4]-'0');
+		printf("ID:%d\r\n",t);
+		v=0;
+		for(i=0;i<8;i++)
+		{
+			v*=10;
+			v+=USART_RX_BUF[6+i]-'0';
+		}
+		if(USART_RX_BUF[5]=='-')
+			v*=-1;
+		printf("Value:%d\r\n",v);
+		if(ParamSet(t,v)==0)
+		{
+			printf("Complete.\r\n");
+			
+		}
+		else
+		{
+			printf("Failed.\r\n");
+			
+		}
+		return;
+	}
+	if(USART_RX_BUF[0]=='s'&&USART_RX_BUF[1]=='h'&&USART_RX_BUF[2]=='o'&&USART_RX_BUF[3]=='w')
+	{
+		printf("SHOW CMD\r\n");
+		ParamShow();
+	}
+	if(USART_RX_BUF[0]=='r'&&USART_RX_BUF[1]=='s'&&USART_RX_BUF[2]=='t'&&USART_RX_BUF[3]=='p')
+	{
+		printf("RSTP CMD\r\n");
+		ParamReset();
+		ParamWrite();
+		printf("Param reset complete.\r\n");
+		ParamShow();
 	}
 }
 
@@ -193,15 +253,15 @@ void EXTI15_10_IRQHandler(void)
 		//TEST1=1;
 		AD7606FSMCRead(sys.sensors.ADCData);
 		ADCReadVol(sys.sensors.ADCData+8);
-		//printf("%d\r\n",sys.sensors.ADCData[0]);
+//		//printf("%d\r\n",sys.sensors.ADCData[0]);
+//		printf("%d\r\n",sizeof(SensorDataPackage));
 		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
-		
-		if(sys.intEnabled[0]>=0)
-			sys.sensors.SensorData[sys.intEnabled[0]]=0;
-		if(sys.intEnabled[1]>=0)
-			sys.sensors.SensorData[sys.intEnabled[1]]=0;
-
 		EXTI_ClearITPendingBit(EXTI_Line13);
+//		if(sys.intEnabled[0]>=0)
+//			sys.sensors.SensorData[sys.intEnabled[0]]=0;
+//		if(sys.intEnabled[1]>=0)
+//			sys.sensors.SensorData[sys.intEnabled[1]]=0;
+		SensorsIntUpdate(); 
 		
 		//TEST1=0;
 	}

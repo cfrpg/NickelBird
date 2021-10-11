@@ -1,4 +1,5 @@
 #include "pwm.h"
+#include "pages.h"
 
 u8 _pwm_armed;
 
@@ -45,21 +46,24 @@ void PWMInit(void)
 
 void PWMSet(u32 ch0,u32 ch1)
 {
-	u32 t=(params.pwm_max-params.pwm_min);
 	if(_pwm_armed)
 	{		
 //		TIM_SetCompare1(TIM5,ch0*t/1000+params.pwm_min);
 //		TIM_SetCompare2(TIM5,ch1*t/1000+params.pwm_min);	
 		TIM_SetCompare1(TIM5,ch0);
-		TIM_SetCompare2(TIM5,ch1);		
+		TIM_SetCompare2(TIM5,ch1);	
+		sys.pwm[0]=ch0;
+		sys.pwm[1]=ch1;
 	}
 }
 
 void PWMDisarm(void)
 {
 	_pwm_armed=0;
-	TIM_SetCompare1(TIM5,params.pwm_disarmed);
-	TIM_SetCompare2(TIM5,params.pwm_disarmed);	
+//	TIM_SetCompare1(TIM5,params.pwm_disarmed);
+//	TIM_SetCompare2(TIM5,params.pwm_disarmed);	
+	TIM_SetCompare1(TIM5,1000);
+	TIM_SetCompare2(TIM5,1000);	
 }
 
 void PWMArm(void)

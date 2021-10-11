@@ -61,7 +61,6 @@ namespace NickelBird
 
 		string sepChar;
 		int sscnt;
-		int sstarget;
 
 		ObservableCollection<string> logNameElements;
 
@@ -82,6 +81,10 @@ namespace NickelBird
 		Thread dataListenerThread;
 		bool linkAvilable;
 
+		List<double> freqbuff;
+
+		int freqHead, freqCount;
+		SensorData freqData;
 		public ObservableCollection<string> LogNameElements
 		{
 			get => logNameElements;
@@ -101,10 +104,10 @@ namespace NickelBird
 			syncFlag = new SyncFlag();
 			syncFlag.SkipCount = 50;
 			initConfig();
-			
+			//sensorDatas.Add(new SensorData(syncFlag, config) { Name="Freq"});
+			freqData = new SensorData(syncFlag, config);
+			freqText.DataContext = freqData;
 
-			
-			
 			logNameElements = new ObservableCollection<string>();
 			for (int i = 0; i < config.LogName.Length; i++)
 			{
@@ -114,10 +117,10 @@ namespace NickelBird
 
 			sensorDataList.DataContext = sensorDatas;
 			pathText.DataContext = config;
-			filterGrid.DataContext = config;			
+			filterGrid.DataContext = config;
 			configGrid.DataContext = config;
 
-			
+
 
 			plotters = new List<ChartPlotter>();
 			plotters.Add(Plotter1);
@@ -144,7 +147,7 @@ namespace NickelBird
 
 			flightState = new FlightState(syncFlag);
 			flightState.Airspeed = 0;
-			
+
 			graphGrid.DataContext = flightState;
 			logNameGrid.DataContext = this;
 			configNameGrid.DataContext = this;
@@ -162,10 +165,8 @@ namespace NickelBird
 			trimList = new Queue<int>();
 			sepChar = "\t";
 			sscnt = 0;
-			sstextBlock.DataContext = flightState;
 			sstextBox.DataContext = flightState;
 			csvcheckBox.DataContext = config;
-			sscheckBox.DataContext = flightState;
 			//graphChannels = new List<int>();
 			//for (int i = 0; i < plotters.Count; i++)
 			//	graphChannels.Add(0);
@@ -192,13 +193,23 @@ namespace NickelBird
 			tableName2.DataContext = config;
 			tableDataGrid.DataContext = flightState;
 
+			freqName.ItemsSource = sensorDatas;
+			freqName.DisplayMemberPath = "FullName";
+			freqName.DataContext = config;
+			freqcheckBox.DataContext = config;
+
 			timerText.DataContext = flightState;
+			freqText.DataContext = flightState;
 
 			linkAvilable = false;
 			dataListenerThread = new Thread(dataListenerWorker);
 			dataListenerThread.IsBackground = true;
 			dataListenerThread.Priority = ThreadPriority.AboveNormal;
-			dataListenerThread.Start();			
+			dataListenerThread.Start();
+
+			freqbuff = new List<double>(1024);
+			for (int i = 0; i < 1024; i++)
+				freqbuff.Add(0);
 
 			// portScanner = new AdvancedPortScanner(2000000, 256, 3);
 			portScanner = new AdvancedPortScanner(config.Baudrate, 256, 3);
@@ -232,10 +243,13 @@ namespace NickelBird
 
 		private void Link_OnReceivePackage(CommLink sender, LinkEventArgs e)
 		{
-			
+
 		}
 		void analyzePackage(SBLinkPackage package)
 		{
+			bool stopFlag = false;
+			if (isLogging)
+				isWritingFile = true;
 			plotTime += 0.001;
 			graphSkipCnt++;
 			package.StartRead();
@@ -275,8 +289,9 @@ namespace NickelBird
 				if (isLogging)
 				{
 					isWritingFile = true;
-					if (((!flightState.SSEanbled) || (flightState.SSEanbled && sscnt > 0)) && logcnt >= config.LogSkip)
+					if (logcnt >= config.LogSkip)
 					{
+
 						logWriter.Write(currentTime.ToString());
 						for (int i = 0; i < sensorDatas.Count; i++)
 						{
@@ -295,19 +310,20 @@ namespace NickelBird
 						logWriter.Write(Environment.NewLine);
 						logWriter.Flush();
 						isWritingFile = false;
-						if (flightState.SSEanbled)
-						{
-							sscnt--;
-							if (sscnt <= 0)
-							{
-								sscnt = 0;
-								flightState.SSCount++;
-							}
-						}
+
 						logcnt = 0;
 					}
+					isWritingFile = false;
 					logcnt++;
 					flightState.Timer += 0.001;
+					if (flightState.SSEanbled)
+					{
+						sscnt++;
+						if (sscnt >= flightState.SSTime)
+						{
+							stopFlag = true;
+						}
+					}
 				}
 				for (int i = 0; i < plotters.Count; i++)
 				{
@@ -347,14 +363,37 @@ namespace NickelBird
 						graphcnt = 0;
 					}
 
+					//sensorDatas[sensorDatas.Count - 1].SetRawValue((float)SharpBladeDAS.MathHelper.CorrFreq(freqbuff, freqHead, freqCount));
+
 					graphSkipCnt = 0;
+				}
+				if(config.FreqEnabled)
+				{
+					freqbuff[(freqHead + freqCount) % freqbuff.Count] = sensorDatas[config.FreqData].LpfValue;
+					freqCount++;
+					if (freqCount >= 1000)
+					{
+						freqHead += freqCount - 1000;
+						freqHead %= freqbuff.Count;
+						freqCount = 1000;
+						if (syncFlag.UpdateUI)
+							flightState.Freqency = (float)SharpBladeDAS.MathHelper.CorrFreq(freqbuff, freqHead, freqCount);
+					}
+				}
+
+				if(stopFlag)
+				{
+					Dispatcher.Invoke(new Action(() =>
+					{
+						stopLog();
+					}));
 				}
 
 				if (trim >= 0)
 				{
 					trimsum += sensorDatas[trim].Value;
 					trimcnt++;
-					if (trimcnt >= 100)
+					if (trimcnt >= 1000)
 					{
 						sensorDatas[trim].Offset = -trimsum / trimcnt;
 						if (trimList.Count == 0)
@@ -570,96 +609,113 @@ namespace NickelBird
 		{
 			if (isLogging)
 			{
-				isLogging = false;
-				//Wait for all writing complete
-				while (isWritingFile) ;
-				logWriter.Close();
-				logBtn.Content = "开始采集";
-
-				sensorDataList.IsEnabled = true;
-				configTab.IsEnabled = true;
-				if (flightState.SSEanbled)
-				{
-					logBtn.IsDefault = true;
-					ssbutton.IsDefault = false;
-				}
-				// auto inc name
-				int orignalVal = 0;
-				int incVal = 0;
-
-				if (int.TryParse(nameText1.Text, out orignalVal) && int.TryParse(nameIncText1.Text, out incVal))
-				{
-					nameText1.Text = (orignalVal + incVal).ToString();
-				}
-				if (int.TryParse(nameText2.Text, out orignalVal) && int.TryParse(nameIncText2.Text, out incVal))
-				{
-					nameText2.Text = (orignalVal + incVal).ToString();
-				}
-				if (int.TryParse(nameText3.Text, out orignalVal) && int.TryParse(nameIncText3.Text, out incVal))
-				{
-					nameText3.Text = (orignalVal + incVal).ToString();
-				}
-				if (int.TryParse(nameText4.Text, out orignalVal) && int.TryParse(nameIncText4.Text, out incVal))
-				{
-					nameText4.Text = (orignalVal + incVal).ToString();
-				}
-				if (int.TryParse(nameText5.Text, out orignalVal) && int.TryParse(nameIncText5.Text, out incVal))
-				{
-					nameText5.Text = (orignalVal + incVal).ToString();
-				}
-				flightState.Timer = 0;
-
+				stopLog();
 			}
 			else
 			{
-				saveConfig();
-				logBtn.Content = "停止采集";
-				sensorDataList.IsEnabled = false;
-				configTab.IsEnabled = false;
-				if (sscheckBox.IsChecked == true)
-				{
-					logBtn.IsDefault = false;
-					ssbutton.IsDefault = true;
-				}
-				string name = "";
-				if (logNameElements[0] != "")
-					name += "_" + ((nameText1.Text != "") ? nameText1.Text : " ");
-				if (logNameElements[1] != "")
-					name += "_" + ((nameText2.Text != "") ? nameText2.Text : " ");
-				if (logNameElements[2] != "")
-					name += "_" + ((nameText3.Text != "") ? nameText3.Text : " ");
-				if (logNameElements[3] != "")
-					name += "_" + ((nameText4.Text != "") ? nameText4.Text : " ");
-				if (logNameElements[4] != "")
-					name += "_" + ((nameText5.Text != "") ? nameText5.Text : " ");
-				createFolder(config.LogPath);
-				if (csvcheckBox.IsChecked == true)
-					logWriter = new StreamWriter(config.LogPath + "\\" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + name + "_" + nameText.Text + ".csv");
-				else
-					logWriter = new StreamWriter(config.LogPath + "\\" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + name + "_" + nameText.Text + ".txt");
-				logWriter.Write("Time");
-				for (int i = 0; i < sensorDatas.Count; i++)
-				{
-					if (sensorDatas[i].LogEnabled)
-					{
-						logWriter.Write(sepChar + sensorDatas[i].Name);
-						logWriter.Write(sepChar + sensorDatas[i].Name + "_RAW");
-						if (sensorDatas[i].FilterEnabled)
-							logWriter.Write(sepChar + sensorDatas[i].Name + "_LPF");
-					}
-				}
-				if (csvcheckBox.IsChecked == true)
-					logWriter.Write(",");
-				logWriter.Write(Environment.NewLine);
-				logWriter.Flush();
-				logStartTime = -1;
-				currentTime = 0;
-				flightState.SSCount = 0;
-				logcnt = 1;
-				isLogging = true;
+				startLog();
 
 			}
 		}
+
+		private void startLog()
+		{
+			saveConfig();
+			logBtn.Content = "停止采集";
+			sensorDataList.IsEnabled = false;
+			configTab.IsEnabled = false;
+			ssbutton.IsEnabled = false;
+			if(flightState.SSEanbled)
+			{
+				logBtn.IsEnabled = false;
+			}
+			string name = "";
+			if (logNameElements[0] != "")
+				name += "_" + ((nameText1.Text != "") ? nameText1.Text : " ");
+			if (logNameElements[1] != "")
+				name += "_" + ((nameText2.Text != "") ? nameText2.Text : " ");
+			if (logNameElements[2] != "")
+				name += "_" + ((nameText3.Text != "") ? nameText3.Text : " ");
+			if (logNameElements[3] != "")
+				name += "_" + ((nameText4.Text != "") ? nameText4.Text : " ");
+			if (logNameElements[4] != "")
+				name += "_" + ((nameText5.Text != "") ? nameText5.Text : " ");
+			createFolder(config.LogPath);
+			if (csvcheckBox.IsChecked == true)
+				logWriter = new StreamWriter(config.LogPath + "\\" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + name + "_" + nameText.Text + ".csv");
+			else
+				logWriter = new StreamWriter(config.LogPath + "\\" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + name + "_" + nameText.Text + ".txt");
+			logWriter.Write("Time");
+			for (int i = 0; i < sensorDatas.Count; i++)
+			{
+				if (sensorDatas[i].LogEnabled)
+				{
+					logWriter.Write(sepChar + sensorDatas[i].Name);
+					logWriter.Write(sepChar + sensorDatas[i].Name + "_RAW");
+					if (sensorDatas[i].FilterEnabled)
+						logWriter.Write(sepChar + sensorDatas[i].Name + "_LPF");
+				}
+			}
+			if (csvcheckBox.IsChecked == true)
+				logWriter.Write(",");
+			logWriter.Write(Environment.NewLine);
+			logWriter.Flush();
+			logStartTime = -1;
+			currentTime = 0;
+			sscnt = 0;
+			logcnt = 1;
+			isLogging = true;
+		}
+
+		private void stopLog()
+		{
+			isLogging = false;
+			//Wait for all writing complete								
+			while (isWritingFile) ;
+			logWriter.Close();
+			logBtn.Content = "开始采集";
+
+			sensorDataList.IsEnabled = true;
+			configTab.IsEnabled = true;
+			ssbutton.IsEnabled = true;
+			if (flightState.SSEanbled)
+			{
+				logBtn.IsEnabled = true;
+			}
+			flightState.SSEanbled = false;
+			//if (flightState.SSEanbled)
+			//{
+			//	logBtn.IsDefault = true;
+			//	ssbutton.IsDefault = false;
+			//}
+			// auto inc name
+			int orignalVal = 0;
+			int incVal = 0;
+
+			if (int.TryParse(nameText1.Text, out orignalVal) && int.TryParse(nameIncText1.Text, out incVal))
+			{
+				nameText1.Text = (orignalVal + incVal).ToString();
+			}
+			if (int.TryParse(nameText2.Text, out orignalVal) && int.TryParse(nameIncText2.Text, out incVal))
+			{
+				nameText2.Text = (orignalVal + incVal).ToString();
+			}
+			if (int.TryParse(nameText3.Text, out orignalVal) && int.TryParse(nameIncText3.Text, out incVal))
+			{
+				nameText3.Text = (orignalVal + incVal).ToString();
+			}
+			if (int.TryParse(nameText4.Text, out orignalVal) && int.TryParse(nameIncText4.Text, out incVal))
+			{
+				nameText4.Text = (orignalVal + incVal).ToString();
+			}
+			if (int.TryParse(nameText5.Text, out orignalVal) && int.TryParse(nameIncText5.Text, out incVal))
+			{
+				nameText5.Text = (orignalVal + incVal).ToString();
+			}
+			flightState.Timer = 0;
+		}
+
+
 
 		private void SaveLogNameBtn_Click(object sender, RoutedEventArgs e)
 		{
@@ -689,8 +745,7 @@ namespace NickelBird
 			}
 		}
 
-		
-		
+
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			nameText1.Text = config.LogNameBackup[0];
@@ -701,7 +756,7 @@ namespace NickelBird
 			nameText.Text = config.LogNameBackup[5];
 
 		}
-		
+
 		private void CsvcheckBox_Checked(object sender, RoutedEventArgs e)
 		{
 			if (csvcheckBox.IsChecked == true)
@@ -712,8 +767,11 @@ namespace NickelBird
 
 		private void Ssbutton_Click(object sender, RoutedEventArgs e)
 		{
-			if (isLogging && sscnt <= 0)
-				sscnt = flightState.SSTime;
+			if(!isLogging)
+			{
+				flightState.SSEanbled = true;
+				startLog();
+			}
 		}
 		
 		private void TrimBtn_Click(object sender, RoutedEventArgs e)

@@ -323,7 +323,7 @@ void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 	{
 		v=-v;
 		p=1;
-		buf[0]='-';		
+		buf[0]='-';
 	}
 	t=v;	
 	do{

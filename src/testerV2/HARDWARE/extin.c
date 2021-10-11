@@ -10,36 +10,59 @@ void ExtinInit(void)
 	EXTI_InitTypeDef ei;
 	NVIC_InitTypeDef ni;
 	
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
 	
-	gi.GPIO_Pin=GPIO_Pin_12|GPIO_Pin_13;
+	gi.GPIO_Pin=GPIO_Pin_0|GPIO_Pin_1;
 	gi.GPIO_Mode=GPIO_Mode_IN;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
-	GPIO_Init(GPIOB,&gi);
+	GPIO_Init(GPIOE,&gi);
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
 	
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB,EXTI_PinSource12);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB,EXTI_PinSource13);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE,EXTI_PinSource0);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE,EXTI_PinSource1);
 	
-	ei.EXTI_Line=EXTI_Line13;
+	ei.EXTI_Line=EXTI_Line0;
 	ei.EXTI_Mode=EXTI_Mode_Interrupt;
 	ei.EXTI_Trigger=EXTI_Trigger_Falling;
 	ei.EXTI_LineCmd=ENABLE;
 	EXTI_Init(&ei);
-	ei.EXTI_Line=EXTI_Line12;
+	ei.EXTI_Line=EXTI_Line1;
 	EXTI_Init(&ei);
 	
-	ni.NVIC_IRQChannel=EXTI15_10_IRQn;
+	ni.NVIC_IRQChannel=EXTI0_IRQn;
 	ni.NVIC_IRQChannelCmd=ENABLE;
-	ni.NVIC_IRQChannelPreemptionPriority=1;
+	ni.NVIC_IRQChannelPreemptionPriority=2;
 	ni.NVIC_IRQChannelSubPriority=3;
+	NVIC_Init(&ni);
+	ni.NVIC_IRQChannel=EXTI1_IRQn;
 	NVIC_Init(&ni);
 	
 	lastIntTime[0]=0;
 	lastIntTime[1]=0;
+}
+
+void EXTI0_IRQHandler(void)
+{	
+	if(EXTI_GetITStatus(EXTI_Line0)!=RESET)
+	{	
+		EXTI_ClearITPendingBit(EXTI_Line0);
+		sys.intFlag[0]=1;
+		sys.intTime[0]=sys.sensors.header.time;
+		
+	}	
+}
+void EXTI1_IRQHandler(void)
+{	
+	if(EXTI_GetITStatus(EXTI_Line1)!=RESET)
+	{		
+		EXTI_ClearITPendingBit(EXTI_Line1);		
+		sys.intFlag[1]=1;
+		sys.intTime[1]=sys.sensors.header.time;
+		
+	}	
 }
 
 //void EXTI15_10_IRQHandler(void)

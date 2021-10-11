@@ -16,6 +16,7 @@ namespace NickelBird
 		double airspeed;
 		double airspeedkmh;
 		double voltage;
+		double freqency;
 				
 
 		ObservableCollection<double> graphData;
@@ -24,7 +25,6 @@ namespace NickelBird
 
 		SyncFlag syncFlag;
 
-		int ssCount;
 		int ssTime;
 		bool ssEanbled;
 
@@ -62,17 +62,9 @@ namespace NickelBird
 					PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Voltage"));
 			}
 		}
-		
+
 		public SyncFlag SyncFlag { get => syncFlag; set => syncFlag = value; }
-		public int SSCount
-		{
-			get => ssCount;
-			set
-			{
-				ssCount = value;
-				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SSCount"));
-			}
-		}
+
 		public int SSTime
 		{
 			get => ssTime;
@@ -133,11 +125,21 @@ namespace NickelBird
 			}
 		}
 
+		public double Freqency
+		{
+			get => freqency;
+			set
+			{
+				freqency = value;
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Freqency"));
+			}
+		}
+
 		public FlightState(SyncFlag sf)
 		{
 			syncFlag = sf;
-			SSTime = 100;
-			SSCount = 0;
+			SSTime = 2000;			
+			SSEanbled = false;
 			graphData = new ObservableCollection<double>();
 			tableData = new ObservableCollection<double>();
 			graphMaxData = new ObservableCollection<double>();
@@ -147,7 +149,6 @@ namespace NickelBird
 				tableData.Add(0);
 				graphMaxData.Add(0);
 			}
-			
 		}
 	}
 }
