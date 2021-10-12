@@ -8,19 +8,12 @@
 #include "keyboard.h"
 #include "parameter.h"
 #include "pages.h"
-#include "ads1256.h"
-#include "eo.h"
 #include "pwm.h"
 #include "sblink.h"
-#include "rtc.h"
 #include "adc.h"
-#include "ad7606.h"
 #include "ad7606fsmc.h"
 #include "i2c.h"
-#include "ms4525do.h"
 #include "spi.h"
-#include "bmp280.h"
-#include "sdp3x.h"
 #include "extin.h"
 #include "sensors.h"
 #include "mb85rs.h"
@@ -60,7 +53,7 @@ int main(void)
 	u8 key;
 	delay_init(168);
 	uart_init(115200);
-	printf("%x\r\n",SCB->VTOR);
+	
 	OledInit();
 	MainClockInit();
 	LEDInit();
@@ -76,23 +69,14 @@ int main(void)
 		ParamWrite();
 	}
 	PWMInit();
-	//SPIInit();
 	
 //	initTestGPIO();
 	PagesInit();
-//	delay_ms(100);
 	LinkInit();	
 	ADCInit();
 	AD7606FSMCInit();
-//	BMPInit();
-//	MS4525DOInit();
 	I2CInit();
 	ExtinInit();
-//	
-//	while(tick[0]<200);
-//	LEDSet(1);
-//	
-//	lastKey=0xFF;	
 
 	KeyInit();
 
@@ -104,20 +88,6 @@ int main(void)
 	delay_ms(500);
 	while(1)
 	{	
-//		LEDFlip();	
-//		
-//		delay_ms(1000);
-//		printf("%x %d %d\r\n",GPGetData(),KeyGetState(),WheelGetValue());
-//		
-////		for(i=0;i<8;i++)
-////		{
-////			printf("%d ",sys.sensors.ADCData[i]);
-////		}
-////		printf("\r\n");
-//		ADCReadVol(sys.sensors.ADCData+8);
-		//printf("%d\r\n",DMA_GetCurrDataCounter(DMA2_Stream0));
-		//AD7606FSMCRead(sys.sensors.ADCData);
-		//printf("%d\r\n",sys.sensors.ADCData[0]);
 		if(tick[0]>=500)
 		{
 			tick[0]=0;
@@ -127,38 +97,10 @@ int main(void)
 				AnalyzePkg();
 				USART_RX_STA=0;
 			}
-//			Sdp3xReadOut(SDP3X_ADDR1,2,tmp);
-//			printf("%d,%d,",tmp[0],tmp[1]);
-//			Sdp3xReadOut(SDP3X_ADDR2,2,tmp);
-//			printf("%d,%d,",tmp[0],tmp[1]);
-//			Sdp3xReadOut(SDP3X_ADDR3,2,tmp);
-//			printf("%d,%d\r\n",tmp[0],tmp[1]);
 		}
 		if(tick[1]>=2)
 		{
-			tick[1]=0;
-			if(sblinkReady)
-			{
-				//memcpy(package,recBuff[currBuff],recBuffLen[currBuff]);
-				//sblinkReady=0;
-				//printf("Rec Fun=%d,Len=%d\r\n",package[1],package[2]);
-				LEDFlip();
-				delay_ms(200);
-				LEDFlip();
-				delay_ms(200);
-				LEDFlip();
-				
-				MS4525DOCali(200);
-				sys.temperature=BMPReadTemperature();
-				sys.pressure=BMPReadPressure();
-				sys.rho=BMPReadAverageRho(200);
-				LEDFlip();
-				delay_ms(200);
-				LEDFlip();
-				delay_ms(200);
-				LEDFlip();
-				sblinkReady=0;
-			}
+			tick[1]=0;			
 			SensorsFastUpdate();
 		}
 		if(tick[2]>=200)
@@ -237,13 +179,7 @@ void TIM7_IRQHandler(void)
 			cpucnt=0;
 		RTCcnt++;
 		if(RTCcnt>999)
-			RTCcnt=999;
-//		AD7606FSMCRead(sys.sensors.ADCData);
-//		AD7606FSMCStart();
-//		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
-//		if(RTCcnt%4==0)
-//			UpdateSensors();
-		
+			RTCcnt=999;		
 	}
 }
 
@@ -252,17 +188,9 @@ void EXTI15_10_IRQHandler(void)
 	//printf("int\r\n");
 	if (EXTI_GetITStatus(EXTI_Line13) != RESET)
 	{
-		//TEST1=1;
 		AD7606FSMCRead(sys.sensors.ADCData);
 		ADCReadVol(sys.sensors.ADCData+8);
-//		//printf("%d\r\n",sys.sensors.ADCData[0]);
-//		printf("%d\r\n",sizeof(SensorDataPackage));
 		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
-		
-//		if(sys.intEnabled[0]>=0)
-//			sys.sensors.SensorData[sys.intEnabled[0]]=0;
-//		if(sys.intEnabled[1]>=0)
-//			sys.sensors.SensorData[sys.intEnabled[1]]=0;
 		SensorsIntUpdate(); 
 		EXTI_ClearITPendingBit(EXTI_Line13);
 		//TEST1=0;
@@ -281,8 +209,6 @@ void TIM3_IRQHandler(void)
 		//TEST1=1;
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 		ADCStartConv();
-//		ADCReadVol(sys.sensors.ADCData+8);
-//		SensorsIntUpdate();
 		sys.sensors.header.time++;
 		//TEST0=0;
 	}
@@ -302,5 +228,4 @@ void initTestGPIO(void)
 	
 	TEST0=0;
 	TEST1=0;
-
 }
