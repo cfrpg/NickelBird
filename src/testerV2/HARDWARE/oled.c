@@ -292,14 +292,25 @@ void OledDispInt(u8 x,u8 y,s32 v,u8 ml,u8 f)
 	do{
 		t/=10;
 		len++;
-	}while(t>0);		
-	buf[len]=0;
+	}while(t>0);
+	if(len>ml)
+	{
+		len=ml-1;
+		while(len>=p)
+		{
+			buf[len]='9';
+			len--;
+		}
+		OledDispString(x,y,buf,f);	
+		return;
+	}
 	while(ml>len)
 	{
 		buf[ml-1]=' ';
 		ml--;
 	}
-	len--;
+	ml--;
+	len=ml;
 	while(len>=p)
 	{
 		buf[len]=v%10+'0';
@@ -324,27 +335,43 @@ void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 		v=-v;
 		p=1;
 		buf[0]='-';
+		len++;
 	}
 	t=v;	
 	do{
 		t/=10;
 		len++;
-	}while(t>0);	
-	if(len<=pre)
-		len=pre+1;
-	if(p)
-		len++;
-	pre=len-pre;
-	buf[len+1]=0;	
-	while(ml>len+1)
+	}while(t>0);
+	len++;
+	if(len>ml)
+	{
+		len=ml-1;
+		while(len>=p)
+		{
+			buf[len]='9';
+			len--;
+		}
+		buf[ml-pre-1]='.';
+		OledDispString(x,y,buf,f);	
+		return;
+	}
+	while(ml>len)
 	{
 		buf[ml-1]=' ';
 		ml--;
-	}		
+	}
+	if(ml<pre+2)
+		ml=pre+2;
+	ml--;
+	
+	len=ml;
+	
 	while(len>=p)
 	{
-		if(len==pre)
+		if(len+pre==ml)
+		{
 			buf[len]='.';
+		}
 		else
 		{
 			buf[len]=v%10+'0';
