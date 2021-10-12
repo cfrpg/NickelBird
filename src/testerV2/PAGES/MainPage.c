@@ -53,29 +53,25 @@ void PageInit_main(u8 f)
 
 void PageUpdate_main(void)
 {
-	u8 key=currKey&(currKey^lastKey);
-	u8 wheelpush=0;
 	u8 draw=0;
 	u8 i;
-	s16 dpwm=0;
-	if((currWheelPush&0x07)==0x01)
-		wheelpush=1;
+	s16 dpwm=0;	
 	if(mainp.state==0)
 	{
 		//normal state
-		if(key&KEY_A)
+		if(keyPress&KEY_A)
 		{
 			mainp.currch^=1;
 			draw|=0x01;
 		}
-		if(key&KEY_B)
+		if(keyPress&KEY_B)
 		{
 			mainp.bind^=1;
 			draw|=0x01;
 		}
 		if(PWMIsArmed())
 		{
-			if(wheelpush)
+			if(wheelPress)
 			{
 				PWMDisarm();
 				sys.pwm[0]=*pwm_disarmed;
@@ -83,11 +79,11 @@ void PageUpdate_main(void)
 				draw|=0x06;
 				OledDispString(0,2,"      ",0);
 			}
-			if(key&KEY_UP)
+			if(keyPress&KEY_UP)
 			{
 				dpwm=100;
 			}
-			if(key&KEY_DOWN)
+			if(keyPress&KEY_DOWN)
 			{
 				dpwm=-100;
 			}
@@ -135,7 +131,7 @@ void PageUpdate_main(void)
 		}
 		else
 		{
-			if(wheelpush)
+			if(wheelPress)
 			{
 				PWMArm();
 				sys.pwm[0]=*pwm_min;
@@ -144,9 +140,9 @@ void PageUpdate_main(void)
 				OledDispString(0,2,"ARMED",0);
 			}
 		}
-		if(key&KEY_LEFT)
+		if(keyPress&KEY_LEFT)
 			PagesNext(-1);
-		if(key&KEY_RIGHT)
+		if(keyPress&KEY_RIGHT)
 			PagesNext(1);
 	}
 	mainpage_showData(draw);

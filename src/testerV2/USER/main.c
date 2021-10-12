@@ -41,6 +41,8 @@ u8 lastWheelPush=0;
 u8 currWheelPush=0;
 s32 lastWheel=0;
 s32 currWheel=0;
+u8 keyPress=0;
+u8 wheelPress=0;
 
 s8 currpage;
 systemState sys;
@@ -256,13 +258,13 @@ void EXTI15_10_IRQHandler(void)
 //		//printf("%d\r\n",sys.sensors.ADCData[0]);
 //		printf("%d\r\n",sizeof(SensorDataPackage));
 		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
-		EXTI_ClearITPendingBit(EXTI_Line13);
+		
 //		if(sys.intEnabled[0]>=0)
 //			sys.sensors.SensorData[sys.intEnabled[0]]=0;
 //		if(sys.intEnabled[1]>=0)
 //			sys.sensors.SensorData[sys.intEnabled[1]]=0;
 		SensorsIntUpdate(); 
-		
+		EXTI_ClearITPendingBit(EXTI_Line13);
 		//TEST1=0;
 	}
 	if (EXTI_GetITStatus(EXTI_Line11) != RESET)

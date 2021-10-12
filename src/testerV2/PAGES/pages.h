@@ -39,6 +39,8 @@ extern s32 lastWheel;
 extern s32 currWheel;
 extern u8 lastWheelPush;
 extern u8 currWheelPush;
+extern u8 keyPress;
+extern u8 wheelPress;
 
 extern s8 currpage;
 extern u16 cpucnt;

@@ -2,6 +2,11 @@
 #include "oled.h"
 #include "pwm.h"
 
+#define Falcon_Main 0
+#define Falcon_Cali_Sel 1
+#define Falcon_Cali_Full 2
+#define Falcon_Cali_Stroke 3
+
 void falconpage_showData(u8 f);
 void falconpage_fastUpdate(void);
 void falconpage_intUpdate(void);
@@ -11,6 +16,14 @@ struct
 	const s32* pwm_min;
 	const s32* pwm_max;
 	const s32* pwm_disarmed;
+	const float* aat_sin_max;
+	const float* aat_sin_min;
+	const float* aat_sin_off;
+	const float* aat_cos_max;
+	const float* aat_cos_min;
+	const float* aat_cos_off;
+	const float* aat_up_ang;
+	const float* aat_down_ang;
 	u8 state;
 	u8 currch;
 	u8 bind;
@@ -24,7 +37,7 @@ void PageInit_falcon(u8 f)
 {
 	if(f)
 	{
-		falconp.state=0;
+		falconp.state=Falcon_Main;
 		falconp.currch=0;
 		falconp.bind=0;
 		falconp.phase=0;
@@ -34,6 +47,14 @@ void PageInit_falcon(u8 f)
 		falconp.pwm_min=ParamGetFromName("PWM_MIN");
 		falconp.pwm_max=ParamGetFromName("PWM_MAX");		
 		falconp.pwm_disarmed=ParamGetFromName("PWM_DISARMED");
+		falconp.aat_sin_max=ParamGetFromName("AAT_SIN_MAX");
+		falconp.aat_sin_min=ParamGetFromName("AAT_SIN_MIN");
+		falconp.aat_sin_off=ParamGetFromName("AAT_SIN_OFF");
+		falconp.aat_cos_max=ParamGetFromName("AAT_COS_MAX");
+		falconp.aat_cos_min=ParamGetFromName("AAT_COS_MIN");
+		falconp.aat_cos_off=ParamGetFromName("AAT_COS_OFF");
+		falconp.aat_up_ang=ParamGetFromName("AAT_UP_ANG");
+		falconp.aat_down_ang=ParamGetFromName("AAT_DOWN_ANG");
 		falconp.pwm[0]=*falconp.pwm_disarmed;
 		falconp.pwm[1]=*falconp.pwm_disarmed;
 		return;
@@ -69,31 +90,32 @@ void PageInit_falcon(u8 f)
 	
 }
 
+void falcon_update_main(void)
+{
+	
+}
+
 void PageUpdate_falcon(void)
 {
-	u8 key=currKey&(currKey^lastKey);
-	u8 wheelpush=0;	
 	u8 i;
 	s16 dpwm=0;
-	falconp.draw&=0xF0;
-	if((currWheelPush&0x07)==0x01)
-		wheelpush=1;
-	if(falconp.state==0)
+	falconp.draw&=0xF0;	
+	if(falconp.state==Falcon_Main)
 	{
 		//normal state
-		if(key&KEY_A)
+		if(keyPress&KEY_A)
 		{
 			falconp.currch^=1;
 			falconp.draw|=0x01;
 		}
-		if(key&KEY_B)
+		if(keyPress&KEY_B)
 		{
 			falconp.bind^=1;
 			falconp.draw|=0x01;
 		}
 		if(PWMIsArmed())
 		{
-			if(wheelpush)
+			if(wheelPress)
 			{
 				PWMDisarm();
 				falconp.pwm[0]=*falconp.pwm_disarmed;
@@ -101,11 +123,11 @@ void PageUpdate_falcon(void)
 				falconp.draw|=0x06;
 				OledDispString(0,2,"      ",0);
 			}
-			if(key&KEY_UP)
+			if(keyPress&KEY_UP)
 			{
 				dpwm=100;
 			}
-			if(key&KEY_DOWN)
+			if(keyPress&KEY_DOWN)
 			{
 				dpwm=-100;
 			}
@@ -155,7 +177,7 @@ void PageUpdate_falcon(void)
 		}
 		else
 		{
-			if(wheelpush)
+			if(wheelPress)
 			{
 				PWMArm();
 				falconp.pwm[0]=*falconp.pwm_min;
@@ -163,9 +185,9 @@ void PageUpdate_falcon(void)
 				falconp.draw|=0x06;
 				OledDispString(0,2,"ARMED",0);
 			}
-			if(key&KEY_LEFT)
+			if(keyPress&KEY_LEFT)
 				PagesNext(-1);
-			if(key&KEY_RIGHT)
+			if(keyPress&KEY_RIGHT)
 				PagesNext(1);
 		}
 		

@@ -79,6 +79,8 @@ void PagesUpdate(void)
 	currWheel=WheelGetValue();
 	currWheelPush<<=1;
 	currWheelPush|=KeyGetState();
+	keyPress=currKey&(currKey^lastKey);
+	wheelPress=((currWheelPush&0x07)==0x01);
 	switch(currpage)
 	{
 		case MainPage:
@@ -102,10 +104,10 @@ void PagesDrawHeader(u8 n,s8 *name)
 	OledDispString(0,1,"=",0);
 	OledDispString(19,1,"=",0);
 	OledDispString(4,1,"/",0);
-	OledDispInt(5,1,PageNum,0,0);
-	if(n>8)
-		OledDispInt(2,1,n+1,0,0);
+	OledDispInt(5,1,PageNum,1,0);
+	if(n>9)
+		OledDispInt(2,1,n+1,2,0);
 	else
-		OledDispInt(3,1,n+1,0,0);
+		OledDispInt(3,1,n+1,1,0);
 	OledDispString(8,1,name,0);
 }
