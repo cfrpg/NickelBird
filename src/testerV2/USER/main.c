@@ -19,8 +19,8 @@
 #include "mb85rs.h"
 #include "logo.h"
 
-#define TEST0 PEout(0)
-#define TEST1 PEout(1)
+#define TEST0 PBout(6)
+#define TEST1 PBout(7)
 
 
 void initTestGPIO(void);
@@ -70,7 +70,7 @@ int main(void)
 	}
 	PWMInit();
 	
-//	initTestGPIO();
+	initTestGPIO();
 	PagesInit();
 	LinkInit();	
 	ADCInit();
@@ -103,7 +103,7 @@ int main(void)
 			tick[1]=0;			
 			SensorsFastUpdate();
 		}
-		if(tick[2]>=200)
+		if(tick[2]>=100)
 		{
 			tick[2]=0;
 			SensorsSlowUpdate();
@@ -188,12 +188,14 @@ void EXTI15_10_IRQHandler(void)
 	//printf("int\r\n");
 	if (EXTI_GetITStatus(EXTI_Line13) != RESET)
 	{
+		TEST0=1;
 		AD7606FSMCRead(sys.sensors.ADCData);
 		ADCReadVol(sys.sensors.ADCData+8);
-		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
 		SensorsIntUpdate(); 
+		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
+
 		EXTI_ClearITPendingBit(EXTI_Line13);
-		//TEST1=0;
+		TEST0=0;
 	}
 	if (EXTI_GetITStatus(EXTI_Line11) != RESET)
 	{
@@ -218,13 +220,13 @@ void initTestGPIO(void)
 {
 	GPIO_InitTypeDef gi;
 	
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
-	gi.GPIO_Pin=GPIO_Pin_0|GPIO_Pin_1;
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+	gi.GPIO_Pin=GPIO_Pin_6|GPIO_Pin_7;
 	gi.GPIO_Mode=GPIO_Mode_OUT;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;
-	GPIO_Init(GPIOE,&gi);
+	GPIO_Init(GPIOB,&gi);
 	
 	TEST0=0;
 	TEST1=0;
