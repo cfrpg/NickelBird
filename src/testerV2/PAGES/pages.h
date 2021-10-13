@@ -11,6 +11,9 @@
 
 #define PageNum 2
 
+#define PI 3.1415926
+#define TwoPI 6.283185307
+
 typedef struct
 {
 	s32 ADCRawData[8];

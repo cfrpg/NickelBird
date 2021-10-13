@@ -188,14 +188,18 @@ void EXTI15_10_IRQHandler(void)
 	//printf("int\r\n");
 	if (EXTI_GetITStatus(EXTI_Line13) != RESET)
 	{
-		TEST0=1;
+		//TEST0=1;
 		AD7606FSMCRead(sys.sensors.ADCData);
 		ADCReadVol(sys.sensors.ADCData+8);
 		SensorsIntUpdate(); 
 		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
 
 		EXTI_ClearITPendingBit(EXTI_Line13);
-		TEST0=0;
+		sys.sensors.SensorData[0]=0;
+		sys.sensors.SensorData[1]=0;
+		sys.sensors.SensorData[2]=0;
+		sys.sensors.SensorData[3]=0;
+		//TEST0=0;
 	}
 	if (EXTI_GetITStatus(EXTI_Line11) != RESET)
 	{

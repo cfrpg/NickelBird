@@ -360,8 +360,8 @@ void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 		buf[ml-1]=' ';
 		ml--;
 	}
-	if(ml<pre+2)
-		ml=pre+2;
+	if(ml<pre+2+p)
+		ml=pre+2+p;
 	ml--;
 	
 	len=ml;

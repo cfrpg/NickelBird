@@ -12,6 +12,10 @@ void falconpage_showData(u8 f);
 void falconpage_fastUpdate(void);
 void falconpage_intUpdate(void);
 
+float falconpage_getRawAngle(void);
+void falconpage_setPhiCalc(void);
+float falconpage_getPhi(float a);
+
 struct
 {
 	const s32* pwm_min;
@@ -26,6 +30,8 @@ struct
 	u32 caliCnt;
 	s32 smax,smin,cmax,cmin;
 	float angle;
+	float phi;
+	float phiOffset;
 	u8 state;
 	u8 currch;
 	u8 bind;
@@ -34,6 +40,7 @@ struct
 	s32 phaseTime[2];
 	u16 pwm[2];
 	u8 draw;
+	s8 strokeDir;
 } falconp;
 void PageInit_falcon(u8 f)
 {
@@ -64,7 +71,7 @@ void PageInit_falcon(u8 f)
 	sys.fastUpdate=falconpage_fastUpdate;
 	sys.intUpdate=falconpage_intUpdate;
 	
-	
+	falconpage_setPhiCalc();
 	OledClear(0);
 	PagesDrawHeader(FalconPage,"Falcon");
 	
@@ -74,12 +81,12 @@ void PageInit_falcon(u8 f)
 	}
 	
 	OledDispString(5,4,":      |    %",0);
-	OledDispString(6,5,"    ms|     Hz",0);
+	OledDispString(6,5,"    ms|     %",0);
 	OledDispString(5,7,":      |    %",0);
-	OledDispString(6,8,"    ms|     Hz",0);	
+	OledDispString(6,8,"    ms|     %",0);	
 	OledDispString(0,10,"OUT  :      |    %",0);
 	OledDispString(6,11,"    ms|     Hz",0);	
-	OledDispString(0,13,"Phi",0);	
+	OledDispString(0,13,"Phi         |",0);	
 		
 	OledDispString(0,15,"SWAP",0);
 	
@@ -95,6 +102,8 @@ void falcon_update_main(void)
 	u8 i;
 	s16 dpwm=0;
 	//normal state
+	falconp.draw|=0x80;
+	falconp.draw&=0xf0;
 	if(keyPress&KEY_A)
 	{
 		falconp.currch^=1;
@@ -193,6 +202,7 @@ void falcon_update_main(void)
 			PagesNext(-1);
 		if(keyPress&KEY_RIGHT)
 			PagesNext(1);
+		sys.sensors.SensorData[3]=falconp.draw;
 	}
 }
 
@@ -219,6 +229,18 @@ void falcon_update_cali(void)
 			OledDispString(0,15,"                     ",0);	
 			OledDispString(10,15,"OK",0);	
 			falconp.caliCnt=0;
+		}
+		if(keyPress&KEY_C)
+		{
+			falconp.state=Falcon_Cali_Stroke;
+			falconp.caliCnt=0;
+			*falconp.aat_up_ang=0;
+			*falconp.aat_down_ang=0;
+			OledDispString(0,5,"Stroke Range Cali",0);
+			OledDispString(0,7,"Upstroke limit cali",0);
+			OledDispString(0,15,"                     ",0);	
+			OledDispString(0,13,"Phi",0);
+			OledDispString(8,15,"START",0);
 		}
 	}
 	if(falconp.state==Falcon_Cali_Full)
@@ -249,12 +271,74 @@ void falcon_update_cali(void)
 			PageInit_falcon(0);
 		}
 	}
+	if(falconp.state==Falcon_Cali_Stroke)
+	{
+		OledDispFixed(6,13,falconp.angle*5730,2,8,0);
+		if(falconp.caliCnt==0)
+		{
+			if(keyPress&KEY_B)
+			{
+				OledDispString(8,15,"     ",0);
+				OledDispString(4,8,"/30",0);
+				*falconp.aat_up_ang+=falconpage_getRawAngle();
+				falconp.caliCnt++;
+			}
+		}
+		else if(falconp.caliCnt>0&&falconp.caliCnt<30)
+		{
+			*falconp.aat_up_ang+=falconpage_getRawAngle();
+			falconp.caliCnt++;
+			OledDispInt(2,8,falconp.caliCnt,2,0);
+			if(falconp.caliCnt==30)
+			{
+				OledDispString(8,8,"OK",0);
+				*falconp.aat_up_ang/=30;
+				OledDispFixed(11,8,*falconp.aat_up_ang*5730,2,8,0);
+				OledDispString(0,9,"Downstroke limit cali",0);				
+				OledDispString(8,15,"START",0);
+			}
+		}
+		else if(falconp.caliCnt==30)
+		{
+			if(keyPress&KEY_B)
+			{
+				OledDispString(8,15,"     ",0);
+				OledDispString(4,10,"/30",0);
+				*falconp.aat_down_ang+=falconpage_getRawAngle();
+				falconp.caliCnt++;
+			}
+		}
+		else if(falconp.caliCnt>30&&falconp.caliCnt<60)
+		{
+			*falconp.aat_down_ang+=falconpage_getRawAngle();
+			falconp.caliCnt++;
+			OledDispInt(2,10,falconp.caliCnt-30,2,0);
+			if(falconp.caliCnt==60)
+			{
+				OledDispString(8,10,"OK",0);	
+				*falconp.aat_down_ang/=30;
+				OledDispFixed(11,10,*falconp.aat_down_ang*5730,2,8,0);				
+				OledDispString(8,15,"SAVE",0);
+			}
+		}
+		else if(falconp.caliCnt==60)
+		{
+			if(keyPress&KEY_B)
+			{				
+				ParamWrite();
+				falconp.state=Falcon_Main;
+				PageInit_falcon(0);
+			}
+		}
+		
+		
+	}
 	
 }
 
 void PageUpdate_falcon(void)
 {	
-	falconp.draw&=0xF0;	
+	
 	if(falconp.state==Falcon_Main)
 	{
 		falcon_update_main();
@@ -317,17 +401,22 @@ void falconpage_showData(u8 f)
 	if(f&0x10)
 	{
 		OledDispInt(6,5,falconp.phaseTime[0],4,0);
-		OledDispFixed(13,5,100000/falconp.phaseTime[0],2,5,0);
+		//OledDispFixed(13,5,100000/falconp.phaseTime[0],2,5,0);
+		OledDispFixed(13,5,falconp.phaseTime[0]*1000/(falconp.phaseTime[0]+falconp.phaseTime[1]),1,5,0);
 		f&=0xEF;
 	}
 	if(f&0x20)
 	{
 		OledDispInt(6,8,falconp.phaseTime[1],4,0);
-		OledDispFixed(13,8,100000/falconp.phaseTime[1],2,5,0);
+		//OledDispFixed(13,8,100000/falconp.phaseTime[1],2,5,0);		
+		OledDispFixed(13,8,falconp.phaseTime[1]*1000/(falconp.phaseTime[0]+falconp.phaseTime[1]),1,5,0);
 		f&=0xDF;
 	}
 	if(f)
-		OledDispFixed(6,13,falconp.angle*5730,2,8,0);
+	{
+		OledDispFixed(4,13,falconp.angle*5730,2,8,0);
+		OledDispFixed(13,13,falconp.phi*5730,2,8,0);
+	}
 }
 void falconpage_fastUpdate(void)
 {
@@ -336,31 +425,83 @@ void falconpage_fastUpdate(void)
 
 void falconpage_intUpdate(void)
 {
-	if(sys.intFlag[0])
+	if(sys.intFlag[1])
 	{
-		sys.intFlag[0]=0;
+		sys.intFlag[1]=0;
 		if(falconp.phase==1)
 		{
 			falconp.phase=0;
 			falconp.phaseTime[1]=sys.intTime[0]-falconp.lasttime;
 			falconp.lasttime=sys.intTime[0];
 			falconp.draw|=0x20;
-			sys.sensors.SensorData[0]++;
+			sys.sensors.SensorData[0]=1;
 		}
 	}
-	if(sys.intFlag[1])
+	if(sys.intFlag[0])
 	{
-		sys.intFlag[1]=0;
+		sys.intFlag[0		]=0;
 		if(falconp.phase==0)
 		{
 			falconp.phase=1;
 			falconp.phaseTime[0]=sys.intTime[1]-falconp.lasttime;
 			falconp.lasttime=sys.intTime[1];
 			falconp.draw|=0x10;
-			sys.sensors.SensorData[1]++;
+			sys.sensors.SensorData[1]=1;
 		}
 	}
-	falconp.angle=atan2f((sys.sensors.ADCData[6]-*falconp.aat_sin_off)*(*falconp.aat_sin_scl),
-						(sys.sensors.ADCData[7]-*falconp.aat_cos_off)*(*falconp.aat_cos_scl));
-	sys.sensors.SensorData[2]=falconp.angle;
+	falconp.angle=falconpage_getRawAngle();
+	falconp.phi=falconpage_getPhi(falconp.angle);
+	sys.sensors.SensorData[2]=falconp.phi;
+	//sys.sensors.SensorData[3]=1000/(falconp.phaseTime[1]+falconp.phaseTime[0]);
+	sys.sensors.SensorData[3]=falconp.phase;
+}
+
+float falconpage_getRawAngle(void)
+{
+	float t=atan2f((sys.sensors.ADCData[6]-*falconp.aat_sin_off)*(*falconp.aat_sin_scl),
+			(sys.sensors.ADCData[7]-*falconp.aat_cos_off)*(*falconp.aat_cos_scl));
+	if(t<0)
+	{
+		t+=TwoPI;
+	}
+	return t;
+}
+
+//a-b
+float anglesub(float a,float b)
+{
+	if(a>b)
+		return a-b;
+	return a+TwoPI-b;
+}
+
+void falconpage_setPhiCalc(void)
+{
+	float t1,t2;
+	t1=anglesub(*falconp.aat_up_ang,*falconp.aat_down_ang);
+	t2=anglesub(*falconp.aat_down_ang,*falconp.aat_up_ang);
+	if(t1<t2)
+	{
+		falconp.strokeDir=1;
+		falconp.phiOffset=t1/2;
+	}
+	else
+	{
+		falconp.strokeDir=-1;
+		falconp.phiOffset=t2/2;
+	}
+}
+
+float falconpage_getPhi(float a)
+{
+	float phi;
+	phi=a-*falconp.aat_down_ang;
+	while(phi<0)
+		phi+=TwoPI;
+	while(phi>=TwoPI)
+		phi-=TwoPI;
+	if(phi>PI)
+		phi-=TwoPI;
+	//phi-=falconp.phiOffset;
+	return phi*falconp.strokeDir-falconp.phiOffset;
 }
