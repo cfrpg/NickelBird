@@ -18,6 +18,7 @@ void PagesInit(void)
 	sys.slowUpdate=0;
 	sys.fastUpdate=0;
 	sys.intUpdate=0;
+	sys.intReset=0;
 	
 	PageInit_main(1);
 	PageInit_falcon(1);

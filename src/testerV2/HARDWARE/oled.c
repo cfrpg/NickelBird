@@ -383,7 +383,7 @@ void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 }
 
 //vertical scan
-void OledDispBitmap(u8 x,u8 y,u8 w,u8 h,u8* data)
+void OledDispBitmap(u8 x,u8 y,u8 w,u8 h,const u8* data)
 {
 	u8 i,j,c;
 	s8 k;

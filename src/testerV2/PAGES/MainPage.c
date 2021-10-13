@@ -49,6 +49,7 @@ void PageInit_main(u8 f)
 	sys.fastUpdate=mainpage_fastUpdate;
 	sys.slowUpdate=0;
 	sys.intUpdate=0;	
+	sys.intReset=0;
 }
 
 void PageUpdate_main(void)

@@ -143,7 +143,7 @@ void USART1_IRQHandler(void)
 {
 	
 	u8 b;
-	u8 curr=currBuff^1;
+	
 	printf("rx %x\r\n",b);
 	if (USART_GetFlagStatus(USART1, USART_FLAG_ORE) != RESET)
 	{

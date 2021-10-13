@@ -6,7 +6,7 @@ void KeyInit(void)
 {
 	GPIO_InitTypeDef gi;
 	EXTI_InitTypeDef ei;
-	NVIC_InitTypeDef ni;
+//	NVIC_InitTypeDef ni;
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);

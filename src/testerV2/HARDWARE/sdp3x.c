@@ -15,22 +15,18 @@ void Sdp3xSetMode(u8 addr,u16 cmd)
 {
 	u8 h=cmd>>8;
 	u8 l=cmd&0xFF;
-	u8 b=0;
 	I2CStart();
 	I2CSendByte(addr);
-	b=I2CWaitAck();
+	I2CWaitAck();
 	I2CSendByte(h);
 	I2CWaitAck();
 	I2CSendByte(l);
 	I2CWaitAck();
 	I2CStop();
-	//printf("%d\r\n",b);
 }
 
 void Sdp3xReadOut(u8 addr,u8 n,s16 data[])
 {
-	u8 b;
-	u8 crc;
 	u8 i;
 	I2CStart();
 	I2CSendByte(addr+1);
@@ -44,7 +40,7 @@ void Sdp3xReadOut(u8 addr,u8 n,s16 data[])
 		data[i]<<=8;
 		data[i]+=I2CReadByte();
 		I2CAck();
-		crc=I2CReadByte();		
+		I2CReadByte();//crc	
 	}
 	I2CNAck();
 	I2CStop();
@@ -64,9 +60,9 @@ float Sdp3xReadAirspeed(u8 addr,float temp,float pre,float *dpre)
 		f=1;
 	}
 	if(temp==0||pre==0)
-		ias=sqrt(2*dp/1.125);
+		ias=sqrt(2*dp/1.125f);
 	else
-		ias=96600/pre*sqrt(2*dp/1.1289*temp+(273.15)/298.15);
+		ias=96600/pre*sqrt(2*dp/1.1289f*temp+(273.15f)/298.15f);
 	
 	if(f)
 		return -ias;
@@ -90,7 +86,7 @@ void Sdp3xCali(u8 addr,u8 n)
 
 void Sdp3xReadDevID(u8 addr)
 {
-	u8 b,i,j;
+	u8 i;
 	u8 buf[18];
 	I2CStart();
 	I2CSendByte(addr);

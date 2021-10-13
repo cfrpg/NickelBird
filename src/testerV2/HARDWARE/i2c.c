@@ -138,5 +138,5 @@ void I2CNAck(void)
 
 u8 I2CCheckDevice(u8 addr)
 {
-	
+	return 0;
 }

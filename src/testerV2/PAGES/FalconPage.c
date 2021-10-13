@@ -11,6 +11,7 @@
 void falconpage_showData(u8 f);
 void falconpage_fastUpdate(void);
 void falconpage_intUpdate(void);
+void falconpage_intReset(void);
 
 float falconpage_getRawAngle(void);
 void falconpage_setPhiCalc(void);
@@ -70,6 +71,7 @@ void PageInit_falcon(u8 f)
 	sys.slowUpdate=0;
 	sys.fastUpdate=falconpage_fastUpdate;
 	sys.intUpdate=falconpage_intUpdate;
+	sys.intReset=falconpage_intReset;
 	
 	falconpage_setPhiCalc();
 	OledClear(0);
@@ -439,7 +441,7 @@ void falconpage_intUpdate(void)
 	}
 	if(sys.intFlag[0])
 	{
-		sys.intFlag[0		]=0;
+		sys.intFlag[0]=0;
 		if(falconp.phase==0)
 		{
 			falconp.phase=1;
@@ -454,6 +456,12 @@ void falconpage_intUpdate(void)
 	sys.sensors.SensorData[2]=falconp.phi;
 	//sys.sensors.SensorData[3]=1000/(falconp.phaseTime[1]+falconp.phaseTime[0]);
 	sys.sensors.SensorData[3]=falconp.phase;
+}
+
+void falconpage_intReset(void)
+{
+	sys.sensors.SensorData[0]=0;
+	sys.sensors.SensorData[1]=0;	
 }
 
 float falconpage_getRawAngle(void)

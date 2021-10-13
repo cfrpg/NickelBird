@@ -48,9 +48,8 @@ s16 adraw[8];
 
 int main(void)
 {
-	s16 i;
-	s16 tmp[2];
-	u8 key;
+//	s16 i;
+//	s16 tmp[2];
 	delay_init(168);
 	uart_init(115200);
 	
@@ -195,10 +194,11 @@ void EXTI15_10_IRQHandler(void)
 		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
 
 		EXTI_ClearITPendingBit(EXTI_Line13);
-		sys.sensors.SensorData[0]=0;
-		sys.sensors.SensorData[1]=0;
-		sys.sensors.SensorData[2]=0;
-		sys.sensors.SensorData[3]=0;
+		if(sys.intReset!=0)
+		{
+			(*sys.intReset)();
+		}
+		
 		//TEST0=0;
 	}
 	if (EXTI_GetITStatus(EXTI_Line11) != RESET)

@@ -27,5 +27,5 @@ void OledDispString(u8 x,u8 y,s8 c[],u8 f);
 void OledDispInt(u8 x,u8 y,s32 v,u8 ml,u8 f);
 void OledDispFloat(u8 x,u8 y,float v,s8 len,s8 pre,u8 f);
 void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f);
-void OledDispBitmap(u8 x,u8 y,u8 w,u8 h,u8* data);
+void OledDispBitmap(u8 x,u8 y,u8 w,u8 h,const u8* data);
 #endif

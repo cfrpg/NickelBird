@@ -11,8 +11,8 @@
 
 #define PageNum 2
 
-#define PI 3.1415926
-#define TwoPI 6.283185307
+#define PI 3.1415926f
+#define TwoPI 6.283185307f
 
 typedef struct
 {
@@ -30,6 +30,7 @@ typedef struct
 	void (*slowUpdate)(void);
 	void (*fastUpdate)(void);
 	void (*intUpdate)(void);
+	void (*intReset)(void);
 	u8 intFlag[2];
 	u32 intTime[2];
 
