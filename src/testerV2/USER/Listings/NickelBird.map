@@ -931,7 +931,6 @@ Section Cross References
     falconpage.o(i.falcon_update_main) refers to pwm.o(i.PWMIsArmed) for PWMIsArmed
     falconpage.o(i.falcon_update_main) refers to pwm.o(i.PWMDisarm) for PWMDisarm
     falconpage.o(i.falcon_update_main) refers to oled.o(i.OledDispString) for OledDispString
-    falconpage.o(i.falcon_update_main) refers to pwm.o(i.PWMSet) for PWMSet
     falconpage.o(i.falcon_update_main) refers to pwm.o(i.PWMArm) for PWMArm
     falconpage.o(i.falcon_update_main) refers to oled.o(i.OledClear) for OledClear
     falconpage.o(i.falcon_update_main) refers to pages.o(i.PagesDrawHeader) for PagesDrawHeader
@@ -939,6 +938,10 @@ Section Cross References
     falconpage.o(i.falcon_update_main) refers to falconpage.o(.bss) for falconp
     falconpage.o(i.falcon_update_main) refers to main.o(.data) for keyPress
     falconpage.o(i.falcon_update_main) refers to main.o(.bss) for sys
+    falconpage.o(i.falconpage_fastUpdate) refers to pwm.o(i.PWMIsArmed) for PWMIsArmed
+    falconpage.o(i.falconpage_fastUpdate) refers to pwm.o(i.PWMSet) for PWMSet
+    falconpage.o(i.falconpage_fastUpdate) refers to falconpage.o(.bss) for falconp
+    falconpage.o(i.falconpage_fastUpdate) refers to main.o(.bss) for sys
     falconpage.o(i.falconpage_getPhi) refers to falconpage.o(.bss) for falconp
     falconpage.o(i.falconpage_getRawAngle) refers to atan2f.o(i.__hardfp_atan2f) for __hardfp_atan2f
     falconpage.o(i.falconpage_getRawAngle) refers to main.o(.bss) for sys
@@ -2709,62 +2712,62 @@ Image Symbol Table
     i.delay_xms                              0x08004e70   Section        0  delay.o(i.delay_xms)
     i.falcon_update_cali                     0x08004ebc   Section        0  falconpage.o(i.falcon_update_cali)
     i.falcon_update_main                     0x08005494   Section        0  falconpage.o(i.falcon_update_main)
-    i.falconpage_fastUpdate                  0x080057b0   Section        0  falconpage.o(i.falconpage_fastUpdate)
-    i.falconpage_getPhi                      0x080057b4   Section        0  falconpage.o(i.falconpage_getPhi)
-    i.falconpage_getRawAngle                 0x0800583c   Section        0  falconpage.o(i.falconpage_getRawAngle)
-    i.falconpage_intReset                    0x080058c4   Section        0  falconpage.o(i.falconpage_intReset)
-    i.falconpage_intUpdate                   0x080058e0   Section        0  falconpage.o(i.falconpage_intUpdate)
-    i.falconpage_setPhiCalc                  0x080059c8   Section        0  falconpage.o(i.falconpage_setPhiCalc)
-    i.falconpage_showData                    0x08005a48   Section        0  falconpage.o(i.falconpage_showData)
-    i.fputc                                  0x08005d1c   Section        0  usart.o(i.fputc)
-    i.initTestGPIO                           0x08005d38   Section        0  main.o(i.initTestGPIO)
-    i.main                                   0x08005d80   Section        0  main.o(i.main)
-    i.mainpage_fastUpdate                    0x08005eb0   Section        0  mainpage.o(i.mainpage_fastUpdate)
-    i.mainpage_showData                      0x08005ef8   Section        0  mainpage.o(i.mainpage_showData)
-    i.oledSelectRect                         0x08006004   Section        0  oled.o(i.oledSelectRect)
-    i.paramReadBinary                        0x08006044   Section        0  parameter.o(i.paramReadBinary)
-    i.paramReadFixed                         0x0800606c   Section        0  parameter.o(i.paramReadFixed)
-    i.uart_init                              0x08006094   Section        0  usart.o(i.uart_init)
-    locale$$code                             0x08006148   Section       44  lc_numeric_c.o(locale$$code)
-    x$fpl$d2f                                0x08006174   Section       98  d2f.o(x$fpl$d2f)
-    $v0                                      0x08006174   Number         0  d2f.o(x$fpl$d2f)
-    x$fpl$ddiv                               0x080061d8   Section      688  ddiv.o(x$fpl$ddiv)
-    $v0                                      0x080061d8   Number         0  ddiv.o(x$fpl$ddiv)
-    ddiv_entry                               0x080061df   Thumb Code     0  ddiv.o(x$fpl$ddiv)
-    x$fpl$dflt                               0x08006488   Section       46  dflt_clz.o(x$fpl$dflt)
-    $v0                                      0x08006488   Number         0  dflt_clz.o(x$fpl$dflt)
-    x$fpl$dnaninf                            0x080064b6   Section      156  dnaninf.o(x$fpl$dnaninf)
-    $v0                                      0x080064b6   Number         0  dnaninf.o(x$fpl$dnaninf)
-    x$fpl$dretinf                            0x08006552   Section       12  dretinf.o(x$fpl$dretinf)
-    $v0                                      0x08006552   Number         0  dretinf.o(x$fpl$dretinf)
-    x$fpl$f2d                                0x08006560   Section       86  f2d.o(x$fpl$f2d)
-    $v0                                      0x08006560   Number         0  f2d.o(x$fpl$f2d)
-    x$fpl$fnaninf                            0x080065b6   Section      140  fnaninf.o(x$fpl$fnaninf)
-    $v0                                      0x080065b6   Number         0  fnaninf.o(x$fpl$fnaninf)
-    x$fpl$fpinit                             0x08006642   Section       10  fpinit.o(x$fpl$fpinit)
-    $v0                                      0x08006642   Number         0  fpinit.o(x$fpl$fpinit)
-    x$fpl$fretinf                            0x0800664c   Section       10  fretinf.o(x$fpl$fretinf)
-    $v0                                      0x0800664c   Number         0  fretinf.o(x$fpl$fretinf)
-    x$fpl$printf1                            0x08006656   Section        4  printf1.o(x$fpl$printf1)
-    $v0                                      0x08006656   Number         0  printf1.o(x$fpl$printf1)
-    .constdata                               0x0800665a   Section     2048  main.o(.constdata)
-    x$fpl$usenofp                            0x0800665a   Section        0  usenofp.o(x$fpl$usenofp)
-    .constdata                               0x08006e5a   Section        3  sblinkutility.o(.constdata)
-    .constdata                               0x08006e5d   Section      570  oled.o(.constdata)
-    .constdata                               0x08007098   Section      320  parameterlist.o(.constdata)
-    .constdata                               0x080071d8   Section       40  _printf_hex_int.o(.constdata)
-    uc_hextab                                0x080071d8   Data          20  _printf_hex_int.o(.constdata)
-    lc_hextab                                0x080071ec   Data          20  _printf_hex_int.o(.constdata)
-    .constdata                               0x08007200   Section      148  bigflt0.o(.constdata)
-    tenpwrs_x                                0x08007200   Data          60  bigflt0.o(.constdata)
-    tenpwrs_i                                0x0800723c   Data          64  bigflt0.o(.constdata)
-    locale$$data                             0x080072b4   Section       28  lc_numeric_c.o(locale$$data)
-    __lcnum_c_name                           0x080072b8   Data           2  lc_numeric_c.o(locale$$data)
-    __lcnum_c_start                          0x080072c0   Data           0  lc_numeric_c.o(locale$$data)
-    __lcnum_c_point                          0x080072cc   Data           0  lc_numeric_c.o(locale$$data)
-    __lcnum_c_thousands                      0x080072ce   Data           0  lc_numeric_c.o(locale$$data)
-    __lcnum_c_grouping                       0x080072cf   Data           0  lc_numeric_c.o(locale$$data)
-    __lcnum_c_end                            0x080072d0   Data           0  lc_numeric_c.o(locale$$data)
+    i.falconpage_fastUpdate                  0x0800577c   Section        0  falconpage.o(i.falconpage_fastUpdate)
+    i.falconpage_getPhi                      0x080057c0   Section        0  falconpage.o(i.falconpage_getPhi)
+    i.falconpage_getRawAngle                 0x08005848   Section        0  falconpage.o(i.falconpage_getRawAngle)
+    i.falconpage_intReset                    0x080058d0   Section        0  falconpage.o(i.falconpage_intReset)
+    i.falconpage_intUpdate                   0x080058ec   Section        0  falconpage.o(i.falconpage_intUpdate)
+    i.falconpage_setPhiCalc                  0x080059e4   Section        0  falconpage.o(i.falconpage_setPhiCalc)
+    i.falconpage_showData                    0x08005a64   Section        0  falconpage.o(i.falconpage_showData)
+    i.fputc                                  0x08005d38   Section        0  usart.o(i.fputc)
+    i.initTestGPIO                           0x08005d54   Section        0  main.o(i.initTestGPIO)
+    i.main                                   0x08005d9c   Section        0  main.o(i.main)
+    i.mainpage_fastUpdate                    0x08005ecc   Section        0  mainpage.o(i.mainpage_fastUpdate)
+    i.mainpage_showData                      0x08005f14   Section        0  mainpage.o(i.mainpage_showData)
+    i.oledSelectRect                         0x08006020   Section        0  oled.o(i.oledSelectRect)
+    i.paramReadBinary                        0x08006060   Section        0  parameter.o(i.paramReadBinary)
+    i.paramReadFixed                         0x08006088   Section        0  parameter.o(i.paramReadFixed)
+    i.uart_init                              0x080060b0   Section        0  usart.o(i.uart_init)
+    locale$$code                             0x08006164   Section       44  lc_numeric_c.o(locale$$code)
+    x$fpl$d2f                                0x08006190   Section       98  d2f.o(x$fpl$d2f)
+    $v0                                      0x08006190   Number         0  d2f.o(x$fpl$d2f)
+    x$fpl$ddiv                               0x080061f4   Section      688  ddiv.o(x$fpl$ddiv)
+    $v0                                      0x080061f4   Number         0  ddiv.o(x$fpl$ddiv)
+    ddiv_entry                               0x080061fb   Thumb Code     0  ddiv.o(x$fpl$ddiv)
+    x$fpl$dflt                               0x080064a4   Section       46  dflt_clz.o(x$fpl$dflt)
+    $v0                                      0x080064a4   Number         0  dflt_clz.o(x$fpl$dflt)
+    x$fpl$dnaninf                            0x080064d2   Section      156  dnaninf.o(x$fpl$dnaninf)
+    $v0                                      0x080064d2   Number         0  dnaninf.o(x$fpl$dnaninf)
+    x$fpl$dretinf                            0x0800656e   Section       12  dretinf.o(x$fpl$dretinf)
+    $v0                                      0x0800656e   Number         0  dretinf.o(x$fpl$dretinf)
+    x$fpl$f2d                                0x0800657c   Section       86  f2d.o(x$fpl$f2d)
+    $v0                                      0x0800657c   Number         0  f2d.o(x$fpl$f2d)
+    x$fpl$fnaninf                            0x080065d2   Section      140  fnaninf.o(x$fpl$fnaninf)
+    $v0                                      0x080065d2   Number         0  fnaninf.o(x$fpl$fnaninf)
+    x$fpl$fpinit                             0x0800665e   Section       10  fpinit.o(x$fpl$fpinit)
+    $v0                                      0x0800665e   Number         0  fpinit.o(x$fpl$fpinit)
+    x$fpl$fretinf                            0x08006668   Section       10  fretinf.o(x$fpl$fretinf)
+    $v0                                      0x08006668   Number         0  fretinf.o(x$fpl$fretinf)
+    x$fpl$printf1                            0x08006672   Section        4  printf1.o(x$fpl$printf1)
+    $v0                                      0x08006672   Number         0  printf1.o(x$fpl$printf1)
+    .constdata                               0x08006676   Section     2048  main.o(.constdata)
+    x$fpl$usenofp                            0x08006676   Section        0  usenofp.o(x$fpl$usenofp)
+    .constdata                               0x08006e76   Section        3  sblinkutility.o(.constdata)
+    .constdata                               0x08006e79   Section      570  oled.o(.constdata)
+    .constdata                               0x080070b4   Section      320  parameterlist.o(.constdata)
+    .constdata                               0x080071f4   Section       40  _printf_hex_int.o(.constdata)
+    uc_hextab                                0x080071f4   Data          20  _printf_hex_int.o(.constdata)
+    lc_hextab                                0x08007208   Data          20  _printf_hex_int.o(.constdata)
+    .constdata                               0x0800721c   Section      148  bigflt0.o(.constdata)
+    tenpwrs_x                                0x0800721c   Data          60  bigflt0.o(.constdata)
+    tenpwrs_i                                0x08007258   Data          64  bigflt0.o(.constdata)
+    locale$$data                             0x080072d0   Section       28  lc_numeric_c.o(locale$$data)
+    __lcnum_c_name                           0x080072d4   Data           2  lc_numeric_c.o(locale$$data)
+    __lcnum_c_start                          0x080072dc   Data           0  lc_numeric_c.o(locale$$data)
+    __lcnum_c_point                          0x080072e8   Data           0  lc_numeric_c.o(locale$$data)
+    __lcnum_c_thousands                      0x080072ea   Data           0  lc_numeric_c.o(locale$$data)
+    __lcnum_c_grouping                       0x080072eb   Data           0  lc_numeric_c.o(locale$$data)
+    __lcnum_c_end                            0x080072ec   Data           0  lc_numeric_c.o(locale$$data)
     .data                                    0x20000000   Section       23  main.o(.data)
     .data                                    0x20000017   Section       16  stm32f4xx_rcc.o(.data)
     APBAHBPrescTable                         0x20000017   Data          16  stm32f4xx_rcc.o(.data)
@@ -3183,47 +3186,47 @@ Image Symbol Table
     delay_ms                                 0x08004e39   Thumb Code    56  delay.o(i.delay_ms)
     delay_xms                                0x08004e71   Thumb Code    72  delay.o(i.delay_xms)
     falcon_update_cali                       0x08004ebd   Thumb Code  1478  falconpage.o(i.falcon_update_cali)
-    falcon_update_main                       0x08005495   Thumb Code   702  falconpage.o(i.falcon_update_main)
-    falconpage_fastUpdate                    0x080057b1   Thumb Code     2  falconpage.o(i.falconpage_fastUpdate)
-    falconpage_getPhi                        0x080057b5   Thumb Code   122  falconpage.o(i.falconpage_getPhi)
-    falconpage_getRawAngle                   0x0800583d   Thumb Code   122  falconpage.o(i.falconpage_getRawAngle)
-    falconpage_intReset                      0x080058c5   Thumb Code    20  falconpage.o(i.falconpage_intReset)
-    falconpage_intUpdate                     0x080058e1   Thumb Code   222  falconpage.o(i.falconpage_intUpdate)
-    falconpage_setPhiCalc                    0x080059c9   Thumb Code   124  falconpage.o(i.falconpage_setPhiCalc)
-    falconpage_showData                      0x08005a49   Thumb Code   678  falconpage.o(i.falconpage_showData)
-    fputc                                    0x08005d1d   Thumb Code    24  usart.o(i.fputc)
-    initTestGPIO                             0x08005d39   Thumb Code    60  main.o(i.initTestGPIO)
-    main                                     0x08005d81   Thumb Code   250  main.o(i.main)
-    mainpage_fastUpdate                      0x08005eb1   Thumb Code    66  mainpage.o(i.mainpage_fastUpdate)
-    mainpage_showData                        0x08005ef9   Thumb Code   242  mainpage.o(i.mainpage_showData)
-    oledSelectRect                           0x08006005   Thumb Code    58  oled.o(i.oledSelectRect)
-    paramReadBinary                          0x08006045   Thumb Code    40  parameter.o(i.paramReadBinary)
-    paramReadFixed                           0x0800606d   Thumb Code    38  parameter.o(i.paramReadFixed)
-    uart_init                                0x08006095   Thumb Code   172  usart.o(i.uart_init)
-    _get_lc_numeric                          0x08006149   Thumb Code    44  lc_numeric_c.o(locale$$code)
-    __aeabi_d2f                              0x08006175   Thumb Code     0  d2f.o(x$fpl$d2f)
-    _d2f                                     0x08006175   Thumb Code    98  d2f.o(x$fpl$d2f)
-    __aeabi_ddiv                             0x080061d9   Thumb Code     0  ddiv.o(x$fpl$ddiv)
-    _ddiv                                    0x080061d9   Thumb Code   552  ddiv.o(x$fpl$ddiv)
-    __aeabi_i2d                              0x08006489   Thumb Code     0  dflt_clz.o(x$fpl$dflt)
-    _dflt                                    0x08006489   Thumb Code    46  dflt_clz.o(x$fpl$dflt)
-    __fpl_dnaninf                            0x080064b7   Thumb Code   156  dnaninf.o(x$fpl$dnaninf)
-    __fpl_dretinf                            0x08006553   Thumb Code    12  dretinf.o(x$fpl$dretinf)
-    __aeabi_f2d                              0x08006561   Thumb Code     0  f2d.o(x$fpl$f2d)
-    _f2d                                     0x08006561   Thumb Code    86  f2d.o(x$fpl$f2d)
-    __fpl_fnaninf                            0x080065b7   Thumb Code   140  fnaninf.o(x$fpl$fnaninf)
-    _fp_init                                 0x08006643   Thumb Code    10  fpinit.o(x$fpl$fpinit)
-    __fplib_config_fpu_vfp                   0x0800664b   Thumb Code     0  fpinit.o(x$fpl$fpinit)
-    __fplib_config_pureend_doubles           0x0800664b   Thumb Code     0  fpinit.o(x$fpl$fpinit)
-    __fpl_fretinf                            0x0800664d   Thumb Code    10  fretinf.o(x$fpl$fretinf)
-    _printf_fp_dec                           0x08006657   Thumb Code     4  printf1.o(x$fpl$printf1)
-    __I$use$fp                               0x0800665a   Number         0  usenofp.o(x$fpl$usenofp)
-    gImage_logo                              0x0800665a   Data        2048  main.o(.constdata)
-    DataLen                                  0x08006e5a   Data           3  sblinkutility.o(.constdata)
-    F6x8                                     0x08006e5d   Data         570  oled.o(.constdata)
-    parameterList                            0x08007098   Data         320  parameterlist.o(.constdata)
-    Region$$Table$$Base                      0x08007294   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x080072b4   Number         0  anon$$obj.o(Region$$Table)
+    falcon_update_main                       0x08005495   Thumb Code   652  falconpage.o(i.falcon_update_main)
+    falconpage_fastUpdate                    0x0800577d   Thumb Code    60  falconpage.o(i.falconpage_fastUpdate)
+    falconpage_getPhi                        0x080057c1   Thumb Code   122  falconpage.o(i.falconpage_getPhi)
+    falconpage_getRawAngle                   0x08005849   Thumb Code   122  falconpage.o(i.falconpage_getRawAngle)
+    falconpage_intReset                      0x080058d1   Thumb Code    20  falconpage.o(i.falconpage_intReset)
+    falconpage_intUpdate                     0x080058ed   Thumb Code   234  falconpage.o(i.falconpage_intUpdate)
+    falconpage_setPhiCalc                    0x080059e5   Thumb Code   124  falconpage.o(i.falconpage_setPhiCalc)
+    falconpage_showData                      0x08005a65   Thumb Code   678  falconpage.o(i.falconpage_showData)
+    fputc                                    0x08005d39   Thumb Code    24  usart.o(i.fputc)
+    initTestGPIO                             0x08005d55   Thumb Code    60  main.o(i.initTestGPIO)
+    main                                     0x08005d9d   Thumb Code   250  main.o(i.main)
+    mainpage_fastUpdate                      0x08005ecd   Thumb Code    66  mainpage.o(i.mainpage_fastUpdate)
+    mainpage_showData                        0x08005f15   Thumb Code   242  mainpage.o(i.mainpage_showData)
+    oledSelectRect                           0x08006021   Thumb Code    58  oled.o(i.oledSelectRect)
+    paramReadBinary                          0x08006061   Thumb Code    40  parameter.o(i.paramReadBinary)
+    paramReadFixed                           0x08006089   Thumb Code    38  parameter.o(i.paramReadFixed)
+    uart_init                                0x080060b1   Thumb Code   172  usart.o(i.uart_init)
+    _get_lc_numeric                          0x08006165   Thumb Code    44  lc_numeric_c.o(locale$$code)
+    __aeabi_d2f                              0x08006191   Thumb Code     0  d2f.o(x$fpl$d2f)
+    _d2f                                     0x08006191   Thumb Code    98  d2f.o(x$fpl$d2f)
+    __aeabi_ddiv                             0x080061f5   Thumb Code     0  ddiv.o(x$fpl$ddiv)
+    _ddiv                                    0x080061f5   Thumb Code   552  ddiv.o(x$fpl$ddiv)
+    __aeabi_i2d                              0x080064a5   Thumb Code     0  dflt_clz.o(x$fpl$dflt)
+    _dflt                                    0x080064a5   Thumb Code    46  dflt_clz.o(x$fpl$dflt)
+    __fpl_dnaninf                            0x080064d3   Thumb Code   156  dnaninf.o(x$fpl$dnaninf)
+    __fpl_dretinf                            0x0800656f   Thumb Code    12  dretinf.o(x$fpl$dretinf)
+    __aeabi_f2d                              0x0800657d   Thumb Code     0  f2d.o(x$fpl$f2d)
+    _f2d                                     0x0800657d   Thumb Code    86  f2d.o(x$fpl$f2d)
+    __fpl_fnaninf                            0x080065d3   Thumb Code   140  fnaninf.o(x$fpl$fnaninf)
+    _fp_init                                 0x0800665f   Thumb Code    10  fpinit.o(x$fpl$fpinit)
+    __fplib_config_fpu_vfp                   0x08006667   Thumb Code     0  fpinit.o(x$fpl$fpinit)
+    __fplib_config_pureend_doubles           0x08006667   Thumb Code     0  fpinit.o(x$fpl$fpinit)
+    __fpl_fretinf                            0x08006669   Thumb Code    10  fretinf.o(x$fpl$fretinf)
+    _printf_fp_dec                           0x08006673   Thumb Code     4  printf1.o(x$fpl$printf1)
+    __I$use$fp                               0x08006676   Number         0  usenofp.o(x$fpl$usenofp)
+    gImage_logo                              0x08006676   Data        2048  main.o(.constdata)
+    DataLen                                  0x08006e76   Data           3  sblinkutility.o(.constdata)
+    F6x8                                     0x08006e79   Data         570  oled.o(.constdata)
+    parameterList                            0x080070b4   Data         320  parameterlist.o(.constdata)
+    Region$$Table$$Base                      0x080072b0   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x080072d0   Number         0  anon$$obj.o(Region$$Table)
     tick                                     0x20000000   Data           6  main.o(.data)
     cpucnt                                   0x20000006   Data           2  main.o(.data)
     lastKey                                  0x20000008   Data           1  main.o(.data)
@@ -3287,9 +3290,9 @@ Memory Map of the image
 
   Image Entry point : 0x08000189
 
-  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00007354, Max: 0x00080000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x08000000, Size: 0x00007370, Max: 0x00080000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x000072d0, Max: 0x00080000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x08000000, Load base: 0x08000000, Size: 0x000072ec, Max: 0x00080000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -3569,82 +3572,81 @@ Memory Map of the image
     0x08004e38   0x08004e38   0x00000038   Code   RO         6806    i.delay_ms          delay.o
     0x08004e70   0x08004e70   0x0000004c   Code   RO         6808    i.delay_xms         delay.o
     0x08004ebc   0x08004ebc   0x000005d8   Code   RO         7034    i.falcon_update_cali  falconpage.o
-    0x08005494   0x08005494   0x0000031c   Code   RO         7035    i.falcon_update_main  falconpage.o
-    0x080057b0   0x080057b0   0x00000002   Code   RO         7036    i.falconpage_fastUpdate  falconpage.o
-    0x080057b2   0x080057b2   0x00000002   PAD
-    0x080057b4   0x080057b4   0x00000088   Code   RO         7037    i.falconpage_getPhi  falconpage.o
-    0x0800583c   0x0800583c   0x00000088   Code   RO         7038    i.falconpage_getRawAngle  falconpage.o
-    0x080058c4   0x080058c4   0x0000001c   Code   RO         7039    i.falconpage_intReset  falconpage.o
-    0x080058e0   0x080058e0   0x000000e8   Code   RO         7040    i.falconpage_intUpdate  falconpage.o
-    0x080059c8   0x080059c8   0x00000080   Code   RO         7041    i.falconpage_setPhiCalc  falconpage.o
-    0x08005a48   0x08005a48   0x000002d4   Code   RO         7042    i.falconpage_showData  falconpage.o
-    0x08005d1c   0x08005d1c   0x0000001c   Code   RO         6873    i.fputc             usart.o
-    0x08005d38   0x08005d38   0x00000048   Code   RO            8    i.initTestGPIO      main.o
-    0x08005d80   0x08005d80   0x00000130   Code   RO            9    i.main              main.o
-    0x08005eb0   0x08005eb0   0x00000048   Code   RO         6984    i.mainpage_fastUpdate  mainpage.o
-    0x08005ef8   0x08005ef8   0x0000010c   Code   RO         6985    i.mainpage_showData  mainpage.o
-    0x08006004   0x08006004   0x00000040   Code   RO         6334    i.oledSelectRect    oled.o
-    0x08006044   0x08006044   0x00000028   Code   RO         5489    i.paramReadBinary   parameter.o
-    0x0800606c   0x0800606c   0x00000026   Code   RO         5490    i.paramReadFixed    parameter.o
-    0x08006092   0x08006092   0x00000002   PAD
-    0x08006094   0x08006094   0x000000b4   Code   RO         6874    i.uart_init         usart.o
-    0x08006148   0x08006148   0x0000002c   Code   RO         7351    locale$$code        c_w.l(lc_numeric_c.o)
-    0x08006174   0x08006174   0x00000062   Code   RO         7195    x$fpl$d2f           fz_wm.l(d2f.o)
-    0x080061d6   0x080061d6   0x00000002   PAD
-    0x080061d8   0x080061d8   0x000002b0   Code   RO         7204    x$fpl$ddiv          fz_wm.l(ddiv.o)
-    0x08006488   0x08006488   0x0000002e   Code   RO         7208    x$fpl$dflt          fz_wm.l(dflt_clz.o)
-    0x080064b6   0x080064b6   0x0000009c   Code   RO         7263    x$fpl$dnaninf       fz_wm.l(dnaninf.o)
-    0x08006552   0x08006552   0x0000000c   Code   RO         7265    x$fpl$dretinf       fz_wm.l(dretinf.o)
-    0x0800655e   0x0800655e   0x00000002   PAD
-    0x08006560   0x08006560   0x00000056   Code   RO         7215    x$fpl$f2d           fz_wm.l(f2d.o)
-    0x080065b6   0x080065b6   0x0000008c   Code   RO         7269    x$fpl$fnaninf       fz_wm.l(fnaninf.o)
-    0x08006642   0x08006642   0x0000000a   Code   RO         7423    x$fpl$fpinit        fz_wm.l(fpinit.o)
-    0x0800664c   0x0800664c   0x0000000a   Code   RO         7271    x$fpl$fretinf       fz_wm.l(fretinf.o)
-    0x08006656   0x08006656   0x00000004   Code   RO         7217    x$fpl$printf1       fz_wm.l(printf1.o)
-    0x0800665a   0x0800665a   0x00000000   Code   RO         7273    x$fpl$usenofp       fz_wm.l(usenofp.o)
-    0x0800665a   0x0800665a   0x00000800   Data   RO           11    .constdata          main.o
-    0x08006e5a   0x08006e5a   0x00000003   Data   RO         5777    .constdata          sblinkutility.o
-    0x08006e5d   0x08006e5d   0x0000023a   Data   RO         6336    .constdata          oled.o
-    0x08007097   0x08007097   0x00000001   PAD
-    0x08007098   0x08007098   0x00000140   Data   RO         6780    .constdata          parameterlist.o
-    0x080071d8   0x080071d8   0x00000028   Data   RO         7143    .constdata          c_w.l(_printf_hex_int.o)
-    0x08007200   0x08007200   0x00000094   Data   RO         7322    .constdata          c_w.l(bigflt0.o)
-    0x08007294   0x08007294   0x00000020   Data   RO         7494    Region$$Table       anon$$obj.o
-    0x080072b4   0x080072b4   0x0000001c   Data   RO         7350    locale$$data        c_w.l(lc_numeric_c.o)
+    0x08005494   0x08005494   0x000002e8   Code   RO         7035    i.falcon_update_main  falconpage.o
+    0x0800577c   0x0800577c   0x00000044   Code   RO         7036    i.falconpage_fastUpdate  falconpage.o
+    0x080057c0   0x080057c0   0x00000088   Code   RO         7037    i.falconpage_getPhi  falconpage.o
+    0x08005848   0x08005848   0x00000088   Code   RO         7038    i.falconpage_getRawAngle  falconpage.o
+    0x080058d0   0x080058d0   0x0000001c   Code   RO         7039    i.falconpage_intReset  falconpage.o
+    0x080058ec   0x080058ec   0x000000f8   Code   RO         7040    i.falconpage_intUpdate  falconpage.o
+    0x080059e4   0x080059e4   0x00000080   Code   RO         7041    i.falconpage_setPhiCalc  falconpage.o
+    0x08005a64   0x08005a64   0x000002d4   Code   RO         7042    i.falconpage_showData  falconpage.o
+    0x08005d38   0x08005d38   0x0000001c   Code   RO         6873    i.fputc             usart.o
+    0x08005d54   0x08005d54   0x00000048   Code   RO            8    i.initTestGPIO      main.o
+    0x08005d9c   0x08005d9c   0x00000130   Code   RO            9    i.main              main.o
+    0x08005ecc   0x08005ecc   0x00000048   Code   RO         6984    i.mainpage_fastUpdate  mainpage.o
+    0x08005f14   0x08005f14   0x0000010c   Code   RO         6985    i.mainpage_showData  mainpage.o
+    0x08006020   0x08006020   0x00000040   Code   RO         6334    i.oledSelectRect    oled.o
+    0x08006060   0x08006060   0x00000028   Code   RO         5489    i.paramReadBinary   parameter.o
+    0x08006088   0x08006088   0x00000026   Code   RO         5490    i.paramReadFixed    parameter.o
+    0x080060ae   0x080060ae   0x00000002   PAD
+    0x080060b0   0x080060b0   0x000000b4   Code   RO         6874    i.uart_init         usart.o
+    0x08006164   0x08006164   0x0000002c   Code   RO         7351    locale$$code        c_w.l(lc_numeric_c.o)
+    0x08006190   0x08006190   0x00000062   Code   RO         7195    x$fpl$d2f           fz_wm.l(d2f.o)
+    0x080061f2   0x080061f2   0x00000002   PAD
+    0x080061f4   0x080061f4   0x000002b0   Code   RO         7204    x$fpl$ddiv          fz_wm.l(ddiv.o)
+    0x080064a4   0x080064a4   0x0000002e   Code   RO         7208    x$fpl$dflt          fz_wm.l(dflt_clz.o)
+    0x080064d2   0x080064d2   0x0000009c   Code   RO         7263    x$fpl$dnaninf       fz_wm.l(dnaninf.o)
+    0x0800656e   0x0800656e   0x0000000c   Code   RO         7265    x$fpl$dretinf       fz_wm.l(dretinf.o)
+    0x0800657a   0x0800657a   0x00000002   PAD
+    0x0800657c   0x0800657c   0x00000056   Code   RO         7215    x$fpl$f2d           fz_wm.l(f2d.o)
+    0x080065d2   0x080065d2   0x0000008c   Code   RO         7269    x$fpl$fnaninf       fz_wm.l(fnaninf.o)
+    0x0800665e   0x0800665e   0x0000000a   Code   RO         7423    x$fpl$fpinit        fz_wm.l(fpinit.o)
+    0x08006668   0x08006668   0x0000000a   Code   RO         7271    x$fpl$fretinf       fz_wm.l(fretinf.o)
+    0x08006672   0x08006672   0x00000004   Code   RO         7217    x$fpl$printf1       fz_wm.l(printf1.o)
+    0x08006676   0x08006676   0x00000000   Code   RO         7273    x$fpl$usenofp       fz_wm.l(usenofp.o)
+    0x08006676   0x08006676   0x00000800   Data   RO           11    .constdata          main.o
+    0x08006e76   0x08006e76   0x00000003   Data   RO         5777    .constdata          sblinkutility.o
+    0x08006e79   0x08006e79   0x0000023a   Data   RO         6336    .constdata          oled.o
+    0x080070b3   0x080070b3   0x00000001   PAD
+    0x080070b4   0x080070b4   0x00000140   Data   RO         6780    .constdata          parameterlist.o
+    0x080071f4   0x080071f4   0x00000028   Data   RO         7143    .constdata          c_w.l(_printf_hex_int.o)
+    0x0800721c   0x0800721c   0x00000094   Data   RO         7322    .constdata          c_w.l(bigflt0.o)
+    0x080072b0   0x080072b0   0x00000020   Data   RO         7494    Region$$Table       anon$$obj.o
+    0x080072d0   0x080072d0   0x0000001c   Data   RO         7350    locale$$data        c_w.l(lc_numeric_c.o)
 
 
-    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x080072d0, Size: 0x00001198, Max: 0x00020000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x20000000, Load base: 0x080072ec, Size: 0x00001198, Max: 0x00020000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x080072d0   0x00000017   Data   RW           12    .data               main.o
-    0x20000017   0x080072e7   0x00000010   Data   RW         3242    .data               stm32f4xx_rcc.o
-    0x20000027   0x080072f7   0x00000001   PAD
-    0x20000028   0x080072f8   0x00000009   Data   RW         5398    .data               adc.o
-    0x20000031   0x08007301   0x00000001   Data   RW         5446    .data               led.o
-    0x20000032   0x08007302   0x00000001   Data   RW         5579    .data               pwm.o
-    0x20000033   0x08007303   0x00000001   PAD
-    0x20000034   0x08007304   0x0000000a   Data   RW         5651    .data               rtc.o
-    0x2000003e   0x0800730e   0x00000008   Data   RW         5723    .data               sblink.o
-    0x20000046   0x08007316   0x00000002   PAD
-    0x20000048   0x08007318   0x0000000c   Data   RW         6226    .data               extin.o
-    0x20000054   0x08007324   0x00000004   Data   RW         6467    .data               keyboard.o
-    0x20000058   0x08007328   0x00000010   Data   RW         6545    .data               sdcard.o
-    0x20000068   0x08007338   0x00000004   Data   RW         6809    .data               delay.o
-    0x2000006c   0x0800733c   0x00000008   Data   RW         6876    .data               usart.o
-    0x20000074   0x08007344   0x0000000f   Data   RW         6986    .data               mainpage.o
-    0x20000083   0x08007353   0x00000001   PAD
+    0x20000000   0x080072ec   0x00000017   Data   RW           12    .data               main.o
+    0x20000017   0x08007303   0x00000010   Data   RW         3242    .data               stm32f4xx_rcc.o
+    0x20000027   0x08007313   0x00000001   PAD
+    0x20000028   0x08007314   0x00000009   Data   RW         5398    .data               adc.o
+    0x20000031   0x0800731d   0x00000001   Data   RW         5446    .data               led.o
+    0x20000032   0x0800731e   0x00000001   Data   RW         5579    .data               pwm.o
+    0x20000033   0x0800731f   0x00000001   PAD
+    0x20000034   0x08007320   0x0000000a   Data   RW         5651    .data               rtc.o
+    0x2000003e   0x0800732a   0x00000008   Data   RW         5723    .data               sblink.o
+    0x20000046   0x08007332   0x00000002   PAD
+    0x20000048   0x08007334   0x0000000c   Data   RW         6226    .data               extin.o
+    0x20000054   0x08007340   0x00000004   Data   RW         6467    .data               keyboard.o
+    0x20000058   0x08007344   0x00000010   Data   RW         6545    .data               sdcard.o
+    0x20000068   0x08007354   0x00000004   Data   RW         6809    .data               delay.o
+    0x2000006c   0x08007358   0x00000008   Data   RW         6876    .data               usart.o
+    0x20000074   0x08007360   0x0000000f   Data   RW         6986    .data               mainpage.o
+    0x20000083   0x0800736f   0x00000001   PAD
     0x20000084        -       0x000001a8   Zero   RW           10    .bss                main.o
     0x2000022c        -       0x00000040   Zero   RW         5397    .bss                adc.o
     0x2000026c        -       0x00000058   Zero   RW         5492    .bss                parameter.o
     0x200002c4        -       0x00000300   Zero   RW         5722    .bss                sblink.o
     0x200005c4        -       0x0000018a   Zero   RW         6335    .bss                oled.o
-    0x2000074e   0x08007353   0x00000002   PAD
+    0x2000074e   0x0800736f   0x00000002   PAD
     0x20000750        -       0x000002c0   Zero   RW         6544    .bss                sdcard.o
     0x20000a10        -       0x000000c8   Zero   RW         6875    .bss                usart.o
     0x20000ad8        -       0x0000005c   Zero   RW         7043    .bss                falconpage.o
     0x20000b34        -       0x00000060   Zero   RW         7360    .bss                c_w.l(libspace.o)
-    0x20000b94   0x08007353   0x00000004   PAD
+    0x20000b94   0x0800736f   0x00000004   PAD
     0x20000b98        -       0x00000200   Zero   RW          353    HEAP                startup_stm32f40_41xxx.o
     0x20000d98        -       0x00000400   Zero   RW          352    STACK               startup_stm32f40_41xxx.o
 
@@ -3656,50 +3658,50 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       802         30          0          0          0       2492   ad7606fsmc.o
-       580         52          0          9         64       3237   adc.o
-       192         12          0          4          0       1956   delay.o
-       248         20          0         12          0       2384   extin.o
-      4330        670          0          0         92       9277   falconpage.o
-        72         12          0          0          0        518   i2c.o
-       364         52          0          4          0       2924   keyboard.o
-        96         18          0          1          0       1201   led.o
-      1036        232       2048         23        424     334904   main.o
-      1160        200          0         15          0       3425   mainpage.o
-       540         36          0          0          0       3687   mb85rs.o
-       160         14          0          0          0     256378   misc.o
-      1748         94        570          0        394       9944   oled.o
-       558         72          0          0          0       3813   pages.o
-       802         92          0          0         88       5964   parameter.o
-         0          0        320          0          0       1417   parameterlist.o
-       308         44          0          1          0       2890   pwm.o
-        40          4          0         10          0       1160   rtc.o
-       688         94          0          8        768       3694   sblink.o
-         0          0          3          0          0        662   sblinkutility.o
-       448         28          0         16        704      11554   sdcard.o
-        70         12          0          0          0       1997   sensors.o
-        64         26        392          0       1536        852   startup_stm32f40_41xxx.o
-       392         24          0          0          0       5723   stm32f4xx_adc.o
-       664         54          0          0          0       7118   stm32f4xx_dma.o
-       184         16          0          0          0       2276   stm32f4xx_exti.o
-       344         16          0          0          0       2165   stm32f4xx_fsmc.o
-       214          0          0          0          0       1931   stm32f4xx_gpio.o
-        26          0          0          0          0       4154   stm32f4xx_it.o
-       392         48          0         16          0       6057   stm32f4xx_rcc.o
-        68         12          0          0          0       1192   stm32f4xx_rtc.o
-        80         14          0          0          0       3669   stm32f4xx_sdio.o
-       112          0          0          0          0       3690   stm32f4xx_spi.o
-        64          4          0          0          0        664   stm32f4xx_syscfg.o
-       578         48          0          0          0       8343   stm32f4xx_tim.o
-       496          8          0          0          0       7019   stm32f4xx_usart.o
-       340         32          0          0          0       1625   system_stm32f4xx.o
-        96          6          0          0          0        564   timer.o
-       348         24          0          8        200       4300   usart.o
+       802         30          0          0          0       2444   ad7606fsmc.o
+       580         52          0          9         64       3153   adc.o
+       192         12          0          4          0       1908   delay.o
+       248         20          0         12          0       2324   extin.o
+      4360        680          0          0         92       9129   falconpage.o
+        72         12          0          0          0        506   i2c.o
+       364         52          0          4          0       2852   keyboard.o
+        96         18          0          1          0       1165   led.o
+      1036        232       2048         23        424     334592   main.o
+      1160        200          0         15          0       3353   mainpage.o
+       540         36          0          0          0       3615   mb85rs.o
+       160         14          0          0          0     256282   misc.o
+      1748         94        570          0        394       9752   oled.o
+       558         72          0          0          0       3729   pages.o
+       802         92          0          0         88       5844   parameter.o
+         0          0        320          0          0       1381   parameterlist.o
+       308         44          0          1          0       2818   pwm.o
+        40          4          0         10          0       1124   rtc.o
+       688         94          0          8        768       3610   sblink.o
+         0          0          3          0          0        638   sblinkutility.o
+       448         28          0         16        704      11470   sdcard.o
+        70         12          0          0          0       1949   sensors.o
+        64         26        392          0       1536        840   startup_stm32f40_41xxx.o
+       392         24          0          0          0       5627   stm32f4xx_adc.o
+       664         54          0          0          0       6998   stm32f4xx_dma.o
+       184         16          0          0          0       2228   stm32f4xx_exti.o
+       344         16          0          0          0       2129   stm32f4xx_fsmc.o
+       214          0          0          0          0       1895   stm32f4xx_gpio.o
+        26          0          0          0          0       4046   stm32f4xx_it.o
+       392         48          0         16          0       5961   stm32f4xx_rcc.o
+        68         12          0          0          0       1168   stm32f4xx_rtc.o
+        80         14          0          0          0       3621   stm32f4xx_sdio.o
+       112          0          0          0          0       3618   stm32f4xx_spi.o
+        64          4          0          0          0        652   stm32f4xx_syscfg.o
+       578         48          0          0          0       8187   stm32f4xx_tim.o
+       496          8          0          0          0       6899   stm32f4xx_usart.o
+       340         32          0          0          0       1589   system_stm32f4xx.o
+        96          6          0          0          0        552   timer.o
+       348         24          0          8        200       4204   usart.o
 
     ----------------------------------------------------------------------
-     18748       2120       3366        132       4272     726820   Object Totals
+     18776       2130       3366        132       4272     723852   Object Totals
          0          0         32          0          0          0   (incl. Generated)
-        44          0          1          5          2          0   (incl. Padding)
+        42          0          1          5          2          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -3790,15 +3792,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     25810       2580       3582        132       4372     713048   Grand Totals
-     25810       2580       3582        132       4372     713048   ELF Image Totals
-     25810       2580       3582        132          0          0   ROM Totals
+     25838       2590       3582        132       4372     710080   Grand Totals
+     25838       2590       3582        132       4372     710080   ELF Image Totals
+     25838       2590       3582        132          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                29392 (  28.70kB)
+    Total RO  Size (Code + RO Data)                29420 (  28.73kB)
     Total RW  Size (RW Data + ZI Data)              4504 (   4.40kB)
-    Total ROM Size (Code + RO Data + RW Data)      29524 (  28.83kB)
+    Total ROM Size (Code + RO Data + RW Data)      29552 (  28.86kB)
 
 ==============================================================================
 

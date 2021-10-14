@@ -96,10 +96,10 @@ void ADCReadVol(short res[])
 		res[2]+=adc_buff[i][2];
 		res[3]+=adc_buff[i][3];
 	}
-	res[0]>>=4;
-	res[1]>>=4;
-	res[2]>>=4;
-	res[3]>>=4;
+	res[0]>>=3;
+	res[1]>>=3;
+	res[2]>>=3;
+	res[3]>>=3;
 }
 
 void ADCStartConv()

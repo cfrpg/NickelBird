@@ -173,9 +173,9 @@ void falcon_update_main(void)
 			if(falconp.pwm[i]>*falconp.pwm_max)
 				falconp.pwm[i]=*falconp.pwm_max;
 		}
-		sys.pwm[0]=falconp.pwm[falconp.phase];
-		sys.pwm[1]=falconp.pwm[falconp.phase];
-		PWMSet(sys.pwm[0],sys.pwm[1]);
+//		sys.pwm[0]=falconp.pwm[falconp.phase];
+//		sys.pwm[1]=falconp.pwm[falconp.phase];
+//		PWMSet(sys.pwm[0],sys.pwm[1]);
 		
 	}
 	else
@@ -422,7 +422,12 @@ void falconpage_showData(u8 f)
 }
 void falconpage_fastUpdate(void)
 {
-	
+	if(PWMIsArmed())
+	{
+		sys.pwm[0]=falconp.pwm[falconp.phase];
+		sys.pwm[1]=falconp.pwm[falconp.phase];
+		PWMSet(sys.pwm[0],sys.pwm[1]);
+	}
 }
 
 void falconpage_intUpdate(void)
@@ -433,8 +438,8 @@ void falconpage_intUpdate(void)
 		if(falconp.phase==1)
 		{
 			falconp.phase=0;
-			falconp.phaseTime[1]=sys.intTime[0]-falconp.lasttime;
-			falconp.lasttime=sys.intTime[0];
+			falconp.phaseTime[1]=sys.intTime[1]-falconp.lasttime;
+			falconp.lasttime=sys.intTime[1];
 			falconp.draw|=0x20;
 			sys.sensors.SensorData[0]=1;
 		}
@@ -445,8 +450,8 @@ void falconpage_intUpdate(void)
 		if(falconp.phase==0)
 		{
 			falconp.phase=1;
-			falconp.phaseTime[0]=sys.intTime[1]-falconp.lasttime;
-			falconp.lasttime=sys.intTime[1];
+			falconp.phaseTime[0]=sys.intTime[0]-falconp.lasttime;
+			falconp.lasttime=sys.intTime[0];
 			falconp.draw|=0x10;
 			sys.sensors.SensorData[1]=1;
 		}
@@ -454,8 +459,8 @@ void falconpage_intUpdate(void)
 	falconp.angle=falconpage_getRawAngle();
 	falconp.phi=falconpage_getPhi(falconp.angle);
 	sys.sensors.SensorData[2]=falconp.phi;
-	//sys.sensors.SensorData[3]=1000/(falconp.phaseTime[1]+falconp.phaseTime[0]);
-	sys.sensors.SensorData[3]=falconp.phase;
+	sys.sensors.SensorData[3]=1000.0f/(falconp.phaseTime[1]+falconp.phaseTime[0]);
+	//sys.sensors.SensorData[3]=falconp.phase;
 }
 
 void falconpage_intReset(void)
