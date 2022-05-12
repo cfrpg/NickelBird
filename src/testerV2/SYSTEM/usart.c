@@ -94,7 +94,7 @@ void USART2_IRQHandler(void)
 				}
 			}
 			else
-			{	
+			{
 				if(Res=='*')USART_RX_STA=0x4000;				
 			}
 		}

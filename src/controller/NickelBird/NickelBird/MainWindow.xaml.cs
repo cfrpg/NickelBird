@@ -215,6 +215,7 @@ namespace NickelBird
 			portScanner = new AdvancedPortScanner(config.Baudrate, 256, 3);
 			portScanner.OnFindPort += PortScanner_OnFindPort;
 			portScanner.Start();
+
 		}
 
 

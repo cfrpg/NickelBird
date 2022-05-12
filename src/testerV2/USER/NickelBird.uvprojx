@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,USE_USB_OTG_HS,USE_EMBEDDED_PHY</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\USER;..\STM32F4\inc;..\HARDWARE;..\SYSTEM;..\PAGES;..\SYSTEM\USB\Core\inc;..\SYSTEM\USB\Core\src;..\SYSTEM\USB</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\STM32F4\inc;..\MODULE;..\HARDWARE;..\SYSTEM;..\PAGES;..\SYSTEM\USB\Core\inc;..\SYSTEM\USB\Core\src;..\SYSTEM\USB</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -820,6 +820,41 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>MODULE</GroupName>
+          <Files>
+            <File>
+              <FileName>MathHelper.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MODULE\MathHelper.c</FilePath>
+            </File>
+            <File>
+              <FileName>MathHelper.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MODULE\MathHelper.h</FilePath>
+            </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MODULE\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MODULE\pid.h</FilePath>
+            </File>
+            <File>
+              <FileName>filter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MODULE\filter.c</FilePath>
+            </File>
+            <File>
+              <FileName>filter.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MODULE\filter.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>PAGES</GroupName>
           <Files>
             <File>
@@ -846,6 +881,11 @@
               <FileName>FalconPage.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\PAGES\FalconPage.c</FilePath>
+            </File>
+            <File>
+              <FileName>ControllerPage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PAGES\ControllerPage.c</FilePath>
             </File>
           </Files>
         </Group>

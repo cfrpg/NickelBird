@@ -18,19 +18,19 @@ void SeneorsInit(void)
 
 }
 
-void SensorsSlowUpdate(void)
+void SensorsSlowUpdate(u16 time)
 {	
 	if(sys.slowUpdate!=0)
 	{
-		(*sys.slowUpdate)();
+		(*sys.slowUpdate)(time);
 	}
 }
 
-void SensorsFastUpdate(void)
+void SensorsFastUpdate(u16 time)
 {
 	if(sys.fastUpdate!=0)
 	{
-		(*sys.fastUpdate)();
+		(*sys.fastUpdate)(time);
 	}
 }
 

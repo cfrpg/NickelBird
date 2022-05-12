@@ -50,6 +50,7 @@ int main(void)
 {
 //	s16 i;
 //	s16 tmp[2];
+	u16 time;
 	delay_init(168);
 	uart_init(115200);
 	
@@ -60,12 +61,18 @@ int main(void)
 
 	OledDispBitmap(0,0,128,128,gImage_logo);
 	FRAMInit();
-	ParamRead();
-	if(params.headFlag!=0xCFCF||params.tailFlag!=0xFCFC)
+	u8 t=ParamRead();
+	if(t)
 	{
-		OledDispString(0,0,"Reset Parameters.",0);
-		ParamReset();
-		ParamWrite();
+		if(t==255)
+			OledDispString(0,0,"Reset all parameters.",0);		
+		else
+		{
+			OledDispString(0,0,"Reset     parameters.",0);
+			OledDispInt(6,0,t,3,0);
+		}
+		delay_ms(500);
+		delay_ms(500);
 	}
 	PWMInit();
 	
@@ -83,12 +90,14 @@ int main(void)
 	
 	SeneorsInit();
 	
+	PreciseClockInit();
+	
 	delay_ms(500);
 	delay_ms(500);
 	while(1)
 	{	
 		if(tick[0]>=500)
-		{
+		{			
 			tick[0]=0;
 			LEDFlip();
 			if(USART_RX_STA&0x8000)
@@ -99,14 +108,18 @@ int main(void)
 		}
 		if(tick[1]>=2)
 		{
-			tick[1]=0;			
-			SensorsFastUpdate();
+			time=tick[1];
+			tick[1]=0;	
+			SensorsFastUpdate(time);
 		}
 		if(tick[2]>=100)
 		{
+			TEST0=1;
+			time=tick[2];
 			tick[2]=0;
-			SensorsSlowUpdate();
+			SensorsSlowUpdate(time);
 			PagesUpdate();
+			TEST0=0;
 		}
 	}
 }
@@ -156,7 +169,7 @@ void AnalyzePkg(void)
 	if(USART_RX_BUF[0]=='r'&&USART_RX_BUF[1]=='s'&&USART_RX_BUF[2]=='t'&&USART_RX_BUF[3]=='p')
 	{
 		printf("RSTP CMD\r\n");
-		ParamReset();
+		ParamReset(0);
 		ParamWrite();
 		printf("Param reset complete.\r\n");
 		ParamShow();
@@ -174,7 +187,7 @@ void TIM7_IRQHandler(void)
 			tick[n]++;
 		}
 		cpucnt++;
-		if(cpucnt>10000)
+		if(cpucnt>=(10000))
 			cpucnt=0;
 		RTCcnt++;
 		if(RTCcnt>999)

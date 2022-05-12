@@ -2,6 +2,10 @@
 #include "oled.h"
 #include "keyboard.h"
 #include "parameter.h"
+#include "led.h"
+#include "delay.h"
+
+s8 nextPage;
 
 void PagesInit(void)
 {	
@@ -22,8 +26,10 @@ void PagesInit(void)
 	
 	PageInit_main(1);
 	PageInit_falcon(1);
+	PageInit_controller(1);
 	//PageInit_ADC(1);
 	currpage=-1;
+	nextPage=-1;
 }
 
 void PagesChangeTo(u8 p)
@@ -39,6 +45,9 @@ void PagesChangeTo(u8 p)
 			case FalconPage:
 				PageInit_falcon(0);
 			break;
+			case ControllerPage:
+				PageInit_controller(0);
+			break;
 
 			default:
 				currpage=MainPage;
@@ -51,15 +60,24 @@ void PagesChangeTo(u8 p)
 
 void PagesNext(s8 d)
 {	
+//	if(d<0)
+//	{
+//		if(currpage==0)
+//			PagesChangeTo(PageNum-1);
+//		else
+//			PagesChangeTo(currpage-1);
+//	}
+//	if(d>0)
+//		PagesChangeTo((currpage+1)%PageNum);
 	if(d<0)
 	{
 		if(currpage==0)
-			PagesChangeTo(PageNum-1);
+			nextPage=(PageNum-1);
 		else
-			PagesChangeTo(currpage-1);
+			nextPage=(currpage-1);
 	}
 	if(d>0)
-		PagesChangeTo((currpage+1)%PageNum);
+		nextPage=((currpage+1)%PageNum);
 }
 
 void PagesDrawStatusBar(void)
@@ -82,19 +100,36 @@ void PagesUpdate(void)
 	currWheelPush|=KeyGetState();
 	keyPress=currKey&(currKey^lastKey);
 	wheelPress=((currWheelPush&0x07)==0x01);
-	switch(currpage)
+	if(nextPage>=0)
 	{
-		case MainPage:
-			PageUpdate_main();
-		break;
-		case FalconPage:
-			PageUpdate_falcon();
-		break;
-		default:
-			currpage=MainPage;
-			PageInit_main(0);
-			PageUpdate_main();
-		break;
+		PagesChangeTo(nextPage);
+		nextPage=-1;
+	}
+	else
+	{
+		switch(currpage)
+		{
+			case MainPage:
+				PageUpdate_main();
+			break;
+			case FalconPage:
+				PageUpdate_falcon();
+			break;
+			case ControllerPage:
+				PageUpdate_controller();
+			break;
+			default:
+				LEDFlip();
+				delay_ms(100);
+			LEDFlip();
+				delay_ms(100);
+			LEDFlip();
+				delay_ms(100);
+				currpage=MainPage;
+				PageInit_main(0);
+				PageUpdate_main();
+			break;
+		}
 	}
 	lastKey=currKey;
 	lastWheel=currWheel;

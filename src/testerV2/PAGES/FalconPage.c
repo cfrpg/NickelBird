@@ -2,6 +2,7 @@
 #include "oled.h"
 #include "pwm.h"
 #include "math.h"
+#include "MathHelper.h"
 
 #define Falcon_Main 0
 #define Falcon_Cali_Sel 1
@@ -9,7 +10,7 @@
 #define Falcon_Cali_Stroke 3
 
 void falconpage_showData(u8 f);
-void falconpage_fastUpdate(void);
+void falconpage_fastUpdate(u16 time);
 void falconpage_intUpdate(void);
 void falconpage_intReset(void);
 
@@ -42,6 +43,7 @@ struct
 	u16 pwm[2];
 	u8 draw;
 	s8 strokeDir;
+	u8 drawSkip;
 } falconp;
 void PageInit_falcon(u8 f)
 {
@@ -74,7 +76,9 @@ void PageInit_falcon(u8 f)
 	sys.intReset=falconpage_intReset;
 	
 	falconpage_setPhiCalc();
+	OledClearBuff();
 	OledClear(0);
+	
 	PagesDrawHeader(FalconPage,"Falcon");
 	
 	if(PWMIsArmed())
@@ -95,6 +99,7 @@ void PageInit_falcon(u8 f)
 	OledDispString(17,15,"CALI",0);
 	
 	falconpage_showData(0xFF);
+	falconp.drawSkip=0;
 	
 	
 }
@@ -173,8 +178,8 @@ void falcon_update_main(void)
 			if(falconp.pwm[i]>*falconp.pwm_max)
 				falconp.pwm[i]=*falconp.pwm_max;
 		}
-//		sys.pwm[0]=falconp.pwm[falconp.phase];
-//		sys.pwm[1]=falconp.pwm[falconp.phase];
+		sys.pwm[0]=falconp.pwm[falconp.phase];
+		sys.pwm[1]=falconp.pwm[falconp.phase];
 //		PWMSet(sys.pwm[0],sys.pwm[1]);
 		
 	}
@@ -201,9 +206,15 @@ void falcon_update_main(void)
 			falconp.draw=0;
 		}
 		if(keyPress&KEY_LEFT)
+		{
 			PagesNext(-1);
+			falconp.draw=0;
+		}
 		if(keyPress&KEY_RIGHT)
+		{
 			PagesNext(1);
+			falconp.draw=0;
+		}
 		sys.sensors.SensorData[3]=falconp.draw;
 	}
 }
@@ -340,7 +351,7 @@ void falcon_update_cali(void)
 
 void PageUpdate_falcon(void)
 {	
-	
+	falconp.drawSkip++;
 	if(falconp.state==Falcon_Main)
 	{
 		falcon_update_main();
@@ -356,6 +367,7 @@ void falconpage_showData(u8 f)
 {
 	//OledDispInt(0,8,currWheel,5,0);
 	//OledDispInt(0,9,currKey,3,0);
+	
 	if(f&0x01)
 	{
 		if(falconp.bind)
@@ -418,9 +430,10 @@ void falconpage_showData(u8 f)
 	{
 		OledDispFixed(4,13,falconp.angle*5730,2,8,0);
 		OledDispFixed(13,13,falconp.phi*5730,2,8,0);
+		
 	}
 }
-void falconpage_fastUpdate(void)
+void falconpage_fastUpdate(u16 time)
 {
 	if(PWMIsArmed())
 	{
@@ -459,6 +472,7 @@ void falconpage_intUpdate(void)
 	falconp.angle=falconpage_getRawAngle();
 	falconp.phi=falconpage_getPhi(falconp.angle);
 	sys.sensors.SensorData[2]=falconp.phi;
+	//sys.sensors.SensorData[2]=falconp.angle;
 	sys.sensors.SensorData[3]=1000.0f/(falconp.phaseTime[1]+falconp.phaseTime[0]);
 	//sys.sensors.SensorData[3]=falconp.phase;
 }
@@ -480,19 +494,12 @@ float falconpage_getRawAngle(void)
 	return t;
 }
 
-//a-b
-float anglesub(float a,float b)
-{
-	if(a>b)
-		return a-b;
-	return a+TwoPI-b;
-}
 
 void falconpage_setPhiCalc(void)
 {
 	float t1,t2;
-	t1=anglesub(*falconp.aat_up_ang,*falconp.aat_down_ang);
-	t2=anglesub(*falconp.aat_down_ang,*falconp.aat_up_ang);
+	t1=AngleSub(*falconp.aat_up_ang,*falconp.aat_down_ang);
+	t2=AngleSub(*falconp.aat_down_ang,*falconp.aat_up_ang);
 	if(t1<t2)
 	{
 		falconp.strokeDir=1;

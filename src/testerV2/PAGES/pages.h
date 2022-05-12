@@ -8,11 +8,11 @@
 
 #define MainPage 0
 #define FalconPage 1
+#define ControllerPage 2
 
-#define PageNum 2
+#define PageNum 3
 
-#define PI 3.1415926f
-#define TwoPI 6.283185307f
+
 
 typedef struct
 {
@@ -27,12 +27,13 @@ typedef struct
 	float rho;
 	float airspeed;
 	float freq[2];
-	void (*slowUpdate)(void);
-	void (*fastUpdate)(void);
+	void (*slowUpdate)(u16);
+	void (*fastUpdate)(u16);
 	void (*intUpdate)(void);
 	void (*intReset)(void);
 	u8 intFlag[2];
 	u32 intTime[2];
+	u32 EOtime;
 
 } systemState;
 
@@ -63,6 +64,9 @@ void PageUpdate_main(void);
 
 void PageInit_falcon(u8 f);
 void PageUpdate_falcon(void);
+
+void PageInit_controller(u8 f);
+void PageUpdate_controller(void);
 
 
 //void PageInit_ADC(u8 f);

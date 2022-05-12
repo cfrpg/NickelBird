@@ -4,7 +4,9 @@
 
 void mainpage_showData(u8 f);
 
-void mainpage_fastUpdate(void);
+void mainpage_fastUpdate(u16 time);
+void mainpage_slowUpdate(u16 time);
+void mainpage_intUpdate(void);
 
 const s32* pwm_min;
 const s32* pwm_max;
@@ -12,9 +14,12 @@ const s32* pwm_disarmed;
 
 struct
 {
+	u32 eo;
+	u16 lastTime;
 	u8 state;
 	u8 currch;
 	u8 bind;
+	
 } mainp;
 void PageInit_main(u8 f)
 {
@@ -23,6 +28,8 @@ void PageInit_main(u8 f)
 		mainp.state=0;
 		mainp.currch=0;
 		mainp.bind=0;
+		mainp.eo=0;
+		mainp.lastTime=0;
 		pwm_min=ParamGetFromName("PWM_MIN");
 		pwm_max=ParamGetFromName("PWM_MAX");
 		
@@ -30,6 +37,11 @@ void PageInit_main(u8 f)
 		printf("%d %d %d\r\n",*pwm_min,*pwm_max,*pwm_disarmed);
 		return;
 	}
+	sys.fastUpdate=mainpage_fastUpdate;
+	sys.intUpdate=mainpage_intUpdate;
+	sys.slowUpdate=0;
+	sys.intReset=0;
+	OledClearBuff();
 	OledClear(0);
 	PagesDrawHeader(MainPage,"Main");
 	
@@ -46,10 +58,7 @@ void PageInit_main(u8 f)
 	OledDispString(17,15,"CALI",0);
 	
 	mainpage_showData(0xFF);
-	sys.fastUpdate=mainpage_fastUpdate;
-	sys.slowUpdate=0;
-	sys.intUpdate=0;	
-	sys.intReset=0;
+	
 }
 
 void PageUpdate_main(void)
@@ -127,7 +136,7 @@ void PageUpdate_main(void)
 				if(sys.pwm[i]>*pwm_max)
 					sys.pwm[i]=*pwm_max;
 			}
-			PWMSet(sys.pwm[0],sys.pwm[1]);
+			
 			
 		}
 		else
@@ -188,10 +197,37 @@ void mainpage_showData(u8 f)
 	}
 }
 
-void mainpage_fastUpdate(void)
+void mainpage_fastUpdate(u16 time)
 {
 	sys.sensors.SensorData[0]=sys.pwm[0];
 	if(sys.pwm[0]==0)
 		sys.sensors.SensorData[2]++;
 	sys.sensors.SensorData[1]=sys.pwm[1];
+	sys.sensors.SensorData[3]=mainp.eo;
+	PWMSet(sys.pwm[0],sys.pwm[1]);
+}
+
+void mainpage_slowUpdate(u16 time)
+{
+	
+}
+
+void mainpage_intUpdate(void)
+{
+//	u32 time;
+//	if(sys.intFlag[0]||sys.intFlag[1])
+//	{
+//		sys.intFlag[0]=0;
+//		sys.intFlag[1]=0;
+//		mainp.eo++;
+//	}
+//	if(mainp.eo>=40)
+//	{
+//		time=(cpucnt+10000-mainp.lastTime)%10000+1;
+//		mainp.lastTime=cpucnt;
+//		sys.sensors.SensorData[2]=60000*mainp.eo/4/time;
+//		mainp.eo=0;
+//		
+//	}
+	sys.sensors.SensorData[2]=60.0*1000*1000*10/sys.EOtime;
 }

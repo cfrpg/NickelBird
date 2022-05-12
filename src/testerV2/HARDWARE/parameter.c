@@ -13,7 +13,30 @@ u32 param_readWord(u32 addr)
 
 u8 ParamRead(void)
 {
+	u8 i;
 	FRAMRead(0,sizeof(params),(u8*)(&params));
+	if(params.headFlag!=PARAM_HEAD)
+	{
+		ParamReset(0);
+		ParamWrite();
+		return 255;
+	}
+	if(params.tailFlag!=PARAM_TAIL)
+	{
+		for(i=0;i<PARAM_NUM;i++)
+		{
+			if(params.values[i].intValue==PARAM_TAIL)
+			{
+				params.values[i].intValue=0;
+				ParamReset(i);
+				ParamWrite();
+				return PARAM_NUM-i;
+			}
+		}
+		ParamReset(0);
+		ParamWrite();
+		return 255;
+	}
 	return 0;
 }
 
@@ -24,18 +47,18 @@ u8 ParamWrite(void)
 	return 0;
 }
 
-void ParamReset(void)
+void ParamReset(u8 first)
 {
 	u8 i;
-	params.headFlag=0xCFCF;
-	for(i=0;i<PARAM_NUM;i++)
+	params.headFlag=PARAM_HEAD;
+	for(i=first;i<PARAM_NUM;i++)
 	{
 		if(parameterList[i].type>0)
 			params.values[i].floatValue=parameterList[i].defaultValue.floatValue;
 		if(parameterList[i].type<=0)
 			params.values[i].intValue=parameterList[i].defaultValue.intValue;
 	}
-	params.tailFlag=0xFCFC;
+	params.tailFlag=PARAM_TAIL;
 }
 
 float paramReadFixed(s32 v,u8 n)

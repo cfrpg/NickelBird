@@ -5,8 +5,8 @@
 
 
 void SeneorsInit(void);
-void SensorsSlowUpdate(void);
-void SensorsFastUpdate(void);
+void SensorsSlowUpdate(u16 time);
+void SensorsFastUpdate(u16 time);
 void SensorsIntUpdate(void);
 
 #endif
