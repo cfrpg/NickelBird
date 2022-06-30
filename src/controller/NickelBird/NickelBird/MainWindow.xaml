@@ -193,7 +193,7 @@
                             <ColumnDefinition Width="1*"/>
                             <ColumnDefinition Width="1*"/>
                             <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="225"/>
                         </Grid.ColumnDefinitions>
                         <TextBox  Text="{Binding LogNameElements[0]}" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1" Margin="5,0"/>
                         <TextBox  Text="{Binding LogNameElements[1]}" VerticalAlignment="Center" Grid.Column="1" Grid.Row="1" Margin="5,0"/>
@@ -203,11 +203,13 @@
                         <Button x:Name="saveLogNameBtn" Content="保存" Grid.Column="5" VerticalAlignment="Center" Margin="20,0" Click="SaveLogNameBtn_Click"/>
                     </Grid>
                     <TextBlock Text="配置文件" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <TextBox Text="{Binding ConfigName}" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,125,0"/>
-                    <Button x:Name="openConfigBtn" Content="打开..." Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0" Width="80" Click="openConfigBtn_Click" />
+                    <TextBox Text="{Binding ConfigName}" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,230,0"/>
+                    <Button x:Name="openConfigBtn" Content="打开..." Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,125,0" Width="80" Click="openConfigBtn_Click" />
+                    <Button x:Name="saveConfigBtn" Content="另存为..." Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0" Width="80" Click="saveConfigBtn_Click" />
                     <TextBlock Text="相关矩阵" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <TextBox Text="{Binding MatrixName}" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,125,0"/>
-                    <Button x:Name="openMatrixBtn" Content="打开..." Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0" Width="80" Click="openMatrixBtn_Click" />
+                    <TextBox Text="{Binding MatrixName}" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,230,0"/>
+                    <Button x:Name="openMatrixBtn" Content="打开..." Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,125,0" Width="80" Click="openMatrixBtn_Click" />
+                    <Button x:Name="importMatrixBtn" Content="导入..." Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0" Width="80" Click="importMatrixBtn_Click"/>
                     <TextBlock Text="波特率" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     <TextBox Text="{Binding Baudrate}" Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Margin="5,0,125,0"/>
                 </Grid>
@@ -266,7 +268,7 @@
 
             <Button x:Name="logBtn" Content="开始采集" Grid.Column="3" Grid.Row="1" Margin="30,10" Click="LogBtn_Click" IsDefault="True"/>
             <CheckBox x:Name="csvcheckBox" Content="保存为csv" HorizontalAlignment="Left" Grid.Column="3" VerticalAlignment="Center" FontSize="14" Margin="30,0,0,0" IsChecked="{Binding IsCsv}" Checked="CsvcheckBox_Checked"/>
-            <TextBlock x:Name="textBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Text="时长(ms)" VerticalAlignment="Center" Grid.Column="4" FontSize="16" Margin="10,0,0,0"/>
+            <TextBlock x:Name="textBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Text="数据点：" VerticalAlignment="Center" Grid.Column="4" FontSize="16" Margin="10,0,0,0"/>
             <TextBox x:Name="sstextBox" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="{Binding SSTime}" VerticalAlignment="Center" Width="80" Grid.Column="4" Margin="95,0,0,0"/>            
             <Button x:Name="ssbutton" Content="采集一次" Grid.Row="1" Grid.Column="4" Margin="30,10" Click="Ssbutton_Click" />
 
@@ -284,7 +286,9 @@
                 <RowDefinition Height="1*"/>
             </Grid.RowDefinitions>
             <Button x:Name="rstScopeBtn" Content="重置曲线坐标轴"  Grid.Row="1" Margin="30,0,30,3"  Height="24" Click="RstScopeBtn_Click"/>
-            <TextBlock x:Name="timerText" Text="{Binding Timer,StringFormat={}{0:0.000}}" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+            <!-- <TextBlock x:Name="timerText" Text="{Binding Timer,StringFormat={}{0:0.000}}" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>-->
+            <TextBlock x:Name="timerText" Text="{Binding Timer}" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16"/>
+
             <Grid x:Name="tableDataGrid" Grid.Row="3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30"/>

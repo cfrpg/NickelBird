@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 using System.Diagnostics;
 using System.IO;
@@ -236,7 +237,7 @@ namespace NickelBird
 			{
 				while (linkAvilable && link.ReceivedPackageQueue.TryDequeue(out LinkPackage package))
 				{
-					analyzePackage((SBLinkPackage)package);					
+					analyzePackage((SBLinkPackage)package);
 					//Debug.WriteLine("[Link] Recevie package size= {0} function={1} remain={2}", package.DataSize,package.Function,link.ReceivedPackageQueue.Count);
 				}
 			}
@@ -256,7 +257,7 @@ namespace NickelBird
 			package.StartRead();
 			if (logStartTime < 0)
 				logStartTime = package.Time;
-			currentTime = (package.Time - logStartTime) * 0.001;
+			currentTime = (package.Time - logStartTime) / config.FilterFs;
 
 			if (package.Function == 1 || package.Function == 2)
 			{
@@ -316,7 +317,9 @@ namespace NickelBird
 					}
 					isWritingFile = false;
 					logcnt++;
-					flightState.Timer += 0.001;
+					//flightState.Timer += 0.001;
+					flightState.Timer += 1;
+
 					if (flightState.SSEanbled)
 					{
 						sscnt++;
@@ -368,7 +371,7 @@ namespace NickelBird
 
 					graphSkipCnt = 0;
 				}
-				if(config.FreqEnabled)
+				if (config.FreqEnabled)
 				{
 					freqbuff[(freqHead + freqCount) % freqbuff.Count] = sensorDatas[config.FreqData].LpfValue;
 					freqCount++;
@@ -382,7 +385,7 @@ namespace NickelBird
 					}
 				}
 
-				if(stopFlag)
+				if (stopFlag)
 				{
 					Dispatcher.Invoke(new Action(() =>
 					{
@@ -447,7 +450,7 @@ namespace NickelBird
 			}
 			initMatrix(7, 14);
 			sensorDatas.Clear();
-			
+
 			for (int i = 0; i < config.Offsets.Length; i++)
 			{
 				sensorDatas.Add(new SensorData(syncFlag, config)
@@ -463,7 +466,7 @@ namespace NickelBird
 				});
 				buff.Add(0);
 			}
-			
+
 		}
 
 		void initMatrix(int r, int c)
@@ -492,22 +495,22 @@ namespace NickelBird
 				{
 					str = sr.ReadLine();
 					strs = str.Split(',');
-					for (int j = 0; j < col+1 && j < c+1; j++)
+					for (int j = 0; j < col + 1 && j < c + 1; j++)
 					{
-						mat.Data[i, j] = double.Parse(strs[j+1]);//skip header
+						mat.Data[i, j] = double.Parse(strs[j + 1]);//skip header
 					}
 				}
 				for (; i < row; i++)
 					sr.ReadLine();
 				sr.ReadLine();//skip space line
 				sr.ReadLine();//skip header
-				for (i=0;i<row&&i<r;i++)
+				for (i = 0; i < row && i < r; i++)
 				{
 					str = sr.ReadLine();
 					strs = str.Split(',');
-					for (int j = 0; j < col+1 && j < c+1; j++)
+					for (int j = 0; j < col + 1 && j < c + 1; j++)
 					{
-						logmat.Data[i, j] = double.Parse(strs[j+1]);
+						logmat.Data[i, j] = double.Parse(strs[j + 1]);
 					}
 				}
 				sr.Close();
@@ -515,24 +518,24 @@ namespace NickelBird
 			else
 			{
 				showMessage("处理矩阵不存在！");
-				config.MatrixName = "default"+r.ToString()+"x"+c.ToString()+".csv";
+				config.MatrixName = "default" + r.ToString() + "x" + c.ToString() + ".csv";
 				StreamWriter sw = new StreamWriter(path + "\\" + config.MatrixName);
 				sw.Write(r.ToString());
 				sw.Write(",");
 				sw.Write(c.ToString());
-				for (i = 1; i <= c+1; i++)
+				for (i = 1; i <= c + 1; i++)
 					sw.Write(",");
 				sw.WriteLine();
 				//write header
 				sw.Write(",");
 				for (i = 0; i < c; i++)
-					sw.Write(i.ToString()+",");
+					sw.Write(i.ToString() + ",");
 				sw.Write("Offset,");
 				sw.WriteLine();
 				for (i = 0; i < r; i++)
 				{
-					sw.Write(i.ToString()+",");//header
-					for(int j=0;j<c+1;j++)
+					sw.Write(i.ToString() + ",");//header
+					for (int j = 0; j < c + 1; j++)
 					{
 						sw.Write(mat.Data[i, j]);
 						sw.Write(",");
@@ -541,7 +544,7 @@ namespace NickelBird
 
 				}
 				//space line
-				for(i=0;i<=c;i++)
+				for (i = 0; i <= c; i++)
 				{
 					sw.Write(",");
 				}
@@ -555,7 +558,7 @@ namespace NickelBird
 				for (i = 0; i < r; i++)
 				{
 					sw.Write(i.ToString() + ",");
-					for (int j = 0; j < c+1; j++)
+					for (int j = 0; j < c + 1; j++)
 					{
 						sw.Write(logmat.Data[i, j]);
 						sw.Write(",");
@@ -626,7 +629,7 @@ namespace NickelBird
 			sensorDataList.IsEnabled = false;
 			configTab.IsEnabled = false;
 			ssbutton.IsEnabled = false;
-			if(flightState.SSEanbled)
+			if (flightState.SSEanbled)
 			{
 				logBtn.IsEnabled = false;
 			}
@@ -755,7 +758,6 @@ namespace NickelBird
 			nameText4.Text = config.LogNameBackup[3];
 			nameText5.Text = config.LogNameBackup[4];
 			nameText.Text = config.LogNameBackup[5];
-
 		}
 
 		private void CsvcheckBox_Checked(object sender, RoutedEventArgs e)
@@ -768,13 +770,13 @@ namespace NickelBird
 
 		private void Ssbutton_Click(object sender, RoutedEventArgs e)
 		{
-			if(!isLogging)
+			if (!isLogging)
 			{
 				flightState.SSEanbled = true;
 				startLog();
 			}
 		}
-		
+
 		private void TrimBtn_Click(object sender, RoutedEventArgs e)
 		{
 			if (trim < 0)
@@ -815,17 +817,17 @@ namespace NickelBird
 		private void openConfigBtn_Click(object sender, RoutedEventArgs e)
 		{
 			System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
-			ofd.InitialDirectory = Environment.CurrentDirectory+"\\config";
-			if(ofd.ShowDialog()== System.Windows.Forms.DialogResult.OK)
+			ofd.InitialDirectory = Environment.CurrentDirectory + "\\config";
+			if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
 			{
 				string path = ofd.FileName;
 				FileInfo fi = new FileInfo(path);
 				string name = fi.Name;
-				if(fi.DirectoryName!= (Environment.CurrentDirectory + "\\config"))
+				if (fi.DirectoryName != (Environment.CurrentDirectory + "\\config"))
 				{
 					string newpath = Environment.CurrentDirectory + "\\config\\" + name;
 					FileInfo nfi = new FileInfo(newpath);
-					if(nfi.Exists)
+					if (nfi.Exists)
 					{
 						if (MessageBox.Show("存在同名配置文件，是否覆盖？", "NickelBird", MessageBoxButton.YesNo) == MessageBoxResult.No)
 							return;
@@ -862,7 +864,7 @@ namespace NickelBird
 				}
 				config.MatrixName = name;
 				initMatrix(7, 14);
-				
+
 				//initConfig();
 				//showMessage("重启应用程序启用新配置文件");
 			}
@@ -928,9 +930,154 @@ namespace NickelBird
 			}
 		}
 
+		private void importMatrixBtn_Click(object sender, RoutedEventArgs e)
+		{
+			System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
+			ofd.Filter = "ATI校准文件 (*.cal)|*.cal";
+			ofd.InitialDirectory = Environment.CurrentDirectory + "\\matrices";
+			string[] lines = null;
+			if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+			{
+				string path = ofd.FileName;
+				lines = readCalFile(path);
+				if (lines == null)
+				{
+					MessageBox.Show("校准文件解析失败", "NickelBird");
+					return;
+				}
+
+				//initConfig();
+				//showMessage("重启应用程序启用新配置文件");
+			}
+			MessageBox.Show("校准文件解析成功", "NickelBird");
+			System.Windows.Forms.SaveFileDialog sfd = new System.Windows.Forms.SaveFileDialog();
+			sfd.Filter = "csv文件 (*.csv)|*.csv";
+			sfd.AddExtension = true;
+			sfd.FileName = System.IO.Path.GetFileNameWithoutExtension(ofd.FileName);
+			sfd.InitialDirectory = Environment.CurrentDirectory + "\\matrices";
+			if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+			{
+
+				StreamWriter sw = new StreamWriter(sfd.FileName);
+				sw.WriteLine("7,14,,,,,,,,,,,,,,");
+				sw.WriteLine(",G1,G2,G3,G4,G5,G6,Ch7,Ch8,Volt,Curr,10,11,12,13,Offset");
+				sw.WriteLine("Fx," + lines[0] + "0,0,0,0,0,0,0,0,0");
+				sw.WriteLine("Fy," + lines[1] + "0,0,0,0,0,0,0,0,0");
+				sw.WriteLine("Fz," + lines[2] + "0,0,0,0,0,0,0,0,0");
+				sw.WriteLine("Mx," + lines[3] + "0,0,0,0,0,0,0,0,0");
+				sw.WriteLine("My," + lines[4] + "0,0,0,0,0,0,0,0,0");
+				sw.WriteLine("Mz," + lines[5] + "0,0,0,0,0,0,0,0,0");
+				sw.WriteLine("Power,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1");
+				sw.WriteLine(",,,,,,,,,,,,,,,");
+				sw.WriteLine(",G1,G2,G3,G4,G5,G6,Ch7,Ch8,Volt,Curr,10,11,12,13,Offset");
+				sw.WriteLine("Fx,0,0,0,0,0,0,0,0,0,0,0,0,0,0,101.9716");
+				sw.WriteLine("Fy,0,0,0,0,0,0,0,0,0,0,0,0,0,0,101.9716");
+				sw.WriteLine("Fz,0,0,0,0,0,0,0,0,0,0,0,0,0,0,101.9716");
+				sw.WriteLine("Mx,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1");
+				sw.WriteLine("My,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1");
+				sw.WriteLine("Mz,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1");
+				sw.WriteLine("Power,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1");
+				sw.Close();
+				config.MatrixName = System.IO.Path.GetFileName(sfd.FileName);
+				initMatrix(7, 14);
+			}
+		}
+
+		private string[] readCalFile(string path)
+		{
+			XmlDocument xd = new XmlDocument();
+			xd.Load(path);
+			XmlNode currNode = xd;
+			XmlNodeList list = xd.SelectNodes("//FTSensor/Calibration/UserAxis");
+
+			if (list.Count < 6)
+				return null;
+
+			string[] res = new string[6];
+			int axisflags = 0;
+
+			foreach (XmlNode n in list)
+			{
+				if (n.NodeType == XmlNodeType.Element)
+				{
+					XmlElement xe = (XmlElement)n;
+					int currch = -1;
+					if (xe.HasAttribute("Name"))
+					{
+						switch (xe.GetAttribute("Name"))
+						{
+							case "Fx":
+								currch = 0;
+								break;
+							case "Fy":
+								currch = 1;
+								break;
+							case "Fz":
+								currch = 2;
+								break;
+							case "Tx":
+								currch = 3;
+								break;
+							case "Ty":
+								currch = 4;
+								break;
+							case "Tz":
+								currch = 5;
+								break;
+						}
+					}
+					if (currch >= 0 && xe.HasAttribute("values"))
+					{
+						string raw = xe.GetAttribute("values");
+						string[] parts = raw.Split(' ');
+						List<string> csvLineElements = new List<string>();
+						foreach (string s in parts)
+						{
+							if (s.Length > 1)
+							{
+								if (double.TryParse(s, out _))
+								{
+									csvLineElements.Add(s);
+								}
+							}
+						}
+						if (csvLineElements.Count == 6)
+						{
+							res[currch] = "";
+							foreach (string s in csvLineElements)
+							{
+								res[currch] += s;
+								res[currch] += ",";
+							}
+							axisflags |= 1 << currch;
+						}
+					}
+				}
+			}
+
+			if (axisflags == 0x3F)
+				return res;
+			return null;
+
+		}
+
+		private void saveConfigBtn_Click(object sender, RoutedEventArgs e)
+		{
+			System.Windows.Forms.SaveFileDialog sfd = new System.Windows.Forms.SaveFileDialog();
+			sfd.Filter = "xml文件 (*.xml)|*.xml";
+			sfd.InitialDirectory = Environment.CurrentDirectory + "\\config";
+			sfd.AddExtension = true;
+			if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+			{
+				saveConfig();
+				FileInfo fi = new FileInfo(Environment.CurrentDirectory + "\\config\\" + config.ConfigName);
+				fi.CopyTo(sfd.FileName);
+			}
+		}
+
 		private void tableName1_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-
+			
 		}
 	}
 }
