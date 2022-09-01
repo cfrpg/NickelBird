@@ -13,6 +13,7 @@ namespace SharpBladeDAS
 	public class CommLink : INotifyPropertyChanged
 	{
 		protected ConcurrentQueue<LinkPackage> receivedPackageQueue;
+		protected BlockingCollection<LinkPackage> receivedPackageCollection;
 		protected LinkPackage receivePackage;
 		protected Queue<LinkPackage> sendPackageQueue;
 		protected int txRate;
@@ -100,6 +101,8 @@ namespace SharpBladeDAS
 			get { return connectTime; }
 		}
 
+		public BlockingCollection<LinkPackage> ReceivedPackageCollection { get => receivedPackageCollection; set => receivedPackageCollection = value; }
+
 		public CommLink(LinkProtocol p)
 		{
 			protocol = p;
@@ -110,6 +113,7 @@ namespace SharpBladeDAS
 			state = LinkState.Disconnected;
 			isSending = false;
 			receivedPackageQueue = new ConcurrentQueue<LinkPackage>();
+			receivedPackageCollection = new BlockingCollection<LinkPackage>(receivedPackageQueue);
 			sendPackageQueue = new Queue<LinkPackage>();
 			switch (p)
 			{

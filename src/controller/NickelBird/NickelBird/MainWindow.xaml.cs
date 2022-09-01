@@ -235,7 +235,8 @@ namespace NickelBird
 		{
 			while (true)
 			{
-				while (linkAvilable && link.ReceivedPackageQueue.TryDequeue(out LinkPackage package))
+				//while (linkAvilable && link.ReceivedPackageQueue.TryDequeue(out LinkPackage package))
+				while (linkAvilable && link.ReceivedPackageCollection.TryTake(out LinkPackage package, 2)) 
 				{
 					analyzePackage((SBLinkPackage)package);
 					//Debug.WriteLine("[Link] Recevie package size= {0} function={1} remain={2}", package.DataSize,package.Function,link.ReceivedPackageQueue.Count);

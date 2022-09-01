@@ -266,7 +266,7 @@ void control_update_main(void)
 			if(controlp.state==Controller_Main_Freq)
 			{
 				controlp.freqtgt+=dfreq/10;
-				if(controlp.freqtgt>0.05)
+				if(controlp.freqtgt>0.05f)
 				{
 					controlp.freqtgt=Clampf(controlp.freqtgt,1,5);
 				}
@@ -516,7 +516,7 @@ void controlpage_fastUpdate(u16 time)
 	theta=(controlp.lpf.val-mid)/range;
 //	deadband=(controlp.maxphi-controlp.minphi)/2;
 	flag=0;
-	if(controlp.lpf.val>controlp.maxphi*0.95||controlp.lpf.val<controlp.minphi*0.95)
+	if(controlp.lpf.val>controlp.maxphi*0.95f||controlp.lpf.val<controlp.minphi*0.95f)
 	{
 		flag=1;
 	}

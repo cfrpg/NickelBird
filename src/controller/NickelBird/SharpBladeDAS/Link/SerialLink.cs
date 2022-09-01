@@ -177,7 +177,8 @@ namespace SharpBladeDAS
 						//lock (ReceivedPackageQueue)
 						{
 							//enqueueHandler.BeginInvoke(receivePackage.Clone(), null, null);
-							receivedPackageQueue.Enqueue(receivePackage.Clone());
+							//receivedPackageQueue.Enqueue(receivePackage.Clone());
+							receivedPackageCollection.Add(receivePackage.Clone());
 							
 						}
 						received = true;
@@ -234,7 +235,8 @@ namespace SharpBladeDAS
 			isParsingBuffer = false;
 			isUpdatingBuffer = false;
 			LinkPackage p;
-			while (receivedPackageQueue.TryDequeue(out p)) ;
+			//while (receivedPackageQueue.TryDequeue(out p)) ;
+			while (receivedPackageCollection.TryTake(out _)) ;
 		}
 
 		public override bool SendPackage(LinkPackage package, bool wait)

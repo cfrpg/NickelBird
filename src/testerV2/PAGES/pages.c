@@ -4,6 +4,7 @@
 #include "parameter.h"
 #include "led.h"
 #include "delay.h"
+#include "ad7606fsmc.h"
 
 s8 nextPage;
 
@@ -23,6 +24,9 @@ void PagesInit(void)
 	sys.fastUpdate=0;
 	sys.intUpdate=0;
 	sys.intReset=0;
+	sys.ledInterval=500;
+	sys.adcClkSource=INTERNAL;
+	sys.adcBusy=0;
 	
 	PageInit_main(1);
 	PageInit_falcon(1);
@@ -129,6 +133,21 @@ void PagesUpdate(void)
 				PageInit_main(0);
 				PageUpdate_main();
 			break;
+		}
+	}
+	if(keyPress&KEY_D)
+	{
+		if(sys.adcClkSource==INTERNAL)
+		{
+			sys.adcClkSource=EXTERNAL;
+			sys.ledInterval=100;
+			AD7606FSMCSetExternalClk();
+		}
+		else
+		{
+			sys.adcClkSource=INTERNAL;
+			sys.ledInterval=500;
+			AD7606FSMCSetInternalClk();
 		}
 	}
 	lastKey=currKey;

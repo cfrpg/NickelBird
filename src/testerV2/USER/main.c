@@ -12,8 +12,6 @@
 #include "sblink.h"
 #include "adc.h"
 #include "ad7606fsmc.h"
-#include "i2c.h"
-#include "spi.h"
 #include "extin.h"
 #include "sensors.h"
 #include "mb85rs.h"
@@ -81,7 +79,6 @@ int main(void)
 	LinkInit();	
 	ADCInit();
 	AD7606FSMCInit();
-	I2CInit();
 	ExtinInit();
 
 	KeyInit();
@@ -96,7 +93,7 @@ int main(void)
 	delay_ms(500);
 	while(1)
 	{	
-		if(tick[0]>=500)
+		if(tick[0]>=sys.ledInterval)
 		{			
 			tick[0]=0;
 			LEDFlip();
@@ -104,7 +101,7 @@ int main(void)
 			{				
 				AnalyzePkg();
 				USART_RX_STA=0;
-			}
+			}			
 		}
 		if(tick[1]>=2)
 		{
@@ -203,10 +200,12 @@ void EXTI15_10_IRQHandler(void)
 		//TEST0=1;
 		AD7606FSMCRead(sys.sensors.ADCData);
 		ADCReadVol(sys.sensors.ADCData+8);
+		
 		SensorsIntUpdate(); 
 		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
 
 		EXTI_ClearITPendingBit(EXTI_Line13);
+		sys.adcBusy=0;
 		if(sys.intReset!=0)
 		{
 			(*sys.intReset)();
@@ -227,8 +226,12 @@ void TIM3_IRQHandler(void)
 	{
 		//TEST1=1;
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-		ADCStartConv();
-		sys.sensors.header.time++;
+		if(sys.adcClkSource==INTERNAL&&(!sys.adcBusy))
+		{
+			sys.adcBusy=1;
+			ADCStartConv();
+			sys.sensors.header.time++;
+		}		
 		//TEST0=0;
 	}
 }

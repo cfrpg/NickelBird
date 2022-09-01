@@ -11,12 +11,14 @@ void AD7606FSMCInit(void)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF,ENABLE);	
 	//common GPIO	
 	//CV
-	GPIO_PinAFConfig(GPIOC,GPIO_PinSource6,GPIO_AF_TIM3);
+	
 	gi.GPIO_Pin=GPIO_Pin_6;
 	gi.GPIO_Mode=GPIO_Mode_AF;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	gi.GPIO_PuPd=GPIO_PuPd_NOPULL;
+	
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource6,GPIO_AF_TIM3);
 	GPIO_Init(GPIOC,&gi);
 	//CS
 //	gi.GPIO_Mode=GPIO_Mode_OUT;
@@ -24,6 +26,7 @@ void AD7606FSMCInit(void)
 //	GPIO_Init(GPIOD,&gi);
 	//RST
 	gi.GPIO_Pin=GPIO_Pin_12;
+	gi.GPIO_Mode=GPIO_Mode_OUT;	
 	GPIO_Init(GPIOD,&gi);
 	//BUSY
 	gi.GPIO_Pin=GPIO_Pin_13;
@@ -155,6 +158,28 @@ void AD7606FSMCInit(void)
 	ni.NVIC_IRQChannelPreemptionPriority=0;
 	ni.NVIC_IRQChannelSubPriority=0;
 	NVIC_Init(&ni);
+}
+void AD7606FSMCSetInternalClk(void)
+{
+	//set gpio to af
+	GPIO_PinAFConfig(ADIF_CV_GPIO,ADIF_CV_Pin,GPIO_AF_TIM3);
+	ADIF_CV_GPIO->MODER  &= ~(GPIO_MODER_MODER0 << (ADIF_CV_Pin * 2));
+    ADIF_CV_GPIO->MODER |= (((uint32_t)0x02) << (ADIF_CV_Pin * 2));
+	//start tim3
+	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	TIM_Cmd(TIM3, ENABLE);
+}
+
+void AD7606FSMCSetExternalClk(void)
+{
+	//stop tim3	
+	TIM_Cmd(TIM3, DISABLE);
+	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	//set gpio to out
+	GPIO_PinAFConfig(ADIF_CV_GPIO,ADIF_CV_Pin,(u8)0x00);
+	ADIF_CV_GPIO->MODER  &= ~(GPIO_MODER_MODER0 << (ADIF_CV_Pin * 2));
+    ADIF_CV_GPIO->MODER |= (((uint32_t)0x01) << (ADIF_CV_Pin * 2));
+	ADIF_CV=1;
 }
 
 void AD7606FSMCReset(void)

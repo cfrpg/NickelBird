@@ -1,9 +1,12 @@
 #include "timer.h"
 #include "pages.h"
+#include "adc.h"
+#include "ad7606fsmc.h"
 
 u32 lastCCR;
 u32 EOsum;
 u32 EOcnt;
+u32 adcsum;
 
 void MainClockInit(void)
 {				
@@ -48,7 +51,7 @@ void PreciseClockInit(void)
 	TIM_TimeBaseInit(TIM2, &ti);
 	
 	tc.TIM_Channel=TIM_Channel_2;
-	tc.TIM_ICPolarity=TIM_ICPolarity_Falling;
+	tc.TIM_ICPolarity=TIM_ICPolarity_Rising;
 	tc.TIM_ICSelection=TIM_ICSelection_DirectTI;
 	tc.TIM_ICPrescaler=TIM_ICPSC_DIV1;
 	tc.TIM_ICFilter=0x0F;
@@ -69,7 +72,7 @@ void PreciseClockInit(void)
 
 void TIM2_IRQHandler(void)
 {
-	u32 ccr,val;
+	u32 ccr;
 	if(TIM_GetITStatus(TIM2,TIM_IT_CC2)!=RESET)
 	{
 		//printf("TIM2CC\r\n");
@@ -77,14 +80,32 @@ void TIM2_IRQHandler(void)
 		ccr=TIM_GetCapture2(TIM2);	
 		if(ccr>=lastCCR)
 		{
-			val=ccr-lastCCR;
+			sys.EOinterval=ccr-lastCCR;
 		}
 		else
 		{
-			val=(0xFFFFFFFF-ccr)+lastCCR;
-		}		
+			sys.EOinterval=(0xFFFFFFFF-ccr)+lastCCR;
+		}
 		lastCCR=ccr;
-		EOsum+=val;
+		adcsum+=sys.EOinterval;
+		
+		if(sys.adcClkSource==EXTERNAL)
+		{
+			if(sys.adcBusy==0)
+			{
+				if(adcsum<100)
+				{
+					adcsum=adcsum;
+				}
+				sys.adcBusy=1;
+				AD7606FSMCStart();
+				ADCStartConv();
+				sys.sensors.header.time++;
+				adcsum=0;
+			}
+		}
+		
+		EOsum+=sys.EOinterval;
 		EOcnt++;
 		if(EOcnt>=40)
 		{
@@ -93,7 +114,5 @@ void TIM2_IRQHandler(void)
 			EOcnt=0;			
 		}
 		//TIM_ClearITPendingBit(TIM2,TIM_IT_CC3);
-	}
-	
-	
+	}	
 }

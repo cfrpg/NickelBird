@@ -12,6 +12,9 @@
 
 #define PageNum 3
 
+#define INTERNAL 0
+#define EXTERNAL 1
+
 
 
 typedef struct
@@ -34,6 +37,10 @@ typedef struct
 	u8 intFlag[2];
 	u32 intTime[2];
 	u32 EOtime;
+	u32 EOinterval;
+	u16 ledInterval;
+	u8 adcClkSource;
+	u8 adcBusy;
 
 } systemState;
 
