@@ -23,6 +23,8 @@
 #include "sdp3x.h"
 #include "extin.h"
 #include "sensors.h"
+#include "dac.h"
+#include "math.h"
 
 #define TEST0 PGout(9)
 #define TEST1 PGout(11)
@@ -45,6 +47,7 @@ u8 package[256];
 
 s16 adraw[8];
 
+u32 dacclk;
 
 int main(void)
 {
@@ -65,6 +68,9 @@ int main(void)
 	MS4525DOInit();
 	I2CInit();
 	ExtinInit();
+	
+	DACInit();
+	dacclk=0;
 	
 	while(tick[0]<200);
 	LEDSet(1);
@@ -144,6 +150,9 @@ void TIM7_IRQHandler(void)
 		RTCcnt++;
 		if(RTCcnt>999)
 			RTCcnt=999;
+		dacclk++;
+		DACSet(1,(sinf(2*3.14159f*4*dacclk/1000)+1)/2);
+		DACSet(2,(sinf(2*3.14159f*3*dacclk/1000)+1)/2);
 //		AD7606FSMCRead(sys.sensors.ADCData);
 //		AD7606FSMCStart();
 //		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
