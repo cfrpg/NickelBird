@@ -152,7 +152,7 @@ void TIM7_IRQHandler(void)
 			RTCcnt=999;
 		dacclk++;
 		DACSet(1,(sinf(2*3.14159f*4*dacclk/1000)+1)/2);
-		DACSet(2,(sinf(2*3.14159f*3*dacclk/1000)+1)/2);
+		DACSet(2,(sinf(2*3.14159f*3.02f*dacclk/1000)+0.4f*sinf(2*3.14159f*53*dacclk/1000)+1.4f)/2.8f);
 //		AD7606FSMCRead(sys.sensors.ADCData);
 //		AD7606FSMCStart();
 //		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
