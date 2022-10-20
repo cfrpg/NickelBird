@@ -2,9 +2,9 @@
 #define __OLED_H
 #include "sys.h"
 
-#define OLED_CS PBout(12)
-#define OLED_DC PBout(14)
-#define OLED_RST PDout(8)
+#define OLED_CS PAout(4)
+#define OLED_DC PAout(6)
+#define OLED_RST PCout(4)
 #define OLED_CMD 0
 #define OLED_DATA 1
 
@@ -27,4 +27,5 @@ void OledDispString(u8 x,u8 y,s8 c[],u8 f);
 void OledDispInt(u8 x,u8 y,s32 v,u8 ml,u8 f);
 void OledDispFloat(u8 x,u8 y,float v,s8 len,s8 pre,u8 f);
 void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f);
+void OledDispBitmap(u8 x,u8 y,u8 w,u8 h,const u8* data);
 #endif

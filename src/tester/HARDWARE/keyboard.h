@@ -4,10 +4,11 @@
 #include "sys.h"
 #include "delay.h"
 
-#define GPQ PDin(9)
-#define GPCLK PDout(10)
-#define GPSHIFT PDout(11)
-#define WHEEL PDin(12)
+#define GPQ PEin(4)
+#define GPCLK PEout(3)
+#define GPSHIFT PEout(2)
+#define WHEEL PAin(12)
+#define WHEELPUSH PCin(7) 
 
 #define KEY_A 0x01
 #define KEY_B 0x02
@@ -21,5 +22,7 @@
 void KeyInit(void);
 u8 GPGetData(void);
 s32 WheelGetValue(void);
+void WheelUpdate(void);
+u8 KeyGetState(void);
 
 #endif

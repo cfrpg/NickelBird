@@ -11,42 +11,43 @@ void OledInit(void)
 {
 	GPIO_InitTypeDef gi;
 	SPI_InitTypeDef si;
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB|RCC_AHB1Periph_GPIOD,ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2,ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1,ENABLE);
 	//Init SPI GPIO
-	gi.GPIO_Pin=GPIO_Pin_13|GPIO_Pin_15;
+	gi.GPIO_Pin=GPIO_Pin_5|GPIO_Pin_7;
 	gi.GPIO_Mode=GPIO_Mode_AF;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;
-	GPIO_Init(GPIOB,&gi);
+	GPIO_Init(GPIOA,&gi);
 	//Init common GPIO
-	gi.GPIO_Pin=GPIO_Pin_12|GPIO_Pin_14;
+	gi.GPIO_Pin=GPIO_Pin_4|GPIO_Pin_6;
 	gi.GPIO_Mode=GPIO_Mode_OUT;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
-	GPIO_Init(GPIOB,&gi);
-	gi.GPIO_Pin=GPIO_Pin_8;
-	GPIO_Init(GPIOD,&gi);
+	GPIO_Init(GPIOA,&gi);
+	gi.GPIO_Pin=GPIO_Pin_4;
+	GPIO_Init(GPIOC,&gi);
 	
-	GPIO_PinAFConfig(GPIOB,GPIO_PinSource13,GPIO_AF_SPI2);
-	GPIO_PinAFConfig(GPIOB,GPIO_PinSource15,GPIO_AF_SPI2);
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource5,GPIO_AF_SPI1);
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource7,GPIO_AF_SPI1);
 	
-	RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2,ENABLE);
-	RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2,DISABLE);
-	//Init SPI2
+	RCC_APB2PeriphResetCmd(RCC_APB2Periph_SPI1,ENABLE);
+	RCC_APB2PeriphResetCmd(RCC_APB2Periph_SPI1,DISABLE);
+	//Init SPI1
 	si.SPI_Direction=SPI_Direction_1Line_Tx;
 	si.SPI_Mode=SPI_Mode_Master;
 	si.SPI_DataSize=SPI_DataSize_8b;
 	si.SPI_CPOL=SPI_CPOL_Low;
 	si.SPI_CPHA=SPI_CPHA_1Edge;
 	si.SPI_NSS=SPI_NSS_Soft;
-	si.SPI_BaudRatePrescaler=SPI_BaudRatePrescaler_2;
+	si.SPI_BaudRatePrescaler=SPI_BaudRatePrescaler_4;
 	si.SPI_FirstBit=SPI_FirstBit_MSB;
 	si.SPI_CRCPolynomial=7;
-	SPI_Init(SPI2,&si);
-	SPI_Cmd(SPI2,ENABLE);
+	SPI_Init(SPI1,&si);
+	SPI_Cmd(SPI1,ENABLE);
 	memset(oledBuff,0,sizeof(oledBuff));	
 	memset(oledRevFlag,0,sizeof(oledRevFlag));
 	OledStartUp();
@@ -56,10 +57,11 @@ void OledSendByte(u8 b)
 {
 	OLED_CS=0;
 	//while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
-	SPI_I2S_SendData(SPI2,b);	
-	while(SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_TXE)==RESET);
-	//delay_us(2);
+	SPI_I2S_SendData(SPI1,b);	
+	while(SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_TXE)==RESET);
+	//delay_us(1);
 	//OLED_CS=1;
+	
 }
 
 void OledStartUp(void)
@@ -73,7 +75,7 @@ void OledStartUp(void)
 	OLED_DC=OLED_CMD;
 	OledSendByte(0xae);//Set display off
 	OledSendByte(0xa0);//Set re-map
-	OledSendByte(0x55);
+	OledSendByte(0x46);
 	OledSendByte(0xa1);//Set display start line
 	OledSendByte(0x00);
 	OledSendByte(0xa2);//Set display offset
@@ -104,6 +106,7 @@ void OledStartUp(void)
 	OledSendByte(0xaf);//Display on	
 	OledSendByte(0xb5);
 	OledSendByte(0x03);
+	OledDispOn();
 }
 
 void OledDispOn(void)
@@ -150,6 +153,7 @@ void OledClearBuff(void)
 void OledClear(u8 c)
 {
 	u8 i,j;
+	PEout(1)=1;
 	c=c|(c<<4);
 	oledSelectRect(0,127,0,63);
 	//delay_us(100);
@@ -163,6 +167,7 @@ void OledClear(u8 c)
 		}
 	}
 	//delay_us(100);
+		PEout(1)=0;
 }
 
 void OledRefresh(void)
@@ -287,14 +292,25 @@ void OledDispInt(u8 x,u8 y,s32 v,u8 ml,u8 f)
 	do{
 		t/=10;
 		len++;
-	}while(t>0);		
-	buf[len]=0;
+	}while(t>0);
+	if(len>ml)
+	{
+		len=ml-1;
+		while(len>=p)
+		{
+			buf[len]='9';
+			len--;
+		}
+		OledDispString(x,y,buf,f);	
+		return;
+	}
 	while(ml>len)
 	{
 		buf[ml-1]=' ';
 		ml--;
 	}
-	len--;
+	ml--;
+	len=ml;
 	while(len>=p)
 	{
 		buf[len]=v%10+'0';
@@ -318,28 +334,44 @@ void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 	{
 		v=-v;
 		p=1;
-		buf[0]='-';		
+		buf[0]='-';
+		len++;
 	}
 	t=v;	
 	do{
 		t/=10;
 		len++;
-	}while(t>0);	
-	if(len<=pre)
-		len=pre+1;
-	if(p)
-		len++;
-	pre=len-pre;
-	buf[len+1]=0;	
-	while(ml>len+1)
+	}while(t>0);
+	len++;
+	if(len>ml)
+	{
+		len=ml-1;
+		while(len>=p)
+		{
+			buf[len]='9';
+			len--;
+		}
+		buf[ml-pre-1]='.';
+		OledDispString(x,y,buf,f);	
+		return;
+	}
+	while(ml>len)
 	{
 		buf[ml-1]=' ';
 		ml--;
-	}		
+	}
+	if(ml<pre+2+p)
+		ml=pre+2+p;
+	ml--;
+	
+	len=ml;
+	
 	while(len>=p)
 	{
-		if(len==pre)
+		if(len+pre==ml)
+		{
 			buf[len]='.';
+		}
 		else
 		{
 			buf[len]=v%10+'0';
@@ -348,4 +380,35 @@ void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 		len--;
 	}
 	OledDispString(x,y,buf,f);	
+}
+
+//vertical scan
+void OledDispBitmap(u8 x,u8 y,u8 w,u8 h,const u8* data)
+{
+	u8 i,j,c;
+	s8 k;
+	u16 size,t;
+	u8 bh=h/8;
+	oledSelectRect(y,y+h-1,x>>1,(x+w-1)<<1);
+	size=w;
+	size*=h;
+	OLED_DC=OLED_DATA;
+	for(i=0;i<w;i+=2)
+	{
+		for(j=0;j<bh;j++)
+		{
+			t=i;
+			t=t*bh+j;			
+			for(k=7;k>=0;k--)
+			{
+				c=0;
+				if(data[t]&(1<<k))
+					c=0xF0;
+				if(data[t+bh]&(1<<k))
+					c|=0x0F;
+				OledSendByte(c);
+			}
+		}
+		
+	}
 }

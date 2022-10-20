@@ -4,34 +4,37 @@
 void AD7606FSMCInit(void)
 {
 	GPIO_InitTypeDef gi;
-	
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
+		
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF,ENABLE);	
 	//common GPIO	
 	//CV
-	GPIO_PinAFConfig(GPIOB,GPIO_PinSource0,GPIO_AF_TIM3);
-	gi.GPIO_Pin=GPIO_Pin_0;
+	
+	gi.GPIO_Pin=GPIO_Pin_6;
 	gi.GPIO_Mode=GPIO_Mode_AF;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	gi.GPIO_PuPd=GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOB,&gi);
-	//CS
-	gi.GPIO_Mode=GPIO_Mode_OUT;
-	gi.GPIO_Pin=GPIO_Pin_13;
+	
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource6,GPIO_AF_TIM3);
 	GPIO_Init(GPIOC,&gi);
+	//CS
+//	gi.GPIO_Mode=GPIO_Mode_OUT;
+//	gi.GPIO_Pin=GPIO_Pin_7;
+//	GPIO_Init(GPIOD,&gi);
 	//RST
-	gi.GPIO_Pin=GPIO_Pin_11;
-	GPIO_Init(GPIOF,&gi);
+	gi.GPIO_Pin=GPIO_Pin_12;
+	gi.GPIO_Mode=GPIO_Mode_OUT;	
+	GPIO_Init(GPIOD,&gi);
 	//BUSY
-	gi.GPIO_Pin=GPIO_Pin_2;
+	gi.GPIO_Pin=GPIO_Pin_13;
 	gi.GPIO_Mode=GPIO_Mode_IN;
-	GPIO_Init(GPIOB,&gi);
+	GPIO_Init(GPIOD,&gi);
 	
 	ADIF_CS=1;
+
 	
 	//FSMC GPIO
 	RCC_AHB3PeriphClockCmd(RCC_AHB3Periph_FSMC, ENABLE);
@@ -39,13 +42,14 @@ void AD7606FSMCInit(void)
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource1, GPIO_AF_FSMC);//D3
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource4, GPIO_AF_FSMC);//NOE
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource5, GPIO_AF_FSMC);//NWE
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource7, GPIO_AF_FSMC);//CS
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource8, GPIO_AF_FSMC);//D13
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource9, GPIO_AF_FSMC);//D14
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource10, GPIO_AF_FSMC);//D15
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource14, GPIO_AF_FSMC);//D0
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource15, GPIO_AF_FSMC);//D1
 
-	gi.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | GPIO_Pin_5 |
+	gi.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | GPIO_Pin_5 |GPIO_Pin_7 |
 	                            GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_14 |
 	                            GPIO_Pin_15;
 	gi.GPIO_Mode = GPIO_Mode_AF;
@@ -54,9 +58,6 @@ void AD7606FSMCInit(void)
 	gi.GPIO_PuPd  = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOD, &gi);
 	
-	GPIO_PinAFConfig(GPIOE, GPIO_PinSource4 , GPIO_AF_FSMC);//A20
-	GPIO_PinAFConfig(GPIOE, GPIO_PinSource5 , GPIO_AF_FSMC);//A21
-
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource7 , GPIO_AF_FSMC);//D4
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource8 , GPIO_AF_FSMC);//D5
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource9 , GPIO_AF_FSMC);//D6
@@ -67,11 +68,11 @@ void AD7606FSMCInit(void)
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource14 , GPIO_AF_FSMC);//D11
 	GPIO_PinAFConfig(GPIOE, GPIO_PinSource15 , GPIO_AF_FSMC);//D12
 
-	gi.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 |
+	gi.GPIO_Pin =  GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 |
 	                            GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 |
 	                            GPIO_Pin_15;
 	GPIO_Init(GPIOE, &gi);
-	
+
 	//FSMC Config
 	FSMC_NORSRAMInitTypeDef  fi;
 	FSMC_NORSRAMTimingInitTypeDef  timing;
@@ -84,7 +85,7 @@ void AD7606FSMCInit(void)
 	timing.FSMC_DataLatency = 0;
 	timing.FSMC_AccessMode = FSMC_AccessMode_A;
 	
-	fi.FSMC_Bank = FSMC_Bank1_NORSRAM4;
+	fi.FSMC_Bank = FSMC_Bank1_NORSRAM1;
 	fi.FSMC_DataAddressMux = FSMC_DataAddressMux_Disable;
 	fi.FSMC_MemoryType = FSMC_MemoryType_SRAM;
 	fi.FSMC_MemoryDataWidth = FSMC_MemoryDataWidth_16b;
@@ -103,11 +104,13 @@ void AD7606FSMCInit(void)
 
 	FSMC_NORSRAMInit(&fi);
 	
-	FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM4, ENABLE);
+	FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
+	
+
 	
 	AD7606FSMCReset();
-	
-	//TIM3_CH3
+
+	//TIM3_CH1
 	TIM_TimeBaseInitTypeDef ti;
 	TIM_OCInitTypeDef to;
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);	
@@ -123,8 +126,8 @@ void AD7606FSMCInit(void)
 	to.TIM_Pulse=1;
 	to.TIM_OCPolarity=TIM_OCPolarity_Low;
 	
-	TIM_OC3Init(TIM3,&to);
-	TIM_OC3PreloadConfig(TIM3,TIM_OCPreload_Enable);
+	TIM_OC1Init(TIM3,&to);
+	TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Enable);
 	TIM_ARRPreloadConfig(TIM3,ENABLE);
 	
 	
@@ -137,23 +140,46 @@ void AD7606FSMCInit(void)
 	NVIC_Init(&ni);		
 	TIM_ITConfig(TIM3,TIM_IT_Update,ENABLE ); 
 	TIM_Cmd(TIM3, ENABLE);
-	//PB2 EXTI
+	
+	//PD13 EXTI
 	EXTI_InitTypeDef ei;
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB,EXTI_PinSource2);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD,EXTI_PinSource13);
 	
-	ei.EXTI_Line=EXTI_Line2;
+	ei.EXTI_Line=EXTI_Line13;
 	ei.EXTI_Mode=EXTI_Mode_Interrupt;
 	ei.EXTI_Trigger=EXTI_Trigger_Falling;
 	ei.EXTI_LineCmd=ENABLE;
 	EXTI_Init(&ei);
 	
-	ni.NVIC_IRQChannel=EXTI2_IRQn;
+	ni.NVIC_IRQChannel=EXTI15_10_IRQn;
 	ni.NVIC_IRQChannelCmd=ENABLE;
 	ni.NVIC_IRQChannelPreemptionPriority=0;
 	ni.NVIC_IRQChannelSubPriority=0;
 	NVIC_Init(&ni);
+}
+void AD7606FSMCSetInternalClk(void)
+{
+	//set gpio to af
+	GPIO_PinAFConfig(ADIF_CV_GPIO,ADIF_CV_Pin,GPIO_AF_TIM3);
+	ADIF_CV_GPIO->MODER  &= ~(GPIO_MODER_MODER0 << (ADIF_CV_Pin * 2));
+    ADIF_CV_GPIO->MODER |= (((uint32_t)0x02) << (ADIF_CV_Pin * 2));
+	//start tim3
+	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	TIM_Cmd(TIM3, ENABLE);
+}
+
+void AD7606FSMCSetExternalClk(void)
+{
+	//stop tim3	
+	TIM_Cmd(TIM3, DISABLE);
+	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+	//set gpio to out
+	GPIO_PinAFConfig(ADIF_CV_GPIO,ADIF_CV_Pin,(u8)0x00);
+	ADIF_CV_GPIO->MODER  &= ~(GPIO_MODER_MODER0 << (ADIF_CV_Pin * 2));
+    ADIF_CV_GPIO->MODER |= (((uint32_t)0x01) << (ADIF_CV_Pin * 2));
+	ADIF_CV=1;
 }
 
 void AD7606FSMCReset(void)
@@ -176,7 +202,7 @@ void AD7606FSMCStart(void)
 
 void AD7606FSMCRead(s16* data)
 {
-	ADIF_CS=0;
+//	ADIF_CS=0;
 	data[0]=AD7606_RESULT();
 	data[1]=AD7606_RESULT();
 	data[2]=AD7606_RESULT();
@@ -185,7 +211,7 @@ void AD7606FSMCRead(s16* data)
 	data[5]=AD7606_RESULT();
 	data[6]=AD7606_RESULT();
 	data[7]=AD7606_RESULT();
-	ADIF_CS=1;
+//	ADIF_CS=1;
 }
 
 

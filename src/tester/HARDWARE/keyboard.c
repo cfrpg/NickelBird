@@ -1,49 +1,55 @@
 #include "keyboard.h"
 
-s32 value;
+s32 wheel_value;
 
 void KeyInit(void)
 {
 	GPIO_InitTypeDef gi;
 	EXTI_InitTypeDef ei;
-	NVIC_InitTypeDef ni;
+//	NVIC_InitTypeDef ni;
 	
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD,ENABLE);
-	gi.GPIO_Pin=GPIO_Pin_10|GPIO_Pin_11;
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
+	gi.GPIO_Pin=GPIO_Pin_2|GPIO_Pin_3;
 	gi.GPIO_Mode=GPIO_Mode_OUT;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_PuPd=GPIO_PuPd_NOPULL;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
-	GPIO_Init(GPIOD,&gi);
+	GPIO_Init(GPIOE,&gi);
 	
-	gi.GPIO_Pin=GPIO_Pin_9|GPIO_Pin_12;
+	gi.GPIO_Pin=GPIO_Pin_11|GPIO_Pin_12;
 	gi.GPIO_Mode=GPIO_Mode_IN;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;	
-	GPIO_Init(GPIOD,&gi);
+	GPIO_Init(GPIOA,&gi);
 	
-	gi.GPIO_Pin=GPIO_Pin_13;
+	gi.GPIO_Pin=GPIO_Pin_4;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;	
-	GPIO_Init(GPIOD,&gi);
+	GPIO_Init(GPIOE,&gi);
+	
+	gi.GPIO_Pin=GPIO_Pin_7;
+	gi.GPIO_PuPd=GPIO_PuPd_UP;	
+	GPIO_Init(GPIOC,&gi);
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
 	
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD,EXTI_PinSource13);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA,EXTI_PinSource11);
 	
-	ei.EXTI_Line=EXTI_Line13;
+	ei.EXTI_Line=EXTI_Line11;
 	ei.EXTI_Mode=EXTI_Mode_Interrupt;
 	ei.EXTI_Trigger=EXTI_Trigger_Falling;
 	ei.EXTI_LineCmd=ENABLE;
 	EXTI_Init(&ei);
 	
-	ni.NVIC_IRQChannel=EXTI15_10_IRQn;
-	ni.NVIC_IRQChannelCmd=ENABLE;
-	ni.NVIC_IRQChannelPreemptionPriority=2;
-	ni.NVIC_IRQChannelSubPriority=3;
-	NVIC_Init(&ni);
+//	ni.NVIC_IRQChannel=EXTI15_10_IRQn;
+//	ni.NVIC_IRQChannelCmd=ENABLE;
+//	ni.NVIC_IRQChannelPreemptionPriority=2;
+//	ni.NVIC_IRQChannelSubPriority=3;
+//	NVIC_Init(&ni);
 	
 	GPSHIFT=0;
-	value=0;
+	wheel_value=0;
 }
 
 u8 GPGetData()
@@ -74,20 +80,25 @@ u8 GPGetData()
 	return res;
 }
 
-void EXTI15_10_IRQHandler(void)
+void WheelUpdate(void)
 {
 	if(WHEEL)
 	{
-		value++;
+		wheel_value--;
 	}
 	else
 	{
-		value--;
+		wheel_value++;
 	}
-	EXTI_ClearITPendingBit(EXTI_Line13);
 }
+
 
 s32 WheelGetValue(void)
 {
-	return value;
+	return wheel_value;
+}
+
+u8 KeyGetState(void)
+{
+	return WHEELPUSH^0x01;
 }

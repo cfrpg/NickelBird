@@ -53,7 +53,7 @@ void SPI3Init(void)
 	si.SPI_CPOL=SPI_CPOL_High;
 	si.SPI_CPHA=SPI_CPHA_2Edge;
 	si.SPI_NSS=SPI_NSS_Soft;
-	si.SPI_BaudRatePrescaler=SPI_BaudRatePrescaler_8;
+	si.SPI_BaudRatePrescaler=SPI_BaudRatePrescaler_4;
 	si.SPI_FirstBit=SPI_FirstBit_MSB;
 	si.SPI_CRCPolynomial=7;
 	SPI_Init(SPI3,&si);

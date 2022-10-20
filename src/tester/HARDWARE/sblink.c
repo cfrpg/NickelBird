@@ -32,7 +32,7 @@ void LinkInit(void)
 	gi.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(GPIOA,&gi);
 
-	ui.USART_BaudRate = 921600;
+	ui.USART_BaudRate = 2000000;//921600;
 	ui.USART_WordLength = USART_WordLength_8b;
 	ui.USART_StopBits = USART_StopBits_1;
 	ui.USART_Parity = USART_Parity_No;
@@ -67,7 +67,7 @@ void LinkInit(void)
 	di.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
 	di.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
 	di.DMA_Mode = DMA_Mode_Normal;
-	di.DMA_Priority = DMA_Priority_Medium;
+	di.DMA_Priority = DMA_Priority_VeryHigh;
 	di.DMA_FIFOMode = DMA_FIFOMode_Disable;         
 	di.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
 	di.DMA_MemoryBurst = DMA_MemoryBurst_Single;
@@ -108,12 +108,15 @@ void LinkSendData(void* buff,u8 len)
 	{
 		printf("dma %d\r\n",DMA_GetCurrDataCounter(DMA2_Stream7));
 	}
-	while(DMA_GetCurrDataCounter(DMA2_Stream7));		
-	DMA_Cmd(DMA2_Stream7,DISABLE);	
-	while (DMA_GetCmdStatus(DMA2_Stream7) != DISABLE);	
-	DMA_SetCurrDataCounter(DMA2_Stream7,len+1);
-	DMA_Cmd(DMA2_Stream7,ENABLE);
-	//PGout(13)=1;
+	else
+	{
+		while(DMA_GetCurrDataCounter(DMA2_Stream7));		
+		DMA_Cmd(DMA2_Stream7,DISABLE);	
+		while (DMA_GetCmdStatus(DMA2_Stream7) != DISABLE);	
+		DMA_SetCurrDataCounter(DMA2_Stream7,len+1);
+		DMA_Cmd(DMA2_Stream7,ENABLE);
+		//PGout(13)=1;
+	}
 }
 
 u32 LinkPackTime()
@@ -130,16 +133,17 @@ void DMA2_Stream7_IRQHandler(void)
 		{
 			DMA_ClearFlag(DMA2_Stream7,DMA_FLAG_DMEIF7);
 		}
+		
 		DMA_ClearFlag(DMA2_Stream7,DMA_IT_TCIF7);
 	}		
-	//PGout(13)=0;
+	//PGout(13)=0;	
 }
 
 void USART1_IRQHandler(void)
 {
 	
 	u8 b;
-	u8 curr=currBuff^1;
+	
 	printf("rx %x\r\n",b);
 	if (USART_GetFlagStatus(USART1, USART_FLAG_ORE) != RESET)
 	{

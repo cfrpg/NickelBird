@@ -4,5 +4,6 @@
 
 void ADCInit(void);
 void ADCReadVol(short res[]);
+void ADCStartConv(void);
 
 #endif

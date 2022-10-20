@@ -329,8 +329,8 @@
             <uC99>1</uC99>
             <uGnu>1</uGnu>
             <useXO>0</useXO>
-            <v6Lang>1</v6Lang>
-            <v6LangP>1</v6LangP>
+            <v6Lang>3</v6Lang>
+            <v6LangP>5</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER,USE_USB_OTG_HS,USE_EMBEDDED_PHY</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\USER;..\STM32F4\inc;..\HARDWARE;..\SYSTEM;..\PAGES;..\SYSTEM\USB\Core\inc;..\SYSTEM\USB\Core\src;..\SYSTEM\USB</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\STM32F4\inc;..\MODULE;..\HARDWARE;..\SYSTEM;..\PAGES;..\SYSTEM\USB\Core\inc;..\SYSTEM\USB\Core\src;..\SYSTEM\USB</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -680,56 +680,6 @@
               <FilePath>..\HARDWARE\ad7606fsmc.h</FilePath>
             </File>
             <File>
-              <FileName>i2c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\i2c.c</FilePath>
-            </File>
-            <File>
-              <FileName>i2c.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\HARDWARE\i2c.h</FilePath>
-            </File>
-            <File>
-              <FileName>ms4525do.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\ms4525do.c</FilePath>
-            </File>
-            <File>
-              <FileName>ms4525do.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\HARDWARE\ms4525do.h</FilePath>
-            </File>
-            <File>
-              <FileName>spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>spi.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\HARDWARE\spi.h</FilePath>
-            </File>
-            <File>
-              <FileName>bmp280.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\bmp280.c</FilePath>
-            </File>
-            <File>
-              <FileName>bmp280.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\HARDWARE\bmp280.h</FilePath>
-            </File>
-            <File>
-              <FileName>sdp3x.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\sdp3x.c</FilePath>
-            </File>
-            <File>
-              <FileName>sdp3x.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\HARDWARE\sdp3x.h</FilePath>
-            </File>
-            <File>
               <FileName>extin.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\extin.c</FilePath>
@@ -750,14 +700,44 @@
               <FilePath>..\HARDWARE\sensors.c</FilePath>
             </File>
             <File>
-              <FileName>dac.c</FileName>
+              <FileName>oled.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\HARDWARE\dac.c</FilePath>
+              <FilePath>..\HARDWARE\oled.c</FilePath>
             </File>
             <File>
-              <FileName>dac.h</FileName>
+              <FileName>oled.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\HARDWARE\dac.h</FilePath>
+              <FilePath>..\HARDWARE\oled.h</FilePath>
+            </File>
+            <File>
+              <FileName>font.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\HARDWARE\font.h</FilePath>
+            </File>
+            <File>
+              <FileName>keyboard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\keyboard.c</FilePath>
+            </File>
+            <File>
+              <FileName>keyboard.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\HARDWARE\keyboard.h</FilePath>
+            </File>
+            <File>
+              <FileName>mb85rs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\mb85rs.c</FilePath>
+            </File>
+            <File>
+              <FileName>mb85rs.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\HARDWARE\mb85rs.h</FilePath>
+            </File>
+            <File>
+              <FileName>parameterList.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\parameterList.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -782,12 +762,72 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>MODULE</GroupName>
+          <Files>
+            <File>
+              <FileName>MathHelper.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MODULE\MathHelper.c</FilePath>
+            </File>
+            <File>
+              <FileName>MathHelper.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MODULE\MathHelper.h</FilePath>
+            </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MODULE\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MODULE\pid.h</FilePath>
+            </File>
+            <File>
+              <FileName>filter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MODULE\filter.c</FilePath>
+            </File>
+            <File>
+              <FileName>filter.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MODULE\filter.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>PAGES</GroupName>
           <Files>
             <File>
               <FileName>pages.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\PAGES\pages.h</FilePath>
+            </File>
+            <File>
+              <FileName>logo.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\PAGES\logo.h</FilePath>
+            </File>
+            <File>
+              <FileName>pages.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PAGES\pages.c</FilePath>
+            </File>
+            <File>
+              <FileName>MainPage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PAGES\MainPage.c</FilePath>
+            </File>
+            <File>
+              <FileName>FalconPage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PAGES\FalconPage.c</FilePath>
+            </File>
+            <File>
+              <FileName>ControllerPage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PAGES\ControllerPage.c</FilePath>
             </File>
           </Files>
         </Group>

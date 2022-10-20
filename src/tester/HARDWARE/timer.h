@@ -3,5 +3,6 @@
 #include "sys.h"
 
 void MainClockInit(void);
+void PreciseClockInit(void);
 
 #endif

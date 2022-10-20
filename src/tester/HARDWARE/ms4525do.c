@@ -47,7 +47,7 @@ float MS4525DOReadAirspeed(float rho,float *pre)
 {
 	u8 b0,b1,b2,b3,f=0;
 	u16 p,t;	
-	float temp,dp,ias;
+	float dp,ias;
 	MS4525DO_CS=0;
 	SPIClearBuff(SPI3);
 	b0=ASRead();	
@@ -59,10 +59,9 @@ float MS4525DOReadAirspeed(float rho,float *pre)
 	p=b0&0x3F;
 	p<<=8;
 	p|=b1;
-	t=(t<<3)|(b3>>5);
-	temp=t*200/2047.0f-50;
+	t=(t<<3)|(b3>>5);	
 	dp=(p-1638.3)/(0.8*16383/2)-1;
-	if(rho>0.1)
+	if(rho>0.1f)
 		dp-=MS4525DOoffset;
 	lastdp=dp;
 	if(dp<0)
@@ -70,7 +69,7 @@ float MS4525DOReadAirspeed(float rho,float *pre)
 		dp*=-1;
 		f=1;
 	}
-	dp*=6894.757;
+	dp*=6894.757f;
 	if(rho==0)
 		rho=1.125;
 	ias=sqrt(2*dp/rho);

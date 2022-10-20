@@ -1,4 +1,5 @@
 #include "pwm.h"
+#include "pages.h"
 
 u8 _pwm_armed;
 
@@ -13,10 +14,9 @@ void PWMInit(void)
 	
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource0,GPIO_AF_TIM5);
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource1,GPIO_AF_TIM5);
-	GPIO_PinAFConfig(GPIOA,GPIO_PinSource2,GPIO_AF_TIM5);
-	GPIO_PinAFConfig(GPIOA,GPIO_PinSource3,GPIO_AF_TIM5);
+
 	
-	gi.GPIO_Pin=GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3;
+	gi.GPIO_Pin=GPIO_Pin_0|GPIO_Pin_1;
 	gi.GPIO_Mode=GPIO_Mode_AF;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	gi.GPIO_OType=GPIO_OType_PP;
@@ -34,32 +34,36 @@ void PWMInit(void)
 	to.TIM_OCPolarity=TIM_OCPolarity_High;
 	
 	TIM_OC1Init(TIM5,&to);
+	TIM_OC2Init(TIM5,&to);
+
 	
 	TIM_OC1PreloadConfig(TIM5,TIM_OCPreload_Enable);
+	TIM_OC2PreloadConfig(TIM5,TIM_OCPreload_Enable);
 	TIM_ARRPreloadConfig(TIM5,ENABLE);
 	TIM_Cmd(TIM5,ENABLE);
 	PWMDisarm();
 }
 
-void PWMSet(u32 ch0,u32 ch1,u32 ch2,u32 ch3)
+void PWMSet(u32 ch0,u32 ch1)
 {
-	u32 t=(params.pwm_max-params.pwm_min);
 	if(_pwm_armed)
 	{		
-		TIM_SetCompare1(TIM5,ch0*t/1000+params.pwm_min);
-		TIM_SetCompare2(TIM5,ch1*t/1000+params.pwm_min);
-		TIM_SetCompare3(TIM5,ch2*t/1000+params.pwm_min);
-		TIM_SetCompare4(TIM5,ch3*t/1000+params.pwm_min);		
+//		TIM_SetCompare1(TIM5,ch0*t/1000+params.pwm_min);
+//		TIM_SetCompare2(TIM5,ch1*t/1000+params.pwm_min);	
+		TIM_SetCompare1(TIM5,ch0);
+		TIM_SetCompare2(TIM5,ch1);	
+		sys.pwm[0]=ch0;
+		sys.pwm[1]=ch1;
 	}
 }
 
 void PWMDisarm(void)
 {
 	_pwm_armed=0;
-	TIM_SetCompare1(TIM5,params.pwm_disarmed);
-	TIM_SetCompare2(TIM5,params.pwm_disarmed);
-	TIM_SetCompare3(TIM5,params.pwm_disarmed);
-	TIM_SetCompare4(TIM5,params.pwm_disarmed);
+//	TIM_SetCompare1(TIM5,params.pwm_disarmed);
+//	TIM_SetCompare2(TIM5,params.pwm_disarmed);	
+	TIM_SetCompare1(TIM5,1000);
+	TIM_SetCompare2(TIM5,1000);	
 }
 
 void PWMArm(void)
