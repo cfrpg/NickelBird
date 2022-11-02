@@ -10,13 +10,10 @@
 #include "pages.h"
 #include "extin.h"
 
-u8 sensMSASEnabled;
-float sensMS4525DP;
+#warning "Old version"
 
-void SeneorsInit(void)
-{
 
-}
+
 
 void SensorsSlowUpdate(u16 time)
 {	

@@ -7,7 +7,7 @@
 #define GPQ PEin(4)
 #define GPCLK PEout(3)
 #define GPSHIFT PEout(2)
-#define WHEEL PAin(12)
+#define WHEEL PAin(15)
 #define WHEELPUSH PCin(7) 
 
 #define KEY_A 0x01

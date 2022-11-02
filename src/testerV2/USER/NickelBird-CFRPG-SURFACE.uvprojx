@@ -185,8 +185,6 @@
             <uocXRam>0</uocXRam>
             <RvdsVP>2</RvdsVP>
             <RvdsMve>0</RvdsMve>
-            <RvdsCdeCp>0</RvdsCdeCp>
-            <nBranchProt>0</nBranchProt>
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -353,7 +351,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <ClangAsOpt>4</ClangAsOpt>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -630,6 +628,11 @@
           <GroupName>HARDWARE</GroupName>
           <Files>
             <File>
+              <FileName>adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\adc.c</FilePath>
+            </File>
+            <File>
               <FileName>led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\led.c</FilePath>
@@ -643,6 +646,11 @@
               <FileName>pwm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\pwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\rtc.c</FilePath>
             </File>
             <File>
               <FileName>sblink.c</FileName>
@@ -680,6 +688,16 @@
               <FilePath>..\HARDWARE\extin.h</FilePath>
             </File>
             <File>
+              <FileName>sensors.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\HARDWARE\sensors.h</FilePath>
+            </File>
+            <File>
+              <FileName>sensors.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\sensors.c</FilePath>
+            </File>
+            <File>
               <FileName>oled.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\oled.c</FilePath>
@@ -688,6 +706,11 @@
               <FileName>oled.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\HARDWARE\oled.h</FilePath>
+            </File>
+            <File>
+              <FileName>font.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\HARDWARE\font.h</FilePath>
             </File>
             <File>
               <FileName>keyboard.c</FileName>
@@ -714,41 +737,6 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\parameterList.c</FilePath>
             </File>
-            <File>
-              <FileName>sampling.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\sampling.c</FilePath>
-            </File>
-            <File>
-              <FileName>sampling.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\HARDWARE\sampling.h</FilePath>
-            </File>
-            <File>
-              <FileName>dac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\dac.c</FilePath>
-            </File>
-            <File>
-              <FileName>dac.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\HARDWARE\dac.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>RESOURCE</GroupName>
-          <Files>
-            <File>
-              <FileName>logo.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\PAGES\logo.h</FilePath>
-            </File>
-            <File>
-              <FileName>font.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\HARDWARE\font.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -768,11 +756,6 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>nickelbird.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\SYSTEM\nickelbird.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -820,6 +803,11 @@
               <FilePath>..\PAGES\pages.h</FilePath>
             </File>
             <File>
+              <FileName>logo.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\PAGES\logo.h</FilePath>
+            </File>
+            <File>
               <FileName>pages.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\PAGES\pages.c</FilePath>
@@ -841,6 +829,12 @@
             </File>
           </Files>
         </Group>
+        <Group>
+          <GroupName>USB</GroupName>
+        </Group>
+        <Group>
+          <GroupName>USB_Core</GroupName>
+        </Group>
       </Groups>
     </Target>
   </Targets>
@@ -850,14 +844,5 @@
     <components/>
     <files/>
   </RTE>
-
-  <LayerInfo>
-    <Layers>
-      <Layer>
-        <LayName>NickelBird</LayName>
-        <LayPrjMark>1</LayPrjMark>
-      </Layer>
-    </Layers>
-  </LayerInfo>
 
 </Project>

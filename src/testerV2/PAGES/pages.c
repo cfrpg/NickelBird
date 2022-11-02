@@ -12,7 +12,6 @@ void PagesInit(void)
 {	
 	const s32* t=ParamGetFromName("PWM_MIN");
 	
-	sys.adcEn=0;
 	sys.pwm[0]=*t;
 	sys.pwm[1]=*t;
 	
@@ -156,13 +155,13 @@ void PagesUpdate(void)
 
 void PagesDrawHeader(u8 n,s8 *name)
 {
-	OledDispString(0,1,"=",0);
-	OledDispString(19,1,"=",0);
-	OledDispString(4,1,"/",0);
-	OledDispInt(5,1,PageNum,1,0);
+	OledDrawString(0,1,"=",0);
+	OledDrawString(19,1,"=",0);
+	OledDrawString(4,1,"/",0);
+	OledDrawInt(5,1,PageNum,1,0);
 	if(n>9)
-		OledDispInt(2,1,n+1,2,0);
+		OledDrawInt(2,1,n+1,2,0);
 	else
-		OledDispInt(3,1,n+1,1,0);
-	OledDispString(8,1,name,0);
+		OledDrawInt(3,1,n+1,1,0);
+	OledDrawString(8,1,name,0);
 }

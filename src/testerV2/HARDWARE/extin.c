@@ -1,8 +1,9 @@
 #include "extin.h"
 #include "pages.h"
 
-u32 lastIntTime[2];
-u32 intTempTime;
+#warning "Old version"
+
+
 
 void ExtinInit(void)
 {
@@ -11,12 +12,15 @@ void ExtinInit(void)
 	NVIC_InitTypeDef ni;
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
 	
 	gi.GPIO_Pin=GPIO_Pin_0|GPIO_Pin_1;
 	gi.GPIO_Mode=GPIO_Mode_IN;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
+	GPIO_Init(GPIOE,&gi);
+	gi.GPIO_Pin=GPIO_Pin_8|GPIO_Pin_9;
 	GPIO_Init(GPIOE,&gi);
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
@@ -40,8 +44,6 @@ void ExtinInit(void)
 	ni.NVIC_IRQChannel=EXTI1_IRQn;
 	NVIC_Init(&ni);
 	
-	lastIntTime[0]=0;
-	lastIntTime[1]=0;
 }
 
 void EXTI0_IRQHandler(void)

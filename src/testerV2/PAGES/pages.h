@@ -5,6 +5,7 @@
 #include "sblink.h"
 #include "stdio.h"
 #include "rtc.h"
+#include "nickelbird.h"
 
 #define MainPage 0
 #define FalconPage 1
@@ -15,36 +16,6 @@
 #define INTERNAL 0
 #define EXTERNAL 1
 
-
-
-typedef struct
-{
-	s32 ADCRawData[8];
-	float AuxADCData[2];
-	SensorDataPackage sensors;
-	s32 rpm;
-	u16 pwm[2];
-	u8 adcEn;
-	float temperature;
-	float pressure;
-	float rho;
-	float airspeed;
-	float freq[2];
-	void (*slowUpdate)(u16);
-	void (*fastUpdate)(u16);
-	void (*intUpdate)(void);
-	void (*intReset)(void);
-	u8 intFlag[2];
-	u32 intTime[2];
-	u32 EOtime;
-	u32 EOinterval;
-	u16 ledInterval;
-	u8 adcClkSource;
-	u8 adcBusy;
-
-} systemState;
-
-extern systemState sys;
 extern u8 lastKey;
 extern u8 currKey;
 extern s32 lastWheel;

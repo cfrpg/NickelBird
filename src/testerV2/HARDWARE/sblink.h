@@ -28,7 +28,7 @@ typedef struct
 typedef struct
 {
 	PackageHeader header;
-	short ADCData[12];	
+	short ADCData[16];	
 	float SensorData[4];
 } SensorDataPackage;
 

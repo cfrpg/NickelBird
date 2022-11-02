@@ -10,21 +10,22 @@
 #include "pages.h"
 #include "pwm.h"
 #include "sblink.h"
-#include "adc.h"
 #include "ad7606fsmc.h"
 #include "extin.h"
-#include "sensors.h"
 #include "mb85rs.h"
 #include "logo.h"
+#include "sampling.h"
 
-#define TEST0 PBout(6)
-#define TEST1 PBout(7)
+#include "dac.h"
+
+#define TEST0 PBout(10)
+#define TEST1 PBout(11)
 
 
 void initTestGPIO(void);
 void AnalyzePkg(void);
 
-u16 tick[3]={0,0,0};
+u32 tick[3]={0,0,0};
 u16 cpucnt=0;
 u8 lastKey=0;
 u8 currKey=0;
@@ -42,81 +43,98 @@ u8 package[256];
 
 s16 adraw[8];
 
-
-
 int main(void)
 {
-//	s16 i;
+	s16 i,j;
 //	s16 tmp[2];
 	u16 time;
 	delay_init(168);
-	uart_init(115200);
+	uart_init(921600);
 	
 	OledInit();
 	MainClockInit();
 	LEDInit();
-	OledClear(0x00);
+	OledClear(0x0F);
 
-	OledDispBitmap(0,0,128,128,gImage_logo);
-	FRAMInit();
+	OledDrawBitmap(0,0,128,128,gImage_logo);
+	OledDrawString(0,0,"Show some text",0);
+	for(i=0;i<97-3+1;i++)
+	{
+		OledDrawChar(i%20,i/20,i+' ',0);
+	}
+	OledDrawChar(0,10,61+' ',0);
+//	OledRefresh();
+	FRAMInit();	
+	
 	u8 t=ParamRead();
 	if(t)
 	{
 		if(t==255)
-			OledDispString(0,0,"Reset all parameters.",0);		
+		{
+			OledDrawString(0,0,"Reset all parameters.",0);
+		}
 		else
 		{
-			OledDispString(0,0,"Reset     parameters.",0);
-			OledDispInt(6,0,t,3,0);
+			OledDrawString(0,0,"Reset     parameters.",0);
+			OledDrawInt(6,0,t,3,0);
 		}
 		delay_ms(500);
 		delay_ms(500);
 	}
-	PWMInit();
 	
+	
+//	PWMInit();
+//	
 	initTestGPIO();
-	PagesInit();
-	LinkInit();	
-	ADCInit();
+//	PagesInit();
+//	LinkInit();	
+	SamplingInit();
 	AD7606FSMCInit();
-	ExtinInit();
+//	ExtinInit();
 
 	KeyInit();
+	
+	DACInit();
+	DACSet(0.5f);
 
 	printf("NickelBird\r\n");
 	
-	SeneorsInit();
-	
-	PreciseClockInit();
-	
+//	SeneorsInit();
+//	
+//	PreciseClockInit();
+//	
 	delay_ms(500);
 	delay_ms(500);
+	
+	LEDSetPattern(LED_OFF,LED_OFF,LED_1Hz);
+
 	while(1)
 	{	
-		if(tick[0]>=sys.ledInterval)
+		if(tick[0]>=200)
 		{			
 			tick[0]=0;
-			LEDFlip();
+			LEDUpdate();
 			if(USART_RX_STA&0x8000)
 			{				
 				AnalyzePkg();
 				USART_RX_STA=0;
-			}			
+			}
+			
 		}
 		if(tick[1]>=2)
 		{
-			time=tick[1];
-			tick[1]=0;	
-			SensorsFastUpdate(time);
+//			time=tick[1];
+//			tick[1]=0;	
+//			SensorsFastUpdate(time);
 		}
 		if(tick[2]>=100)
 		{
-			TEST0=1;
-			time=tick[2];
-			tick[2]=0;
-			SensorsSlowUpdate(time);
-			PagesUpdate();
-			TEST0=0;
+//			TEST0=1;
+//			time=tick[2];
+//			tick[2]=0;
+//			SensorsSlowUpdate(time);
+//			PagesUpdate();
+//			TEST0=0;
 		}
 	}
 }
@@ -186,9 +204,7 @@ void TIM7_IRQHandler(void)
 		cpucnt++;
 		if(cpucnt>=(10000))
 			cpucnt=0;
-		RTCcnt++;
-		if(RTCcnt>999)
-			RTCcnt=999;		
+		
 	}
 }
 
@@ -199,10 +215,8 @@ void EXTI15_10_IRQHandler(void)
 	{
 		//TEST0=1;
 		AD7606FSMCRead(sys.sensors.ADCData);
-		ADCReadVol(sys.sensors.ADCData+8);
-		
-		SensorsIntUpdate(); 
-		LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
+		SamplingIntUpdate(); 
+		//LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
 
 		EXTI_ClearITPendingBit(EXTI_Line13);
 		sys.adcBusy=0;
@@ -213,35 +227,21 @@ void EXTI15_10_IRQHandler(void)
 		
 		//TEST0=0;
 	}
-	if (EXTI_GetITStatus(EXTI_Line11) != RESET)
+	if (EXTI_GetITStatus(EXTI_Line10) != RESET)
 	{
 		WheelUpdate();
-		EXTI_ClearITPendingBit(EXTI_Line11);
+		EXTI_ClearITPendingBit(EXTI_Line10);
 	}
 }
 
-void TIM3_IRQHandler(void)
-{
-	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
-	{
-		//TEST1=1;
-		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-		if(sys.adcClkSource==INTERNAL&&(!sys.adcBusy))
-		{
-			sys.adcBusy=1;
-			ADCStartConv();
-			sys.sensors.header.time++;
-		}		
-		//TEST0=0;
-	}
-}
+
 
 void initTestGPIO(void)
 {
 	GPIO_InitTypeDef gi;
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
-	gi.GPIO_Pin=GPIO_Pin_6|GPIO_Pin_7;
+	gi.GPIO_Pin=GPIO_Pin_10|GPIO_Pin_11;
 	gi.GPIO_Mode=GPIO_Mode_OUT;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;

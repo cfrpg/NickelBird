@@ -12,8 +12,10 @@
 #define FRAM_WRITE 0x02
 #define FRAM_RDID 0x9F
 
+#define FRAM_24BIT_ADDR
+
 void FRAMInit(void);
-void FRAMWrite(u16 addr,u16 len,u8* data);
-void FRAMRead(u16 addr,u16 len,u8* data);
+void FRAMWrite(u32 addr,u32 len,u8* data);
+void FRAMRead(u32 addr,u32 len,u8* data);
 
 #endif

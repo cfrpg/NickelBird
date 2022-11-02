@@ -83,20 +83,20 @@ void PageInit_falcon(u8 f)
 	
 	if(PWMIsArmed())
 	{
-		OledDispString(0,2,"ARMED",0);
+		OledDrawString(0,2,"ARMED",0);
 	}
 	
-	OledDispString(5,4,":      |    %",0);
-	OledDispString(6,5,"    ms|     %",0);
-	OledDispString(5,7,":      |    %",0);
-	OledDispString(6,8,"    ms|     %",0);	
-	OledDispString(0,10,"OUT  :      |    %",0);
-	OledDispString(6,11,"    ms|     Hz",0);	
-	OledDispString(0,13,"Phi         |",0);	
+	OledDrawString(5,4,":      |    %",0);
+	OledDrawString(6,5,"    ms|     %",0);
+	OledDrawString(5,7,":      |    %",0);
+	OledDrawString(6,8,"    ms|     %",0);	
+	OledDrawString(0,10,"OUT  :      |    %",0);
+	OledDrawString(6,11,"    ms|     Hz",0);	
+	OledDrawString(0,13,"Phi         |",0);	
 		
-	OledDispString(0,15,"SWAP",0);
+	OledDrawString(0,15,"SWAP",0);
 	
-	OledDispString(17,15,"CALI",0);
+	OledDrawString(17,15,"CALI",0);
 	
 	falconpage_showData(0xFF);
 	falconp.drawSkip=0;
@@ -129,7 +129,7 @@ void falcon_update_main(void)
 			falconp.pwm[0]=*falconp.pwm_disarmed;
 			falconp.pwm[1]=*falconp.pwm_disarmed;
 			falconp.draw|=0x06;
-			OledDispString(0,2,"      ",0);
+			OledDrawString(0,2,"      ",0);
 		}
 		if(keyPress&KEY_UP)
 		{
@@ -191,7 +191,7 @@ void falcon_update_main(void)
 			falconp.pwm[0]=*falconp.pwm_min;
 			falconp.pwm[1]=*falconp.pwm_min;
 			falconp.draw|=0x06;
-			OledDispString(0,2,"ARMED",0);
+			OledDrawString(0,2,"ARMED",0);
 		}
 		
 		if(keyPress&KEY_C)
@@ -199,10 +199,10 @@ void falcon_update_main(void)
 			falconp.state=Falcon_Cali_Sel;
 			OledClear(0);
 			PagesDrawHeader(FalconPage,"Falcon");
-			OledDispString(2,3,"Select Cali Type",0);
-			OledDispString(0,15,"RANGE",0);	
-			OledDispString(9,15,"CALI",1);	
-			OledDispString(15,15,"STROKE",0);
+			OledDrawString(2,3,"Select Cali Type",0);
+			OledDrawString(0,15,"RANGE",0);	
+			OledDrawString(9,15,"CALI",1);	
+			OledDrawString(15,15,"STROKE",0);
 			falconp.draw=0;
 		}
 		if(keyPress&KEY_LEFT)
@@ -235,12 +235,12 @@ void falcon_update_cali(void)
 			falconp.smin=65535;
 			falconp.cmax=-65535;
 			falconp.cmin=65535;
-			OledDispString(2,5,"Full Range Cali",0);
-			OledDispString(7,7,"Min     Max",0);
-			OledDispString(2,8,"Sin:      |      ",0);
-			OledDispString(2,9,"Cos:      |      ",0);
-			OledDispString(0,15,"                     ",0);	
-			OledDispString(10,15,"OK",0);	
+			OledDrawString(2,5,"Full Range Cali",0);
+			OledDrawString(7,7,"Min     Max",0);
+			OledDrawString(2,8,"Sin:      |      ",0);
+			OledDrawString(2,9,"Cos:      |      ",0);
+			OledDrawString(0,15,"                     ",0);	
+			OledDrawString(10,15,"OK",0);	
 			falconp.caliCnt=0;
 		}
 		if(keyPress&KEY_C)
@@ -249,11 +249,11 @@ void falcon_update_cali(void)
 			falconp.caliCnt=0;
 			*falconp.aat_up_ang=0;
 			*falconp.aat_down_ang=0;
-			OledDispString(0,5,"Stroke Range Cali",0);
-			OledDispString(0,7,"Upstroke limit cali",0);
-			OledDispString(0,15,"                     ",0);	
-			OledDispString(0,13,"Phi",0);
-			OledDispString(8,15,"START",0);
+			OledDrawString(0,5,"Stroke Range Cali",0);
+			OledDrawString(0,7,"Upstroke limit cali",0);
+			OledDrawString(0,15,"                     ",0);	
+			OledDrawString(0,13,"Phi",0);
+			OledDrawString(8,15,"START",0);
 		}
 	}
 	if(falconp.state==Falcon_Cali_Full)
@@ -267,10 +267,10 @@ void falcon_update_cali(void)
 		if(falconp.cmax<sys.sensors.ADCData[7])
 			falconp.cmax=sys.sensors.ADCData[7];
 		falconp.caliCnt++;
-		OledDispFixed(6,8,(falconp.smin*5000)>>15,3,6,0);
-		OledDispFixed(13,8,(falconp.smax*5000)>>15,3,6,0);
-		OledDispFixed(6,9,(falconp.cmin*5000)>>15,3,6,0);
-		OledDispFixed(13,9,(falconp.cmax*5000)>>15,3,6,0);
+		OledDrawFixed(6,8,(falconp.smin*5000)>>15,3,6,0);
+		OledDrawFixed(13,8,(falconp.smax*5000)>>15,3,6,0);
+		OledDrawFixed(6,9,(falconp.cmin*5000)>>15,3,6,0);
+		OledDrawFixed(13,9,(falconp.cmax*5000)>>15,3,6,0);
 //		OledDispInt(2,11,falconp.caliCnt,5,0);
 		if(keyPress&KEY_B)
 		{
@@ -286,13 +286,13 @@ void falcon_update_cali(void)
 	}
 	if(falconp.state==Falcon_Cali_Stroke)
 	{
-		OledDispFixed(6,13,falconp.angle*5730,2,8,0);
+		OledDrawFixed(6,13,falconp.angle*5730,2,8,0);
 		if(falconp.caliCnt==0)
 		{
 			if(keyPress&KEY_B)
 			{
-				OledDispString(8,15,"     ",0);
-				OledDispString(4,8,"/30",0);
+				OledDrawString(8,15,"     ",0);
+				OledDrawString(4,8,"/30",0);
 				*falconp.aat_up_ang+=falconpage_getRawAngle();
 				falconp.caliCnt++;
 			}
@@ -301,22 +301,22 @@ void falcon_update_cali(void)
 		{
 			*falconp.aat_up_ang+=falconpage_getRawAngle();
 			falconp.caliCnt++;
-			OledDispInt(2,8,falconp.caliCnt,2,0);
+			OledDrawInt(2,8,falconp.caliCnt,2,0);
 			if(falconp.caliCnt==30)
 			{
-				OledDispString(8,8,"OK",0);
+				OledDrawString(8,8,"OK",0);
 				*falconp.aat_up_ang/=30;
-				OledDispFixed(11,8,*falconp.aat_up_ang*5730,2,8,0);
-				OledDispString(0,9,"Downstroke limit cali",0);				
-				OledDispString(8,15,"START",0);
+				OledDrawFixed(11,8,*falconp.aat_up_ang*5730,2,8,0);
+				OledDrawString(0,9,"Downstroke limit cali",0);				
+				OledDrawString(8,15,"START",0);
 			}
 		}
 		else if(falconp.caliCnt==30)
 		{
 			if(keyPress&KEY_B)
 			{
-				OledDispString(8,15,"     ",0);
-				OledDispString(4,10,"/30",0);
+				OledDrawString(8,15,"     ",0);
+				OledDrawString(4,10,"/30",0);
 				*falconp.aat_down_ang+=falconpage_getRawAngle();
 				falconp.caliCnt++;
 			}
@@ -325,13 +325,13 @@ void falcon_update_cali(void)
 		{
 			*falconp.aat_down_ang+=falconpage_getRawAngle();
 			falconp.caliCnt++;
-			OledDispInt(2,10,falconp.caliCnt-30,2,0);
+			OledDrawInt(2,10,falconp.caliCnt-30,2,0);
 			if(falconp.caliCnt==60)
 			{
-				OledDispString(8,10,"OK",0);	
+				OledDrawString(8,10,"OK",0);	
 				*falconp.aat_down_ang/=30;
-				OledDispFixed(11,10,*falconp.aat_down_ang*5730,2,8,0);				
-				OledDispString(8,15,"SAVE",0);
+				OledDrawFixed(11,10,*falconp.aat_down_ang*5730,2,8,0);				
+				OledDrawString(8,15,"SAVE",0);
 			}
 		}
 		else if(falconp.caliCnt==60)
@@ -372,64 +372,64 @@ void falconpage_showData(u8 f)
 	{
 		if(falconp.bind)
 		{
-			OledDispString(0,4,"UP",1);
-			OledDispString(0,7,"DOWN",1);
-			OledDispString(8,15,"BIND",1);
+			OledDrawString(0,4,"UP",1);
+			OledDrawString(0,7,"DOWN",1);
+			OledDrawString(8,15,"BIND",1);
 		}
 		else
 		{
-			OledDispString(8,15,"BIND",0);
+			OledDrawString(8,15,"BIND",0);
 			if(falconp.currch)
 			{
-				OledDispString(0,4,"UP  ",0);
-				OledDispString(0,7,"DOWN",1);
+				OledDrawString(0,4,"UP  ",0);
+				OledDrawString(0,7,"DOWN",1);
 			}
 			else
 			{
-				OledDispString(0,4,"UP  ",1);
-				OledDispString(0,7,"DOWN",0);
+				OledDrawString(0,4,"UP  ",1);
+				OledDrawString(0,7,"DOWN",0);
 			}
 		}
 	}
 	if(f&0x02)
 	{
-		OledDispInt(6,4,falconp.pwm[0],4,0);
-		OledDispInt(13,4,(falconp.pwm[0]-1000)/10,4,0);
-		OledDispInt(6,10,sys.pwm[0],4,0);
-		OledDispInt(13,10,(sys.pwm[0]-1000)/10,4,0);
+		OledDrawInt(6,4,falconp.pwm[0],4,0);
+		OledDrawInt(13,4,(falconp.pwm[0]-1000)/10,4,0);
+		OledDrawInt(6,10,sys.pwm[0],4,0);
+		OledDrawInt(13,10,(sys.pwm[0]-1000)/10,4,0);
 	}
 	if(f&0x04)
 	{
-		OledDispInt(6,7,falconp.pwm[1],4,0);
-		OledDispInt(13,7,(falconp.pwm[1]-1000)/10,4,0);
-		OledDispInt(6,10,sys.pwm[0],4,0);
-		OledDispInt(13,10,(sys.pwm[0]-1000)/10,4,0);
+		OledDrawInt(6,7,falconp.pwm[1],4,0);
+		OledDrawInt(13,7,(falconp.pwm[1]-1000)/10,4,0);
+		OledDrawInt(6,10,sys.pwm[0],4,0);
+		OledDrawInt(13,10,(sys.pwm[0]-1000)/10,4,0);
 	}
 	if(f&0x30)
 	{
-		OledDispInt(6,10,sys.pwm[0],4,0);
-		OledDispInt(13,10,(sys.pwm[0]-1000)/10,4,0);
-		OledDispInt(6,11,falconp.phaseTime[0]+falconp.phaseTime[1],4,0);
-		OledDispFixed(13,11,100000/(falconp.phaseTime[0]+falconp.phaseTime[1]),2,5,0);
+		OledDrawInt(6,10,sys.pwm[0],4,0);
+		OledDrawInt(13,10,(sys.pwm[0]-1000)/10,4,0);
+		OledDrawInt(6,11,falconp.phaseTime[0]+falconp.phaseTime[1],4,0);
+		OledDrawFixed(13,11,100000/(falconp.phaseTime[0]+falconp.phaseTime[1]),2,5,0);
 	}
 	if(f&0x10)
 	{
-		OledDispInt(6,5,falconp.phaseTime[0],4,0);
+		OledDrawInt(6,5,falconp.phaseTime[0],4,0);
 		//OledDispFixed(13,5,100000/falconp.phaseTime[0],2,5,0);
-		OledDispFixed(13,5,falconp.phaseTime[0]*1000/(falconp.phaseTime[0]+falconp.phaseTime[1]),1,5,0);
+		OledDrawFixed(13,5,falconp.phaseTime[0]*1000/(falconp.phaseTime[0]+falconp.phaseTime[1]),1,5,0);
 		f&=0xEF;
 	}
 	if(f&0x20)
 	{
-		OledDispInt(6,8,falconp.phaseTime[1],4,0);
+		OledDrawInt(6,8,falconp.phaseTime[1],4,0);
 		//OledDispFixed(13,8,100000/falconp.phaseTime[1],2,5,0);		
-		OledDispFixed(13,8,falconp.phaseTime[1]*1000/(falconp.phaseTime[0]+falconp.phaseTime[1]),1,5,0);
+		OledDrawFixed(13,8,falconp.phaseTime[1]*1000/(falconp.phaseTime[0]+falconp.phaseTime[1]),1,5,0);
 		f&=0xDF;
 	}
 	if(f)
 	{
-		OledDispFixed(4,13,falconp.angle*5730,2,8,0);
-		OledDispFixed(13,13,falconp.phi*5730,2,8,0);
+		OledDrawFixed(4,13,falconp.angle*5730,2,8,0);
+		OledDrawFixed(13,13,falconp.phi*5730,2,8,0);
 		
 	}
 }

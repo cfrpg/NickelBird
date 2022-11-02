@@ -178,21 +178,21 @@ void PageInit_controller(u8 f)
 	
 	if(PWMIsArmed())
 	{
-		OledDispString(0,2,"ARMED",0);
+		OledDrawString(0,2,"ARMED",0);
 	}
 	
-	OledDispString(0,4,"TGT :     Hz|     %",0);
-	OledDispString(0,5,"SENS:     Hz|     %",0);
-	OledDispString(0,6,"PHA :     Hz|     %",0);
-	OledDispString(2,8,"P:00.000  I:00.000",0);
-	OledDispString(2,9,"D:00.000",0);
+	OledDrawString(0,4,"TGT :     Hz|     %",0);
+	OledDrawString(0,5,"SENS:     Hz|     %",0);
+	OledDrawString(0,6,"PHA :     Hz|     %",0);
+	OledDrawString(2,8,"P:00.000  I:00.000",0);
+	OledDrawString(2,9,"D:00.000",0);
 //	OledDispString(0,7,"PWM  :2000ms|     %",0);
 //	OledDispString(6,8,"    ms|     %",0);	
-	OledDispString(0,11,"OUT :       |     %",0);
+	OledDrawString(0,11,"OUT :       |     %",0);
 	
-	OledDispString(0,13,"Phi         |",0);	
+	OledDrawString(0,13,"Phi         |",0);	
 	
-	OledDispString(17,15,"TUNE",0);
+	OledDrawString(17,15,"TUNE",0);
 	
 	controlpage_showData(0xFF);
 	controlp.drawSkip=0;	
@@ -229,8 +229,8 @@ void control_update_main(void)
 			controlp.pwm[0]=*controlp.pwm_disarmed;
 			controlp.pwm[1]=*controlp.pwm_disarmed;
 			controlp.draw|=0x03;
-			OledDispString(0,2,"      ",0);
-			OledDispString(17,15,"TUNE",0);
+			OledDrawString(0,2,"      ",0);
+			OledDrawString(17,15,"TUNE",0);
 			controlp.theta_d=0;
 			controlp.freqtgt=0;
 			controlp.state=Controller_Main;
@@ -307,8 +307,8 @@ void control_update_main(void)
 			controlp.pwm[0]=*controlp.pwm_min;
 			controlp.pwm[1]=*controlp.pwm_min;
 			controlp.draw|=0x07;
-			OledDispString(0,2,"ARMED",0);
-			OledDispString(17,15,"    ",0);
+			OledDrawString(0,2,"ARMED",0);
+			OledDrawString(17,15,"    ",0);
 			controlp.state=Controller_Main_Freq;
 			
 		}
@@ -325,7 +325,7 @@ void control_update_main(void)
 		}
 		if(keyPress&KEY_C)
 		{
-			OledDispString(17,15,"SAVE",0);
+			OledDrawString(17,15,"SAVE",0);
 			controlp.state=Controller_Tune_P;
 			controlp.draw|=0x04;
 		}
@@ -338,7 +338,7 @@ void control_update_tune(void)
 	float dpid;
 	if(keyPress&KEY_C)
 	{
-		OledDispString(17,15,"TUNE",0);
+		OledDrawString(17,15,"TUNE",0);
 		controlp.state=Controller_Main;
 		*controlp.ctrl_p=controlp.pid.P;
 		*controlp.ctrl_i=controlp.pid.I;
@@ -419,13 +419,13 @@ void controlpage_showData(u8 f)
 	if(f&0x01)
 	{
 		if(controlp.state==Controller_Main_Freq)			
-			OledDispFixed(5,4,roundf(controlp.freqtgt*100),2,5,1);
+			OledDrawFixed(5,4,roundf(controlp.freqtgt*100),2,5,1);
 		else
-			OledDispFixed(5,4,roundf(controlp.freqtgt*100),2,5,0);
+			OledDrawFixed(5,4,roundf(controlp.freqtgt*100),2,5,0);
 		if(controlp.state==Controller_Main_Ratio)
-			OledDispFixed(13,4,roundf(controlp.ratiotgt*10000),2,5,1);
+			OledDrawFixed(13,4,roundf(controlp.ratiotgt*10000),2,5,1);
 		else
-			OledDispFixed(13,4,roundf(controlp.ratiotgt*10000),2,5,0);
+			OledDrawFixed(13,4,roundf(controlp.ratiotgt*10000),2,5,0);
 	}
 	if(f&0x02)
 	{		
@@ -434,19 +434,19 @@ void controlpage_showData(u8 f)
 	if(f&0x04)
 	{
 		if(controlp.state==Controller_Tune_P)
-			OledDispFixed(4,8,roundf(controlp.pid.P*1000),3,6,1);
+			OledDrawFixed(4,8,roundf(controlp.pid.P*1000),3,6,1);
 		else
-			OledDispFixed(4,8,roundf(controlp.pid.P*1000),3,6,0);
+			OledDrawFixed(4,8,roundf(controlp.pid.P*1000),3,6,0);
 		
 		if(controlp.state==Controller_Tune_I)
-			OledDispFixed(14,8,roundf(controlp.pid.I*1000),3,6,1);
+			OledDrawFixed(14,8,roundf(controlp.pid.I*1000),3,6,1);
 		else
-			OledDispFixed(14,8,roundf(controlp.pid.I*1000),3,6,0);
+			OledDrawFixed(14,8,roundf(controlp.pid.I*1000),3,6,0);
 		
 		if(controlp.state==Controller_Tune_D)
-			OledDispFixed(4,9,roundf(controlp.pid.D*1000),3,6,1);
+			OledDrawFixed(4,9,roundf(controlp.pid.D*1000),3,6,1);
 		else
-			OledDispFixed(4,9,roundf(controlp.pid.D*1000),3,6,0);
+			OledDrawFixed(4,9,roundf(controlp.pid.D*1000),3,6,0);
 //		OledDispInt(6,7,controlp.pwm[1],4,0);
 //		OledDispInt(13,7,(controlp.pwm[1]-1000)/10,4,0);
 //		OledDispInt(6,10,sys.pwm[0],4,0);
@@ -454,20 +454,20 @@ void controlpage_showData(u8 f)
 	}
 	if(f&0x10)
 	{		
-		OledDispFixed(5,5,100000/(controlp.phaseTime[0]+controlp.phaseTime[1]),2,5,0);
-		OledDispFixed(13,5,controlp.phaseTime[0]*10000/(controlp.phaseTime[0]+controlp.phaseTime[1]),2,5,0);
+		OledDrawFixed(5,5,100000/(controlp.phaseTime[0]+controlp.phaseTime[1]),2,5,0);
+		OledDrawFixed(13,5,controlp.phaseTime[0]*10000/(controlp.phaseTime[0]+controlp.phaseTime[1]),2,5,0);
 		f&=0xEF;
 	}	
 	if(f&0x20)
 	{
-		OledDispFixed(4,13,controlp.angle*5730,2,8,0);
-		OledDispFixed(13,13,controlp.phi*5730,2,8,0);
+		OledDrawFixed(4,13,controlp.angle*5730,2,8,0);
+		OledDrawFixed(13,13,controlp.phi*5730,2,8,0);
 		f&=0xDF;
 	}
 	if(f&0x40)
 	{
-		OledDispInt(5,11,controlp.pwm[0],4,0);
-		OledDispInt(13,11,(controlp.pwm[0]-1000)/10,4,0);
+		OledDrawInt(5,11,controlp.pwm[0],4,0);
+		OledDrawInt(13,11,(controlp.pwm[0]-1000)/10,4,0);
 		f&=0xBF;
 	}
 	

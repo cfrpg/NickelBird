@@ -11,6 +11,8 @@ void KeyInit(void)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
+	
+	// Keyboard GPIO
 	gi.GPIO_Pin=GPIO_Pin_2|GPIO_Pin_3;
 	gi.GPIO_Mode=GPIO_Mode_OUT;
 	gi.GPIO_OType=GPIO_OType_PP;
@@ -18,25 +20,31 @@ void KeyInit(void)
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	GPIO_Init(GPIOE,&gi);
 	
-	gi.GPIO_Pin=GPIO_Pin_11|GPIO_Pin_12;
+	gi.GPIO_Pin=GPIO_Pin_4;
+	gi.GPIO_Mode=GPIO_Mode_IN;
+	gi.GPIO_Speed=GPIO_Speed_100MHz;
+	gi.GPIO_PuPd=GPIO_PuPd_UP;	
+	GPIO_Init(GPIOE,&gi);
+	
+	//Encoder GPIO
+	gi.GPIO_Pin=GPIO_Pin_15;
 	gi.GPIO_Mode=GPIO_Mode_IN;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;	
 	GPIO_Init(GPIOA,&gi);
+	gi.GPIO_Pin=GPIO_Pin_10;
+	GPIO_Init(GPIOC,&gi);
 	
-	gi.GPIO_Pin=GPIO_Pin_4;
-	gi.GPIO_PuPd=GPIO_PuPd_UP;	
-	GPIO_Init(GPIOE,&gi);
-	
+	//Encoder key GPIO	
 	gi.GPIO_Pin=GPIO_Pin_7;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;	
 	GPIO_Init(GPIOC,&gi);
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
 	
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA,EXTI_PinSource11);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC,EXTI_PinSource10);
 	
-	ei.EXTI_Line=EXTI_Line11;
+	ei.EXTI_Line=EXTI_Line10;
 	ei.EXTI_Mode=EXTI_Mode_Interrupt;
 	ei.EXTI_Trigger=EXTI_Trigger_Falling;
 	ei.EXTI_LineCmd=ENABLE;

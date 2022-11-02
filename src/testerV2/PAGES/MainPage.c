@@ -47,15 +47,15 @@ void PageInit_main(u8 f)
 	
 	if(PWMIsArmed())
 	{
-		OledDispString(0,2,"ARMED",0);
+		OledDrawString(0,2,"ARMED",0);
 	}
 	
-	OledDispString(3,4,":      |    %",0);
-	OledDispString(3,6,":      |    %",0);
+	OledDrawString(3,4,":      |    %",0);
+	OledDrawString(3,6,":      |    %",0);
 		
-	OledDispString(0,15,"SWAP",0);
+	OledDrawString(0,15,"SWAP",0);
 	
-	OledDispString(17,15,"CALI",0);
+	OledDrawString(17,15,"CALI",0);
 	
 	mainpage_showData(0xFF);
 	
@@ -87,7 +87,7 @@ void PageUpdate_main(void)
 				sys.pwm[0]=*pwm_disarmed;
 				sys.pwm[1]=*pwm_disarmed;
 				draw|=0x06;
-				OledDispString(0,2,"      ",0);
+				OledDrawString(0,2,"      ",0);
 			}
 			if(keyPress&KEY_UP)
 			{
@@ -147,7 +147,7 @@ void PageUpdate_main(void)
 				sys.pwm[0]=*pwm_min;
 				sys.pwm[1]=*pwm_min;
 				draw|=0x06;
-				OledDispString(0,2,"ARMED",0);
+				OledDrawString(0,2,"ARMED",0);
 			}
 		}
 		if(keyPress&KEY_LEFT)
@@ -166,34 +166,34 @@ void mainpage_showData(u8 f)
 	{
 		if(mainp.bind)
 		{
-			OledDispString(0,4,"CH1",1);
-			OledDispString(0,6,"CH2",1);
-			OledDispString(8,15,"BIND",1);
+			OledDrawString(0,4,"CH1",1);
+			OledDrawString(0,6,"CH2",1);
+			OledDrawString(8,15,"BIND",1);
 		}
 		else
 		{
-			OledDispString(8,15,"BIND",0);
+			OledDrawString(8,15,"BIND",0);
 			if(mainp.currch)
 			{
-				OledDispString(0,4,"CH1",0);
-				OledDispString(0,6,"CH2",1);
+				OledDrawString(0,4,"CH1",0);
+				OledDrawString(0,6,"CH2",1);
 			}
 			else
 			{
-				OledDispString(0,4,"CH1",1);
-				OledDispString(0,6,"CH2",0);
+				OledDrawString(0,4,"CH1",1);
+				OledDrawString(0,6,"CH2",0);
 			}
 		}
 	}
 	if(f&0x02)
 	{
-		OledDispInt(4,4,sys.pwm[0],4,0);
-		OledDispInt(11,4,(sys.pwm[0]-1000)/10,4,0);
+		OledDrawInt(4,4,sys.pwm[0],4,0);
+		OledDrawInt(11,4,(sys.pwm[0]-1000)/10,4,0);
 	}
 	if(f&0x04)
 	{
-		OledDispInt(4,6,sys.pwm[1],4,0);
-		OledDispInt(11,6,(sys.pwm[1]-1000)/10,4,0);
+		OledDrawInt(4,6,sys.pwm[1],4,0);
+		OledDrawInt(11,6,(sys.pwm[1]-1000)/10,4,0);
 	}
 }
 

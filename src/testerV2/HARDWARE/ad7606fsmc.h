@@ -3,12 +3,15 @@
 
 #include "sys.h"
 
-#define ADIF_CS		PDout(7)
-#define ADIF_CV		PCout(6)
-#define ADIF_BUSY	PDin(13)
-#define ADIF_RST	PDout(12)
+#define ADIF_CS1		PDout(6)
+#define ADIF_CS2		PDout(7)
+#define ADIF_CV			PCout(6)
+#define ADIF_BUSY		PDin(13)
+#define ADIF_RST		PDout(12)
 #define ADIF_CV_GPIO	GPIOC
 #define ADIF_CV_Pin		6
+
+#define ADIF_MODE_SENS	PDin(3)
 
 #define AD7606_RESULT()	*(__IO uint16_t *)0x60000000
 

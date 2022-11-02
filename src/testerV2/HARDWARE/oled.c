@@ -4,8 +4,9 @@
 #include "font.h"
 #include "stdio.h"
 
-u8 oledBuff[16][22];
-u16 oledRevFlag[21];
+#define OLED_BUFF_SIZE 8192
+
+u8 oledBuff[64][128];
 
 void OledInit(void)
 {
@@ -22,13 +23,13 @@ void OledInit(void)
 	gi.GPIO_PuPd=GPIO_PuPd_UP;
 	GPIO_Init(GPIOA,&gi);
 	//Init common GPIO
-	gi.GPIO_Pin=GPIO_Pin_4|GPIO_Pin_6;
+	gi.GPIO_Pin=GPIO_Pin_6;
 	gi.GPIO_Mode=GPIO_Mode_OUT;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	GPIO_Init(GPIOA,&gi);
-	gi.GPIO_Pin=GPIO_Pin_4;
+	gi.GPIO_Pin=GPIO_Pin_4|GPIO_Pin_5;
 	GPIO_Init(GPIOC,&gi);
 	
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource5,GPIO_AF_SPI1);
@@ -49,9 +50,60 @@ void OledInit(void)
 	SPI_Init(SPI1,&si);
 	SPI_Cmd(SPI1,ENABLE);
 	memset(oledBuff,0,sizeof(oledBuff));	
-	memset(oledRevFlag,0,sizeof(oledRevFlag));
 	OledStartUp();
+	
+	OledClearBuff();
+	
+	// DMA config
+	DMA_InitTypeDef di;
+	NVIC_InitTypeDef ni;
+	
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2,ENABLE);	
+	DMA_DeInit(DMA2_Stream5);	
+	while(DMA_GetCmdStatus(DMA2_Stream5)!=DISABLE);
+	
+	di.DMA_Channel = DMA_Channel_3;
+	di.DMA_PeripheralBaseAddr = (u32)&SPI1->DR;
+	di.DMA_Memory0BaseAddr = (u32)oledBuff;
+	di.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+	di.DMA_BufferSize = 0;
+	di.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	di.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	di.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	di.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	di.DMA_Mode = DMA_Mode_Normal;
+	di.DMA_Priority = DMA_Priority_VeryHigh;
+	di.DMA_FIFOMode = DMA_FIFOMode_Disable;         
+	di.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+	di.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+	di.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+	DMA_Init(DMA2_Stream5, &di);
+	
+	SPI_DMACmd(SPI1,SPI_DMAReq_Tx,ENABLE);
+	
+	DMA_ITConfig(DMA2_Stream5,DMA_IT_TC,ENABLE);
+	
+	ni.NVIC_IRQChannel=DMA2_Stream5_IRQn;
+	ni.NVIC_IRQChannelPreemptionPriority=3;
+	ni.NVIC_IRQChannelSubPriority=3;
+	ni.NVIC_IRQChannelCmd=ENABLE;
+	NVIC_Init(&ni);	
 }
+
+void DMA2_Stream5_IRQHandler(void)
+{
+	if(DMA_GetFlagStatus(DMA2_Stream5,DMA_IT_TCIF5)==SET)
+	{
+		if(DMA_GetFlagStatus(DMA2_Stream5,DMA_FLAG_DMEIF5)!=RESET)
+		{
+			DMA_ClearFlag(DMA2_Stream5,DMA_FLAG_DMEIF5);
+		}		
+		DMA_ClearFlag(DMA2_Stream5,DMA_IT_TCIF5);
+	}		
+	//PGout(13)=0;	
+}
+
+
 
 void OledSendByte(u8 b)
 {
@@ -88,16 +140,16 @@ void OledStartUp(void)
 	OledSendByte(0x81);//Set contrast
 	OledSendByte(0x77);
 	OledSendByte(0xb1);//Set Phase Length
-	OledSendByte(0x31);
+	OledSendByte(0xf4);
 	OledSendByte(0xb3);//Set Front Clock Divider /Oscillator Frequency
-	OledSendByte(0xb1);
-	OledSendByte(0xb4); //For brightness enhancement
+	OledSendByte(0xf0);//b1
+	//OledSendByte(0xb4); //For brightness enhancement
 	OledSendByte(0xb5);
 	OledSendByte(0x03);
 	OledSendByte(0xb6);//Set Second pre-charge Period
 	OledSendByte(0x0d);
 	OledSendByte(0xbc);//Set Pre-charge voltage
-	OledSendByte(0x07);
+	OledSendByte(0x08);
 	OledSendByte(0xbe);//Set VCOMH
 	OledSendByte(0x07);
 	OledSendByte(0xd5);//Function Selection B
@@ -146,19 +198,15 @@ void oledSelectRect(u8 r1,u8 r2,u8 c1,u8 c2)
 
 void OledClearBuff(void)
 {
-	memset(oledBuff,0,sizeof(oledBuff));	
-	memset(oledRevFlag,0,sizeof(oledRevFlag));
+	memset(oledBuff,0xFF,sizeof(oledBuff));	
 }
 
 void OledClear(u8 c)
 {
-	u8 i,j;
-	PEout(1)=1;
+	u8 i,j;	
 	c=c|(c<<4);
 	oledSelectRect(0,127,0,63);
-	//delay_us(100);
-	OLED_DC=OLED_DATA;
-	//delay_us(100);
+	OLED_DC=OLED_DATA;	
 	for(i=0;i<128;i++)
 	{
 		for(j=0;j<64;j++)
@@ -166,116 +214,81 @@ void OledClear(u8 c)
 			OledSendByte(c);
 		}
 	}
-	//delay_us(100);
-		PEout(1)=0;
 }
 
 void OledRefresh(void)
 {
-	u8 i,j,k,l;
-	u16 m;
-	u8 c;
+	u8 i,j;
 	oledSelectRect(0,127,0,63);
 	OLED_DC=OLED_DATA;
-	for(j=0;j<21;j++)
+	for(i=0;i<64;i++)
 	{
-		for(k=0;k<6;k+=2)
+		for(j=0;j<128;j++)
 		{
-			for(i=0;i<16;i++)
-			{
-				m=1<<i;
-				for(l=0;l<8;l++)
-				{
-					c=0;
-					if(F6x8[oledBuff[i][j]][k]&(1<<l))
-						c=0xF0;
-					if(F6x8[oledBuff[i][j]][k+1]&(1<<l))
-						c|=0x0F;
-					if(oledRevFlag[j]&m)
-						OledSendByte(c^0xFF);
-					else
-						OledSendByte(c);
-				}
-			}
-		}		
-	}	
+			OledSendByte(oledBuff[i][j]);
+		}
+	}
 }
 
-void OledSetChar(u8 x,u8 y,s8 c,u8 f)
-{
-	oledBuff[y][x]=c-' ';
-	if(f)
-		oledRevFlag[x]|=(0x0001<<y);
-	else
-		oledRevFlag[x]&=((0x0001<<y)^0xFFFF);	
-}
-
-u8 OledSetString(u8 x,u8 y,s8 c[],u8 f)
-{
-	u8 i;
+void OledStartRefresh(void)
+{	
+	while(DMA_GetCurrDataCounter(DMA2_Stream5));		
+	DMA_Cmd(DMA2_Stream5,DISABLE);	
+	while (DMA_GetCmdStatus(DMA2_Stream5) != DISABLE);		
+	DMA_SetCurrDataCounter(DMA2_Stream5,OLED_BUFF_SIZE);
+	SPI1->DR;
+	OLED_DC=OLED_DATA;
+	OLED_CS=0;
+	DMA_ClearFlag(DMA2_Stream5,DMA_IT_TCIF5);	
+	DMA_Cmd(DMA2_Stream5,ENABLE);
 	
+}
+
+void OledDrawChar(u8 x,u8 y,s8 c,u8 f)
+{
+	u8 i,j,m=0;
+	u8 t1,t2;
+	x*=3;
+	y<<=3;
+	c-=' ';
+	if(f)
+		m=0xFF;
+	for(i=0;i<3;i++)
+	{
+		if(f)
+			memcpy(&(oledBuff[x+i][y]),&(F6x8gf[c][i<<3]),8);
+		else
+			memcpy(&(oledBuff[x+i][y]),&(F6x8g[c][i<<3]),8);
+	}
+	
+}
+
+u8 OledDrawString(u8 x,u8 y,s8 c[],u8 f)
+{
+	u8 i;	
 	for(i=0;c[i]!=0;i++)
 	{
-		oledBuff[y][x+i]=c[i]-' ';
-		if(f)
-			oledRevFlag[x+i]|=(0x0001<<y);
-		else
-			oledRevFlag[x+i]&=((0x0001<<y)^0xFFFF);
+		OledDrawChar(x+i,y,c[i],f);		
 	}
 	return i;
 }
 
-void OledSetRev(u8 x,u8 y,s8 len,u8 f)
+void OledSetStringRev(u8 x,u8 y,s8 len,u8 f)
 {	
-	while(len--)
+	u8 i,j;
+	x*=3;
+	y<<=3;
+	len*=3;
+	for(i=0;i<len;i++)
 	{
-		if(f)
-			oledRevFlag[x+len]|=(0x0001<<y);
-		else
-			oledRevFlag[x+len]&=((0x0001<<y)^0xFFFF);
+		for(j=0;j<8;j++)
+		{
+			oledBuff[x+i][y+j]^=0xFF;
+		}		
 	}
 }
 
-void OledRefreshPart(u8 x,u8 y,s8 len)
-{	
-	s8 j,k,l;
-	u16 m=1<<y;
-	u8 c;
-	oledSelectRect(y<<3,(y<<3)+7,x*3,(x+len)*3-1);
-	OLED_DC=OLED_DATA;
-	for(j=0;j<len;j++)
-	{
-		for(k=0;k<6;k+=2)
-		{							
-			for(l=0;l<8;l++)
-			{
-				c=0;
-				if(F6x8[oledBuff[y][j+x]][k]&(1<<l))
-					c=0xF0;
-				if(F6x8[oledBuff[y][j+x]][k+1]&(1<<l))
-					c|=0x0F;
-				if(oledRevFlag[j+x]&m)
-					OledSendByte(c^0xFF);
-				else
-					OledSendByte(c);
-			}			
-		}		
-	}	
-}
-
-void OledDispChar(u8 x,u8 y,s8 c,u8 f)
-{
-	OledSetChar(x,y,c,f);
-	OledRefreshPart(x,y,1);	
-}
-
-void OledDispString(u8 x,u8 y,s8 c[],u8 f)
-{	
-	u8 t=OledSetString(x,y,c,f);
-	OledRefreshPart(x,y,t);
-}
-
-void OledDispInt(u8 x,u8 y,s32 v,u8 ml,u8 f)
+void OledDrawInt(u8 x,u8 y,s32 v,u8 ml,u8 f)
 {
 	s8 buf[12],p=0,len=0;
 	s32 t;
@@ -301,7 +314,7 @@ void OledDispInt(u8 x,u8 y,s32 v,u8 ml,u8 f)
 			buf[len]='9';
 			len--;
 		}
-		OledDispString(x,y,buf,f);	
+		OledDrawString(x,y,buf,f);	
 		return;
 	}
 	while(ml>len)
@@ -317,15 +330,10 @@ void OledDispInt(u8 x,u8 y,s32 v,u8 ml,u8 f)
 		v/=10;
 		len--;
 	}
-	OledDispString(x,y,buf,f);	
+	OledDrawString(x,y,buf,f);	
 }
 
-void OledDispDouble(u8 x,u8 y,float v,s8 len,s8 pre,u8 f)
-{
-	
-}
-
-void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
+void OledDrawFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 {
 	s8 buf[14],p=0,len=0;
 	s32 t;
@@ -352,7 +360,7 @@ void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 			len--;
 		}
 		buf[ml-pre-1]='.';
-		OledDispString(x,y,buf,f);	
+		OledDrawString(x,y,buf,f);	
 		return;
 	}
 	while(ml>len)
@@ -379,36 +387,32 @@ void OledDispFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 		}
 		len--;
 	}
-	OledDispString(x,y,buf,f);	
+	OledDrawString(x,y,buf,f);	
 }
 
 //vertical scan
-void OledDispBitmap(u8 x,u8 y,u8 w,u8 h,const u8* data)
+void OledDrawBitmap(u8 x,u8 y,u8 w,u8 h,const u8* data)
 {
-	u8 i,j,c;
-	s8 k;
-	u16 size,t;
-	u8 bh=h/8;
-	oledSelectRect(y,y+h-1,x>>1,(x+w-1)<<1);
-	size=w;
-	size*=h;
-	OLED_DC=OLED_DATA;
-	for(i=0;i<w;i+=2)
+	u8 px,py;
+	u8 bh=h>>3;
+	u32 pos=0;
+	for(px=x;px<w+x;px++)
 	{
-		for(j=0;j<bh;j++)
+		for(py=y;py<y+h;py++)
 		{
-			t=i;
-			t=t*bh+j;			
-			for(k=7;k>=0;k--)
+			if(px&1)
 			{
-				c=0;
-				if(data[t]&(1<<k))
-					c=0xF0;
-				if(data[t+bh]&(1<<k))
-					c|=0x0F;
-				OledSendByte(c);
+				oledBuff[px>>1][py]&=0xF0;
+				if(data[pos>>3]&(0x80>>(pos&0x07)))				
+					oledBuff[px>>1][py]|=0x0F;				
 			}
+			else
+			{
+				oledBuff[px>>1][py]&=0x0F;
+				if(data[pos>>3]&(0x80>>(pos&0x07)))				
+					oledBuff[px>>1][py]|=0xF0;
+			}
+			pos++;
 		}
-		
-	}
+	}	
 }

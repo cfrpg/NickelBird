@@ -1,6 +1,6 @@
 #include "sys.h"
 #include "usart.h"	
-
+#warning "Old version"
 #if 1
 #pragma import(__use_no_semihosting)        
 

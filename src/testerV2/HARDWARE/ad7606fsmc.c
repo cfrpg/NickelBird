@@ -10,20 +10,19 @@ void AD7606FSMCInit(void)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF,ENABLE);	
 	//common GPIO	
-	//CV
-	
-	gi.GPIO_Pin=GPIO_Pin_6;
-	gi.GPIO_Mode=GPIO_Mode_AF;
+	// Mode sense
+	gi.GPIO_Pin=GPIO_Pin_3;
+	gi.GPIO_Mode=GPIO_Mode_IN;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
-	gi.GPIO_PuPd=GPIO_PuPd_NOPULL;
+	gi.GPIO_PuPd=GPIO_PuPd_DOWN;	
 	
-	GPIO_PinAFConfig(GPIOC,GPIO_PinSource6,GPIO_AF_TIM3);
-	GPIO_Init(GPIOC,&gi);
+	GPIO_Init(GPIOD,&gi);
+	
 	//CS
-//	gi.GPIO_Mode=GPIO_Mode_OUT;
-//	gi.GPIO_Pin=GPIO_Pin_7;
-//	GPIO_Init(GPIOD,&gi);
+	gi.GPIO_Mode=GPIO_Mode_OUT;
+	gi.GPIO_Pin=GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_Init(GPIOD,&gi);
 	//RST
 	gi.GPIO_Pin=GPIO_Pin_12;
 	gi.GPIO_Mode=GPIO_Mode_OUT;	
@@ -33,8 +32,8 @@ void AD7606FSMCInit(void)
 	gi.GPIO_Mode=GPIO_Mode_IN;
 	GPIO_Init(GPIOD,&gi);
 	
-	ADIF_CS=1;
-
+	ADIF_CS1=1;
+	ADIF_CS2=1;
 	
 	//FSMC GPIO
 	RCC_AHB3PeriphClockCmd(RCC_AHB3Periph_FSMC, ENABLE);
@@ -42,14 +41,14 @@ void AD7606FSMCInit(void)
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource1, GPIO_AF_FSMC);//D3
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource4, GPIO_AF_FSMC);//NOE
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource5, GPIO_AF_FSMC);//NWE
-	GPIO_PinAFConfig(GPIOD, GPIO_PinSource7, GPIO_AF_FSMC);//CS
+//	GPIO_PinAFConfig(GPIOD, GPIO_PinSource7, GPIO_AF_FSMC);//CS
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource8, GPIO_AF_FSMC);//D13
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource9, GPIO_AF_FSMC);//D14
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource10, GPIO_AF_FSMC);//D15
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource14, GPIO_AF_FSMC);//D0
 	GPIO_PinAFConfig(GPIOD, GPIO_PinSource15, GPIO_AF_FSMC);//D1
 
-	gi.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | GPIO_Pin_5 |GPIO_Pin_7 |
+	gi.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | GPIO_Pin_5 |
 	                            GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_14 |
 	                            GPIO_Pin_15;
 	gi.GPIO_Mode = GPIO_Mode_AF;
@@ -77,10 +76,10 @@ void AD7606FSMCInit(void)
 	FSMC_NORSRAMInitTypeDef  fi;
 	FSMC_NORSRAMTimingInitTypeDef  timing;
 	
-	timing.FSMC_AddressSetupTime = 3;
+	timing.FSMC_AddressSetupTime = 0;
 	timing.FSMC_AddressHoldTime = 0;
-	timing.FSMC_DataSetupTime = 6;
-	timing.FSMC_BusTurnAroundDuration = 1;
+	timing.FSMC_DataSetupTime = 1  ;
+	timing.FSMC_BusTurnAroundDuration = 0;
 	timing.FSMC_CLKDivision = 0;
 	timing.FSMC_DataLatency = 0;
 	timing.FSMC_AccessMode = FSMC_AccessMode_A;
@@ -110,39 +109,11 @@ void AD7606FSMCInit(void)
 	
 	AD7606FSMCReset();
 
-	//TIM3_CH1
-	TIM_TimeBaseInitTypeDef ti;
-	TIM_OCInitTypeDef to;
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);	
 	
-	ti.TIM_Period = 84-1; //1ms
-	ti.TIM_Prescaler =999;
-	ti.TIM_ClockDivision = TIM_CKD_DIV1; 
-	ti.TIM_CounterMode = TIM_CounterMode_Up; 
-	TIM_TimeBaseInit(TIM3, &ti);
-	
-	to.TIM_OCMode=TIM_OCMode_PWM1;
-	to.TIM_OutputState=TIM_OutputState_Enable;
-	to.TIM_Pulse=1;
-	to.TIM_OCPolarity=TIM_OCPolarity_Low;
-	
-	TIM_OC1Init(TIM3,&to);
-	TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Enable);
-	TIM_ARRPreloadConfig(TIM3,ENABLE);
-	
-	
-	//TIM3 INT	
-	NVIC_InitTypeDef ni;
-	ni.NVIC_IRQChannel = TIM3_IRQn;
-	ni.NVIC_IRQChannelPreemptionPriority = 1; 
-	ni.NVIC_IRQChannelSubPriority = 1;
-	ni.NVIC_IRQChannelCmd = ENABLE;	
-	NVIC_Init(&ni);		
-	TIM_ITConfig(TIM3,TIM_IT_Update,ENABLE ); 
-	TIM_Cmd(TIM3, ENABLE);
 	
 	//PD13 EXTI
 	EXTI_InitTypeDef ei;
+	NVIC_InitTypeDef ni;
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOD,EXTI_PinSource13);
@@ -202,7 +173,7 @@ void AD7606FSMCStart(void)
 
 void AD7606FSMCRead(s16* data)
 {
-//	ADIF_CS=0;
+	ADIF_CS1=0;
 	data[0]=AD7606_RESULT();
 	data[1]=AD7606_RESULT();
 	data[2]=AD7606_RESULT();
@@ -211,7 +182,17 @@ void AD7606FSMCRead(s16* data)
 	data[5]=AD7606_RESULT();
 	data[6]=AD7606_RESULT();
 	data[7]=AD7606_RESULT();
-//	ADIF_CS=1;
+	ADIF_CS1=1;
+	ADIF_CS2=0;
+	data[8]=AD7606_RESULT();
+	data[9]=AD7606_RESULT();
+	data[10]=AD7606_RESULT();
+	data[11]=AD7606_RESULT();
+	data[12]=AD7606_RESULT();
+	data[13]=AD7606_RESULT();
+	data[14]=AD7606_RESULT();
+	data[15]=AD7606_RESULT();
+	ADIF_CS2=1;	
 }
 
 

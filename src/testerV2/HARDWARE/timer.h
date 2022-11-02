@@ -3,6 +3,6 @@
 #include "sys.h"
 
 void MainClockInit(void);
-void PreciseClockInit(void);
+u32 ClockGetMicroSecond(void);
 
 #endif

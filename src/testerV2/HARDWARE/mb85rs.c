@@ -65,14 +65,25 @@ u8 FRAMReceiveByte(void)
 
 }
 
-void FRAMWrite(u16 addr,u16 len,u8* data)
+void FRAMWrite(u32 addr,u32 len,u8* data)
 {
-	u8 addl,addh;
-	u16 i;
+	u8 addl,addm,addh;
+	u32 i;
 	//Cmd WREN
 	FRAM_CS=0;
 	FRAMSendByte(FRAM_WREN);
 	FRAM_CS=1;
+#ifdef FRAM_24BIT_ADDR
+	addl=(u8)(addr&0x00FF);
+	addm=(u8)((addr>>8)&0x00FF);
+	addh=(u8)((addr>>16)&0x00FF);
+	//Cmd WRITE
+	FRAM_CS=0;
+	FRAMSendByte(FRAM_WRITE);
+	FRAMSendByte(addh);
+	FRAMSendByte(addm);
+	FRAMSendByte(addl);
+#else
 	addl=(u8)(addr&0x00FF);
 	addh=(u8)((addr>>8)&0x00FF);
 	//Cmd WRITE
@@ -80,6 +91,8 @@ void FRAMWrite(u16 addr,u16 len,u8* data)
 	FRAMSendByte(FRAM_WRITE);
 	FRAMSendByte(addh);
 	FRAMSendByte(addl);
+#endif
+	
 	for(i=0;i<len;i++)
 	{
 		FRAMSendByte(data[i]);
@@ -92,10 +105,21 @@ void FRAMWrite(u16 addr,u16 len,u8* data)
 	FRAM_CS=1;
 }
 
-void FRAMRead(u16 addr,u16 len,u8* data)
+void FRAMRead(u32 addr,u32 len,u8* data)
 {
-	u8 addl,addh;
-	u16 i;
+	u8 addl,addm,addh;
+	u32 i;
+#ifdef FRAM_24BIT_ADDR
+	addl=(u8)(addr&0x00FF);
+	addm=(u8)((addr>>8)&0x00FF);
+	addh=(u8)((addr>>16)&0x00FF);
+	//Cmd READ
+	FRAM_CS=0;	
+	FRAMSendByte(FRAM_READ);
+	FRAMSendByte(addh);
+	FRAMSendByte(addm);
+	FRAMSendByte(addl);	
+#else
 	addl=(u8)(addr&0x00FF);
 	addh=(u8)((addr>>8)&0x00FF);
 	//Cmd READ
@@ -103,6 +127,7 @@ void FRAMRead(u16 addr,u16 len,u8* data)
 	FRAMSendByte(FRAM_READ);
 	FRAMSendByte(addh);
 	FRAMSendByte(addl);	
+#endif
 	SPI_I2S_ReceiveData(SPI2);
 	for(i=0;i<len;i++)
 	{

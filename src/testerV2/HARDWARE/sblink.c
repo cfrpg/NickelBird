@@ -2,6 +2,8 @@
 #include "string.h"
 #include "stdio.h"
 
+#warning "Old version"
+
 u8 sendBuff[SENDBUFFSIZE];
 u8 linkSeq;
 u8 recBuff[2][256];
@@ -119,10 +121,10 @@ void LinkSendData(void* buff,u8 len)
 	}
 }
 
+#warning "Empty function"
 u32 LinkPackTime()
-{
-	RTCReadTime();
-	return (time.hour<<22)|(time.min<<16)|(time.sec<<10)|time.ms;
+{	
+	return 0;
 }
 
 void DMA2_Stream7_IRQHandler(void)
