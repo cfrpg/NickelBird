@@ -1,8 +1,11 @@
 #include "sys.h"
 #include "sblink.h"
+#include "sampling.h"
 
 typedef struct
 {
+	//SamplingState spl;
+	
 	SensorDataPackage sensors;
 	u16 pwm[4];
 	float freq[2];
@@ -15,8 +18,7 @@ typedef struct
 	u32 EOtime;
 	u32 EOinterval;
 	u16 ledInterval;
-	u8 adcClkSource;
-	u8 adcBusy;
+
 } systemState;
 
 extern systemState sys;

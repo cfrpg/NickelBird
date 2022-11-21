@@ -14,14 +14,18 @@ void ExtinInit(void)
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB,ENABLE);
 	
+	// Int GPIO
 	gi.GPIO_Pin=GPIO_Pin_0|GPIO_Pin_1;
 	gi.GPIO_Mode=GPIO_Mode_IN;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	GPIO_Init(GPIOE,&gi);
+	// Cap GPIO
+	
 	gi.GPIO_Pin=GPIO_Pin_8|GPIO_Pin_9;
-	GPIO_Init(GPIOE,&gi);
+	
+	GPIO_Init(GPIOB,&gi);
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
 	

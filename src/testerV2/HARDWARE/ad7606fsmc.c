@@ -105,11 +105,7 @@ void AD7606FSMCInit(void)
 	
 	FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
 	
-
-	
-	AD7606FSMCReset();
-
-	
+	AD7606FSMCReset();	
 	
 	//PD13 EXTI
 	EXTI_InitTypeDef ei;
@@ -130,28 +126,28 @@ void AD7606FSMCInit(void)
 	ni.NVIC_IRQChannelSubPriority=0;
 	NVIC_Init(&ni);
 }
-void AD7606FSMCSetInternalClk(void)
-{
-	//set gpio to af
-	GPIO_PinAFConfig(ADIF_CV_GPIO,ADIF_CV_Pin,GPIO_AF_TIM3);
-	ADIF_CV_GPIO->MODER  &= ~(GPIO_MODER_MODER0 << (ADIF_CV_Pin * 2));
-    ADIF_CV_GPIO->MODER |= (((uint32_t)0x02) << (ADIF_CV_Pin * 2));
-	//start tim3
-	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-	TIM_Cmd(TIM3, ENABLE);
-}
+//void AD7606FSMCSetInternalClk(void)
+//{
+//	//set gpio to af
+//	GPIO_PinAFConfig(ADIF_CV_GPIO,ADIF_CV_Pin,GPIO_AF_TIM3);
+//	ADIF_CV_GPIO->MODER  &= ~(GPIO_MODER_MODER0 << (ADIF_CV_Pin * 2));
+//    ADIF_CV_GPIO->MODER |= (((uint32_t)0x02) << (ADIF_CV_Pin * 2));
+//	//start tim3
+//	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+//	TIM_Cmd(TIM3, ENABLE);
+//}
 
-void AD7606FSMCSetExternalClk(void)
-{
-	//stop tim3	
-	TIM_Cmd(TIM3, DISABLE);
-	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-	//set gpio to out
-	GPIO_PinAFConfig(ADIF_CV_GPIO,ADIF_CV_Pin,(u8)0x00);
-	ADIF_CV_GPIO->MODER  &= ~(GPIO_MODER_MODER0 << (ADIF_CV_Pin * 2));
-    ADIF_CV_GPIO->MODER |= (((uint32_t)0x01) << (ADIF_CV_Pin * 2));
-	ADIF_CV=1;
-}
+//void AD7606FSMCSetExternalClk(void)
+//{
+//	//stop tim3	
+//	TIM_Cmd(TIM3, DISABLE);
+//	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+//	//set gpio to out
+//	GPIO_PinAFConfig(ADIF_CV_GPIO,ADIF_CV_Pin,(u8)0x00);
+//	ADIF_CV_GPIO->MODER  &= ~(GPIO_MODER_MODER0 << (ADIF_CV_Pin * 2));
+//    ADIF_CV_GPIO->MODER |= (((uint32_t)0x01) << (ADIF_CV_Pin * 2));
+//	ADIF_CV=1;
+//}
 
 void AD7606FSMCReset(void)
 {

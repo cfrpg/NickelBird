@@ -34,7 +34,6 @@ void PageInit_main(u8 f)
 		pwm_max=ParamGetFromName("PWM_MAX");
 		
 		pwm_disarmed=ParamGetFromName("PWM_DISARMED");
-		printf("%d %d %d\r\n",*pwm_min,*pwm_max,*pwm_disarmed);
 		return;
 	}
 	sys.fastUpdate=mainpage_fastUpdate;

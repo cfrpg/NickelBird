@@ -27,14 +27,7 @@ void AnalyzePkg(void);
 
 u32 tick[3]={0,0,0};
 u16 cpucnt=0;
-u8 lastKey=0;
-u8 currKey=0;
-u8 lastWheelPush=0;
-u8 currWheelPush=0;
-s32 lastWheel=0;
-s32 currWheel=0;
-u8 keyPress=0;
-u8 wheelPress=0;
+
 
 s8 currpage;
 systemState sys;
@@ -48,24 +41,25 @@ int main(void)
 	s16 i,j;
 //	s16 tmp[2];
 	u16 time;
+	
+	// Initialize system function
 	delay_init(168);
 	uart_init(921600);
-	
-	OledInit();
 	MainClockInit();
+	
+	// Initialize hardware
+	OledInit();	
+	OledClear(0x00);	
 	LEDInit();
-	OledClear(0x0F);
-
-	OledDrawBitmap(0,0,128,128,gImage_logo);
-	OledDrawString(0,0,"Show some text",0);
-	for(i=0;i<97-3+1;i++)
-	{
-		OledDrawChar(i%20,i/20,i+' ',0);
-	}
-	OledDrawChar(0,10,61+' ',0);
-//	OledRefresh();
+	KeyInit();
 	FRAMInit();	
 	
+	// Show logo
+	printf("NickelBird\r\n");	
+	OledDrawBitmap(0,0,128,128,gImage_logo);
+	OledRefresh();
+	
+	// Load parameters
 	u8 t=ParamRead();
 	if(t)
 	{
@@ -82,35 +76,31 @@ int main(void)
 		delay_ms(500);
 	}
 	
-	
-//	PWMInit();
-//	
-	initTestGPIO();
-//	PagesInit();
-//	LinkInit();	
-	SamplingInit();
+	//Initialize DAQ peripherals
 	AD7606FSMCInit();
-//	ExtinInit();
-
-	KeyInit();
-	
 	DACInit();
-	DACSet(0.5f);
-
-	printf("NickelBird\r\n");
+	PWMInit();
+	PWMSetAux(1500,1500);
+	//	ExtinInit();
 	
-//	SeneorsInit();
-//	
-//	PreciseClockInit();
-//	
-	delay_ms(500);
-	delay_ms(500);
+	// Initialize sampling control
+	SamplingInit();
+	LinkInit();	
 	
+	//Initialize UI
+	PagesInit();
+//	initTestGPIO();	
+	
+	// System start
 	LEDSetPattern(LED_OFF,LED_OFF,LED_1Hz);
+	delay_ms(500);
+	delay_ms(500);
+	
+	printf("%d\t%d\n",sizeof(PackageHeader),sizeof(SensorDataPackage2));
 
 	while(1)
 	{	
-		if(tick[0]>=200)
+		if(tick[0]>=201)
 		{			
 			tick[0]=0;
 			LEDUpdate();
@@ -123,18 +113,17 @@ int main(void)
 		}
 		if(tick[1]>=2)
 		{
-//			time=tick[1];
-//			tick[1]=0;	
-//			SensorsFastUpdate(time);
+			time=tick[1];
+			tick[1]=0;	
+			SamplingFastUpdate(time);
 		}
-		if(tick[2]>=100)
+		if(tick[2]>=101)
 		{
-//			TEST0=1;
-//			time=tick[2];
-//			tick[2]=0;
-//			SensorsSlowUpdate(time);
-//			PagesUpdate();
-//			TEST0=0;
+			time=tick[2];
+			tick[2]=0;
+			SamplingSlowUpdate(time);
+			PagesUpdate();
+			OledRefresh();
 		}
 	}
 }
@@ -210,22 +199,9 @@ void TIM7_IRQHandler(void)
 
 void EXTI15_10_IRQHandler(void)
 {
-	//printf("int\r\n");
 	if (EXTI_GetITStatus(EXTI_Line13) != RESET)
 	{
-		//TEST0=1;
-		AD7606FSMCRead(sys.sensors.ADCData);
 		SamplingIntUpdate(); 
-		//LinkSendData(&sys.sensors,sizeof(SensorDataPackage));
-
-		EXTI_ClearITPendingBit(EXTI_Line13);
-		sys.adcBusy=0;
-		if(sys.intReset!=0)
-		{
-			(*sys.intReset)();
-		}
-		
-		//TEST0=0;
 	}
 	if (EXTI_GetITStatus(EXTI_Line10) != RESET)
 	{

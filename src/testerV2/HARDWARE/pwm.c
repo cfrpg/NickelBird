@@ -1,6 +1,6 @@
 #include "pwm.h"
 #include "pages.h"
-#warning "Old version"
+
 u8 _pwm_armed;
 
 void PWMInit(void)
@@ -41,16 +41,16 @@ void PWMInit(void)
 	
 	TIM_OC1Init(TIM5,&to);
 	TIM_OC2Init(TIM5,&to);
-	TIM_OC2Init(TIM3,&to);
-	TIM_OC2Init(TIM3,&to);
+	TIM_OC3Init(TIM3,&to);
+	TIM_OC4Init(TIM3,&to);
 
 	
 	TIM_OC1PreloadConfig(TIM5,TIM_OCPreload_Enable);
 	TIM_OC2PreloadConfig(TIM5,TIM_OCPreload_Enable);
 	TIM_ARRPreloadConfig(TIM5,ENABLE);
 	TIM_Cmd(TIM5,ENABLE);
-	TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Enable);
-	TIM_OC2PreloadConfig(TIM3,TIM_OCPreload_Enable);
+	TIM_OC3PreloadConfig(TIM3,TIM_OCPreload_Enable);
+	TIM_OC4PreloadConfig(TIM3,TIM_OCPreload_Enable);
 	TIM_ARRPreloadConfig(TIM3,ENABLE);
 	TIM_Cmd(TIM3,ENABLE);
 	PWMDisarm();
@@ -59,9 +59,7 @@ void PWMInit(void)
 void PWMSet(u32 ch0,u32 ch1)
 {
 	if(_pwm_armed)
-	{		
-//		TIM_SetCompare1(TIM5,ch0*t/1000+params.pwm_min);
-//		TIM_SetCompare2(TIM5,ch1*t/1000+params.pwm_min);	
+	{			
 		TIM_SetCompare1(TIM5,ch0);
 		TIM_SetCompare2(TIM5,ch1);	
 		sys.pwm[0]=ch0;
@@ -70,16 +68,12 @@ void PWMSet(u32 ch0,u32 ch1)
 }
 
 void PWMSetAux(u32 ch0,u32 ch1)
-{
-	if(_pwm_armed)
-	{		
-//		TIM_SetCompare1(TIM5,ch0*t/1000+params.pwm_min);
-//		TIM_SetCompare2(TIM5,ch1*t/1000+params.pwm_min);	
-		TIM_SetCompare1(TIM3,ch0);
-		TIM_SetCompare2(TIM3,ch1);	
+{	
+		TIM_SetCompare3(TIM3,ch0);
+		TIM_SetCompare4(TIM3,ch1);	
 		sys.pwm[2]=ch0;
 		sys.pwm[3]=ch1;
-	}
+	
 }
 
 void PWMDisarm(void)

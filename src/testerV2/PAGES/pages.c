@@ -8,6 +8,15 @@
 
 s8 nextPage;
 
+u8 lastKey=0;
+u8 currKey=0;
+u8 lastWheelPush=0;
+u8 currWheelPush=0;
+s32 lastWheel=0;
+s32 currWheel=0;
+u8 keyPress=0;
+u8 wheelPress=0;
+
 void PagesInit(void)
 {	
 	const s32* t=ParamGetFromName("PWM_MIN");
@@ -24,8 +33,8 @@ void PagesInit(void)
 	sys.intUpdate=0;
 	sys.intReset=0;
 	sys.ledInterval=500;
-	sys.adcClkSource=INTERNAL;
-	sys.adcBusy=0;
+//	sys.adcClkSource=INTERNAL;
+//	sys.adcBusy=0;
 	
 	PageInit_main(1);
 	PageInit_falcon(1);
@@ -33,6 +42,15 @@ void PagesInit(void)
 	//PageInit_ADC(1);
 	currpage=-1;
 	nextPage=-1;
+	
+	lastKey=0;
+	currKey=0;
+	lastWheelPush=0;
+	currWheelPush=0;
+	lastWheel=0;
+	currWheel=0;
+	keyPress=0;
+	wheelPress=0;
 }
 
 void PagesChangeTo(u8 p)
@@ -136,18 +154,18 @@ void PagesUpdate(void)
 	}
 	if(keyPress&KEY_D)
 	{
-		if(sys.adcClkSource==INTERNAL)
-		{
-			sys.adcClkSource=EXTERNAL;
-			sys.ledInterval=100;
-			AD7606FSMCSetExternalClk();
-		}
-		else
-		{
-			sys.adcClkSource=INTERNAL;
-			sys.ledInterval=500;
-			AD7606FSMCSetInternalClk();
-		}
+//		if(sys.adcClkSource==INTERNAL)
+//		{
+//			sys.adcClkSource=EXTERNAL;
+//			sys.ledInterval=100;
+//			AD7606FSMCSetExternalClk();
+//		}
+//		else
+//		{
+//			sys.adcClkSource=INTERNAL;
+//			sys.ledInterval=500;
+//			AD7606FSMCSetInternalClk();
+//		}
 	}
 	lastKey=currKey;
 	lastWheel=currWheel;

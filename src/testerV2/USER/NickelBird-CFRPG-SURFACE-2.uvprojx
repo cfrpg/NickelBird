@@ -628,11 +628,6 @@
           <GroupName>HARDWARE</GroupName>
           <Files>
             <File>
-              <FileName>adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\adc.c</FilePath>
-            </File>
-            <File>
               <FileName>led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\led.c</FilePath>
@@ -646,11 +641,6 @@
               <FileName>pwm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\pwm.c</FilePath>
-            </File>
-            <File>
-              <FileName>rtc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\rtc.c</FilePath>
             </File>
             <File>
               <FileName>sblink.c</FileName>
@@ -737,6 +727,16 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\parameterList.c</FilePath>
             </File>
+            <File>
+              <FileName>sampling.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\sampling.c</FilePath>
+            </File>
+            <File>
+              <FileName>sampling.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\HARDWARE\sampling.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -756,6 +756,11 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>nickelbird.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\SYSTEM\nickelbird.h</FilePath>
             </File>
           </Files>
         </Group>

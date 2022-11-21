@@ -19,7 +19,7 @@ void AD7606FSMCInit(void);
 void AD7606FSMCReset(void);
 void AD7606FSMCStart(void);
 void AD7606FSMCRead(s16* data);
-void AD7606FSMCSetInternalClk(void);
-void AD7606FSMCSetExternalClk(void);
+//void AD7606FSMCSetInternalClk(void);
+//void AD7606FSMCSetExternalClk(void);
 
 #endif

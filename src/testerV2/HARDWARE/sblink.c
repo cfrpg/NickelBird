@@ -2,7 +2,6 @@
 #include "string.h"
 #include "stdio.h"
 
-#warning "Old version"
 
 u8 sendBuff[SENDBUFFSIZE];
 u8 linkSeq;
@@ -22,45 +21,48 @@ void LinkInit(void)
 	NVIC_InitTypeDef ni;
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA,ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
 
-	GPIO_PinAFConfig(GPIOA,GPIO_PinSource9,GPIO_AF_USART1); 
-	GPIO_PinAFConfig(GPIOA,GPIO_PinSource10,GPIO_AF_USART1);
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource2,GPIO_AF_USART2); 
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource3,GPIO_AF_USART2);
 	
-	gi.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
+	gi.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
 	gi.GPIO_Mode = GPIO_Mode_AF;
 	gi.GPIO_Speed = GPIO_Speed_100MHz;
 	gi.GPIO_OType = GPIO_OType_PP;
 	gi.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(GPIOA,&gi);
 
-	ui.USART_BaudRate = 2000000;//921600;
+	USART2->CR1|=USART_CR1_OVER8;
+	ui.USART_BaudRate = 4000000;//4M;
 	ui.USART_WordLength = USART_WordLength_8b;
 	ui.USART_StopBits = USART_StopBits_1;
 	ui.USART_Parity = USART_Parity_No;
 	ui.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	ui.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	USART_Init(USART1, &ui);
-	USART_Cmd(USART1, ENABLE);
+	
+	USART_Init(USART2, &ui);
+	
+	USART_Cmd(USART2, ENABLE);
 	
 	//USART_ITConfig(USART1,USART_IT_RXNE,ENABLE);
 	
-	ni.NVIC_IRQChannel=USART1_IRQn;
-	ni.NVIC_IRQChannelPreemptionPriority=3;
-	ni.NVIC_IRQChannelSubPriority=1;
-	ni.NVIC_IRQChannelCmd=ENABLE;
-	NVIC_Init(&ni);
+//	ni.NVIC_IRQChannel=USART2_IRQn;
+//	ni.NVIC_IRQChannelPreemptionPriority=3;
+//	ni.NVIC_IRQChannelSubPriority=1;
+//	ni.NVIC_IRQChannelCmd=ENABLE;
+//	NVIC_Init(&ni);
+//	
+	USART_ClearFlag(USART2, USART_FLAG_TC);
 	
-	USART_ClearFlag(USART1, USART_FLAG_TC);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1,ENABLE);
 	
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2,ENABLE);
+	DMA_DeInit(DMA1_Stream6);
 	
-	DMA_DeInit(DMA2_Stream7);
-	
-	while(DMA_GetCmdStatus(DMA2_Stream7)!=DISABLE);
+	while(DMA_GetCmdStatus(DMA1_Stream6)!=DISABLE);
 	
 	di.DMA_Channel = DMA_Channel_4;
-	di.DMA_PeripheralBaseAddr = (u32)&USART1->DR;
+	di.DMA_PeripheralBaseAddr = (u32)&USART2->DR;
 	di.DMA_Memory0BaseAddr = (u32)sendBuff;
 	di.DMA_DIR = DMA_DIR_MemoryToPeripheral;
 	di.DMA_BufferSize = 0;
@@ -74,11 +76,11 @@ void LinkInit(void)
 	di.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
 	di.DMA_MemoryBurst = DMA_MemoryBurst_Single;
 	di.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-	DMA_Init(DMA2_Stream7, &di);
-	USART_DMACmd(USART1,USART_DMAReq_Tx,ENABLE);
+	DMA_Init(DMA1_Stream6, &di);
+	USART_DMACmd(USART2,USART_DMAReq_Tx,ENABLE);
 	
-	DMA_ITConfig(DMA2_Stream7,DMA_IT_TC,ENABLE);
-	ni.NVIC_IRQChannel=DMA2_Stream7_IRQn;
+	DMA_ITConfig(DMA1_Stream6,DMA_IT_TC,ENABLE);
+	ni.NVIC_IRQChannel=DMA1_Stream6_IRQn;
 	ni.NVIC_IRQChannelPreemptionPriority=0;
 	ni.NVIC_IRQChannelSubPriority=3;
 	ni.NVIC_IRQChannelCmd=ENABLE;
@@ -102,21 +104,20 @@ void LinkSendData(void* buff,u8 len)
 	{
 		sum^=sendBuff[i];
 	}
-	sendBuff[len]=sum;
-	
+	sendBuff[len]=sum;	
 	linkSeq++;	
-	//printf("%d\r\n",len);
-	if(DMA_GetCurrDataCounter(DMA2_Stream7))
+	if(DMA_GetCurrDataCounter(DMA1_Stream6))
 	{
-		printf("dma %d\r\n",DMA_GetCurrDataCounter(DMA2_Stream7));
+		printf("dma %d\r\n",DMA_GetCurrDataCounter(DMA1_Stream5));
 	}
 	else
 	{
-		while(DMA_GetCurrDataCounter(DMA2_Stream7));		
-		DMA_Cmd(DMA2_Stream7,DISABLE);	
-		while (DMA_GetCmdStatus(DMA2_Stream7) != DISABLE);	
-		DMA_SetCurrDataCounter(DMA2_Stream7,len+1);
-		DMA_Cmd(DMA2_Stream7,ENABLE);
+		
+		while(DMA_GetCurrDataCounter(DMA1_Stream6));		
+		DMA_Cmd(DMA1_Stream6,DISABLE);	
+		while (DMA_GetCmdStatus(DMA1_Stream6) != DISABLE);	
+		DMA_SetCurrDataCounter(DMA1_Stream6,len+1);
+		DMA_Cmd(DMA1_Stream6,ENABLE);		
 		//PGout(13)=1;
 	}
 }
@@ -127,102 +128,17 @@ u32 LinkPackTime()
 	return 0;
 }
 
-void DMA2_Stream7_IRQHandler(void)
+void DMA1_Stream6_IRQHandler(void)
 {
-	if(DMA_GetFlagStatus(DMA2_Stream7,DMA_IT_TCIF7)==SET)
+	//printf("dma int\r\n");
+	if(DMA_GetFlagStatus(DMA1_Stream6,DMA_IT_TCIF6)==SET)
 	{
-		if(DMA_GetFlagStatus(DMA2_Stream7,DMA_FLAG_DMEIF7)!=RESET)
+		if(DMA_GetFlagStatus(DMA1_Stream6,DMA_FLAG_DMEIF6)!=RESET)
 		{
-			DMA_ClearFlag(DMA2_Stream7,DMA_FLAG_DMEIF7);
+			DMA_ClearFlag(DMA1_Stream6,DMA_FLAG_DMEIF6);
 		}
 		
-		DMA_ClearFlag(DMA2_Stream7,DMA_IT_TCIF7);
+		DMA_ClearFlag(DMA1_Stream6,DMA_IT_TCIF6);
 	}		
 	//PGout(13)=0;	
-}
-
-void USART1_IRQHandler(void)
-{
-	
-	u8 b;
-	
-	printf("rx %x\r\n",b);
-	if (USART_GetFlagStatus(USART1, USART_FLAG_ORE) != RESET)
-	{
-		USART_ReceiveData(USART1);
-		USART_ClearFlag(USART1, USART_FLAG_ORE);
-		printf("ore");
-	}
-
-	if(USART_GetITStatus(USART1,USART_IT_RXNE)!=RESET)
-	{
-		//USART_ClearFlag(USART1, USART_FLAG_RXNE);
-		//USART_ClearITPendingBit(USART1,USART_IT_RXNE);
-		
-		b=USART_ReceiveData(USART1);
-		printf("rx %x\r\n",b);
-		if(b==0xAC)
-			sblinkReady=1;
-//		//return;
-//		if(recState!=0)
-//		{
-//			if(recState<9)
-//				recSum^=b;
-//			recBuff[curr][recBuffLen[curr]]=b;
-//			recBuffLen[curr]++;
-//		}
-//		switch(recState)
-//		{
-//			case 0://get STX
-//				if(b==0xFC)
-//				{
-//					recBuff[curr][0]=b;
-//					recSum=0^b;
-//					recBuffLen[curr]=1;
-//					recState=1;
-//				}
-//			break;
-//			case 1://get LEN
-//				pkgLen=b;
-//				recState=2;
-//			break;
-//			case 2://get SEQ
-//				recState=3;
-//			break;
-//			case 3://get FUN
-//				recState=4;
-//			break;
-//			case 4://get TIM1
-//				recState=5;
-//			break;
-//			case 5://get TIM2
-//				recState=6;
-//			break;
-//			case 6://get TIM3
-//				recState=7;
-//			break;
-//			case 7://get TIM4
-//				recState=8;
-//			break;
-//			case 8:
-//				if(recBuffLen[curr]==pkgLen+8)
-//				{
-//					recState=9;
-//				}
-//			break;
-//			case 9:
-//				if(recSum==b)
-//				{
-//					currBuff^=1;
-//					sblinkReady=1;
-//				}
-//				else
-//				{
-//					printf("Bad checksum %d %d\r\n",recSum,b);
-//				}
-//				recState=0;
-//			break;
-//		}
-		
-	}
 }

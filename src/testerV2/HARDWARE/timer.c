@@ -3,7 +3,6 @@
 #include "adc.h"
 #include "ad7606fsmc.h"
 
-#warning "Old version"
 
 u32 lastCCR;
 u32 EOsum;

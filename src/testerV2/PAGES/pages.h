@@ -13,8 +13,7 @@
 
 #define PageNum 3
 
-#define INTERNAL 0
-#define EXTERNAL 1
+
 
 extern u8 lastKey;
 extern u8 currKey;

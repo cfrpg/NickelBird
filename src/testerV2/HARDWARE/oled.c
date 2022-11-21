@@ -116,8 +116,54 @@ void OledSendByte(u8 b)
 	
 }
 
+//void OledStartUp(void)
+//{
+//	OLED_RST=1;
+//	delay_ms(100);
+//	OLED_RST=0;
+//	delay_ms(100);
+//	OLED_RST=1;
+//	delay_ms(100);
+//	OLED_DC=OLED_CMD;
+//	OledSendByte(0xae);//Set display off
+//	OledSendByte(0xa0);//Set re-map
+//	OledSendByte(0x46);
+//	OledSendByte(0xa1);//Set display start line
+//	OledSendByte(0x00);
+//	OledSendByte(0xa2);//Set display offset
+//	OledSendByte(0x00);
+//	OledSendByte(0xa4);//Normal Display
+//	OledSendByte(0xa8);//Set multiplex ratio
+//	OledSendByte(0x7f);
+//	OledSendByte(0xab);//Function Selection A
+//	OledSendByte(0x01);//Enable internal VDD regulator
+//	OledSendByte(0x81);//Set contrast
+//	OledSendByte(0x77);
+//	OledSendByte(0xb1);//Set Phase Length
+//	OledSendByte(0xf4);
+//	OledSendByte(0xb3);//Set Front Clock Divider /Oscillator Frequency
+//	OledSendByte(0xf0);//b1
+//	//OledSendByte(0xb4); //For brightness enhancement
+//	OledSendByte(0xb5);
+//	OledSendByte(0x03);
+//	OledSendByte(0xb6);//Set Second pre-charge Period
+//	OledSendByte(0x0d);
+//	OledSendByte(0xbc);//Set Pre-charge voltage
+//	OledSendByte(0x08);
+//	OledSendByte(0xbe);//Set VCOMH
+//	OledSendByte(0x07);
+//	OledSendByte(0xd5);//Function Selection B
+//	OledSendByte(0x02);//Enable second pre-charge
+//	//OledSendByte(0xb9);
+//	OledSendByte(0xaf);//Display on	
+//	OledSendByte(0xb5);
+//	OledSendByte(0x03);
+//	OledDispOn();
+//}
+
 void OledStartUp(void)
 {
+	//old
 	OLED_RST=1;
 	delay_ms(100);
 	OLED_RST=0;
@@ -140,16 +186,16 @@ void OledStartUp(void)
 	OledSendByte(0x81);//Set contrast
 	OledSendByte(0x77);
 	OledSendByte(0xb1);//Set Phase Length
-	OledSendByte(0xf4);
+	OledSendByte(0x31);
 	OledSendByte(0xb3);//Set Front Clock Divider /Oscillator Frequency
-	OledSendByte(0xf0);//b1
-	//OledSendByte(0xb4); //For brightness enhancement
+	OledSendByte(0xb1);
+	OledSendByte(0xb4); //For brightness enhancement
 	OledSendByte(0xb5);
 	OledSendByte(0x03);
 	OledSendByte(0xb6);//Set Second pre-charge Period
 	OledSendByte(0x0d);
 	OledSendByte(0xbc);//Set Pre-charge voltage
-	OledSendByte(0x08);
+	OledSendByte(0x07);
 	OledSendByte(0xbe);//Set VCOMH
 	OledSendByte(0x07);
 	OledSendByte(0xd5);//Function Selection B
@@ -198,7 +244,7 @@ void oledSelectRect(u8 r1,u8 r2,u8 c1,u8 c2)
 
 void OledClearBuff(void)
 {
-	memset(oledBuff,0xFF,sizeof(oledBuff));	
+	memset(oledBuff,0x00,sizeof(oledBuff));	
 }
 
 void OledClear(u8 c)
@@ -246,13 +292,10 @@ void OledStartRefresh(void)
 
 void OledDrawChar(u8 x,u8 y,s8 c,u8 f)
 {
-	u8 i,j,m=0;
-	u8 t1,t2;
+	u8 i;
 	x*=3;
 	y<<=3;
-	c-=' ';
-	if(f)
-		m=0xFF;
+	c-=' ';	
 	for(i=0;i<3;i++)
 	{
 		if(f)
@@ -394,7 +437,6 @@ void OledDrawFixed(u8 x,u8 y,s32 v,s8 pre,u8 ml,u8 f)
 void OledDrawBitmap(u8 x,u8 y,u8 w,u8 h,const u8* data)
 {
 	u8 px,py;
-	u8 bh=h>>3;
 	u32 pos=0;
 	for(px=x;px<w+x;px++)
 	{

@@ -7,8 +7,8 @@
 #define LINKSTX 0xFC
 
 #define HEARTBEAT 0x00
-#define SENSOR_DATA 0x01
-#define SENSOR_DATA_V2 0x02
+#define SENSOR_DATA 0x02
+#define SENSOR_DATA_V2 0x03
 
 extern const u8 DataLen[];
 extern u8 recBuff[2][256];
@@ -28,9 +28,14 @@ typedef struct
 typedef struct
 {
 	PackageHeader header;
-	short ADCData[16];	
+	s16 ADCData[16];	
 	float SensorData[4];
+	u16 Frequency;
+	u8 Config;
+	u8 reserved;
 } SensorDataPackage;
+
+
 
 typedef struct
 {
