@@ -34,7 +34,7 @@ void LinkInit(void)
 	GPIO_Init(GPIOA,&gi);
 
 	USART2->CR1|=USART_CR1_OVER8;
-	ui.USART_BaudRate = 4000000;//4M;
+	ui.USART_BaudRate = 3000000;//4M;
 	ui.USART_WordLength = USART_WordLength_8b;
 	ui.USART_StopBits = USART_StopBits_1;
 	ui.USART_Parity = USART_Parity_No;
@@ -120,6 +120,27 @@ void LinkSendData(void* buff,u8 len)
 		DMA_Cmd(DMA1_Stream6,ENABLE);		
 		//PGout(13)=1;
 	}
+}
+
+void LinkSendRawData(void* buff,u8 len)
+{
+	if(buff)
+		memcpy(sendBuff,buff,len);
+	if(DMA_GetCurrDataCounter(DMA1_Stream6))
+	{
+		printf("dma %d\r\n",DMA_GetCurrDataCounter(DMA1_Stream5));
+	}
+	else
+	{
+		
+		while(DMA_GetCurrDataCounter(DMA1_Stream6));		
+		DMA_Cmd(DMA1_Stream6,DISABLE);	
+		while (DMA_GetCmdStatus(DMA1_Stream6) != DISABLE);	
+		DMA_SetCurrDataCounter(DMA1_Stream6,len);
+		DMA_Cmd(DMA1_Stream6,ENABLE);		
+		//PGout(13)=1;
+	}
+	
 }
 
 #warning "Empty function"

@@ -12,6 +12,7 @@
 #define ADIF_CV_Pin		6
 
 #define ADIF_MODE_SENS	PDin(3)
+#define ADIF_RNG_SENS	PCin(13)
 
 #define AD7606_RESULT()	*(__IO uint16_t *)0x60000000
 
@@ -19,7 +20,5 @@ void AD7606FSMCInit(void);
 void AD7606FSMCReset(void);
 void AD7606FSMCStart(void);
 void AD7606FSMCRead(s16* data);
-//void AD7606FSMCSetInternalClk(void);
-//void AD7606FSMCSetExternalClk(void);
 
 #endif

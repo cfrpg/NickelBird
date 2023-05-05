@@ -99,10 +99,11 @@ namespace SharpBladeDAS
 							ports[i].state = PortScannerState.Scanning;
 							Debug.WriteLine("[port scanner]start scanning:" + ports[i].name+"-" + baudSet[ports[i].baudNum].ToString());
 						}
-						catch
+						catch(Exception ex)
 						{
 							ports[i].state = PortScannerState.Unavailable;
 							Debug.WriteLine("[port scanner]cannot start scanning:" + ports[i].name);
+							Debug.WriteLine(ex);
 						}
 						break;
 					case PortScannerState.Scanning:
@@ -132,7 +133,7 @@ namespace SharpBladeDAS
 						if (DateTime.Now.Subtract(ports[i].lastCheckTime).TotalSeconds > 1.0)
 						{
 							//ports[i].baudNum = (ports[i].baudNum + 1) % baudSet.Length;
-							ports[i].state = PortScannerState.NewPort;							
+							ports[i].state = PortScannerState.NewPort;
 						}
 						break;
 				}

@@ -1,5 +1,7 @@
 #include "ad7606fsmc.h"
 #include "sblink.h"
+#include "nickelbird.h"
+#include "sblink.h"
 
 void AD7606FSMCInit(void)
 {
@@ -15,21 +17,39 @@ void AD7606FSMCInit(void)
 	gi.GPIO_Mode=GPIO_Mode_IN;
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
-	gi.GPIO_PuPd=GPIO_PuPd_DOWN;	
-	
+	gi.GPIO_PuPd=GPIO_PuPd_DOWN;		
 	GPIO_Init(GPIOD,&gi);
 	
+	// Range sense
+	gi.GPIO_Pin=GPIO_Pin_13;
+	gi.GPIO_Mode=GPIO_Mode_IN;
+	gi.GPIO_OType=GPIO_OType_PP;
+	gi.GPIO_Speed=GPIO_Speed_100MHz;
+	gi.GPIO_PuPd=GPIO_PuPd_DOWN;		
+	GPIO_Init(GPIOC,&gi);
+	
+	
+	
 	//CS
-	gi.GPIO_Mode=GPIO_Mode_OUT;
 	gi.GPIO_Pin=GPIO_Pin_6 | GPIO_Pin_7;
+	gi.GPIO_Mode=GPIO_Mode_OUT;
+	gi.GPIO_OType=GPIO_OType_PP;
+	gi.GPIO_Speed=GPIO_Speed_100MHz;
+	gi.GPIO_PuPd=GPIO_PuPd_DOWN;		
 	GPIO_Init(GPIOD,&gi);
 	//RST
 	gi.GPIO_Pin=GPIO_Pin_12;
 	gi.GPIO_Mode=GPIO_Mode_OUT;	
+	gi.GPIO_OType=GPIO_OType_PP;
+	gi.GPIO_Speed=GPIO_Speed_100MHz;
+	gi.GPIO_PuPd=GPIO_PuPd_DOWN;		
 	GPIO_Init(GPIOD,&gi);
 	//BUSY
 	gi.GPIO_Pin=GPIO_Pin_13;
 	gi.GPIO_Mode=GPIO_Mode_IN;
+	gi.GPIO_OType=GPIO_OType_PP;
+	gi.GPIO_Speed=GPIO_Speed_100MHz;
+	gi.GPIO_PuPd=GPIO_PuPd_UP;
 	GPIO_Init(GPIOD,&gi);
 	
 	ADIF_CS1=1;
@@ -78,7 +98,7 @@ void AD7606FSMCInit(void)
 	
 	timing.FSMC_AddressSetupTime = 0;
 	timing.FSMC_AddressHoldTime = 0;
-	timing.FSMC_DataSetupTime = 1  ;
+	timing.FSMC_DataSetupTime = 4;
 	timing.FSMC_BusTurnAroundDuration = 0;
 	timing.FSMC_CLKDivision = 0;
 	timing.FSMC_DataLatency = 0;
@@ -125,6 +145,18 @@ void AD7606FSMCInit(void)
 	ni.NVIC_IRQChannelPreemptionPriority=0;
 	ni.NVIC_IRQChannelSubPriority=0;
 	NVIC_Init(&ni);
+	
+	sys.sensors.Config&=0b11000000;
+	if(ADIF_RNG_SENS==1)
+	{
+		sys.sensors.Config|=RANGE_10V0BP;
+		sys.sensors.Config|=RANGE_10V0BP<<3;
+	}
+	else
+	{
+		sys.sensors.Config|=RANGE_5V0BP;
+		sys.sensors.Config|=RANGE_5V0BP<<3;
+	}
 }
 //void AD7606FSMCSetInternalClk(void)
 //{

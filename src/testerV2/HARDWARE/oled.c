@@ -200,7 +200,7 @@ void OledStartUp(void)
 	OledSendByte(0x07);
 	OledSendByte(0xd5);//Function Selection B
 	OledSendByte(0x02);//Enable second pre-charge
-	//OledSendByte(0xb9);
+	OledSendByte(0xb9);
 	OledSendByte(0xaf);//Display on	
 	OledSendByte(0xb5);
 	OledSendByte(0x03);

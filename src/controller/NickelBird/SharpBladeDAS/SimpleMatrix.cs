@@ -57,7 +57,7 @@ namespace SharpBladeDAS
 						continue;
 					ans += source[sourceOffset + j] * data[i, j];
 				}
-				dest[i + destOffset] += ans + data[i, col];			
+				dest[i + destOffset] = ans + data[i, col];			
 			}
 		}
 

@@ -2,10 +2,12 @@
 #include "pages.h"
 #include "ad7606fsmc.h"
 #include "sblink.h"
+#include "nickelbird.h"
 
 u32 splcnt;
 u32 splsum;
 u32 spllast;
+u32 _freq_backup;
 
 SamplingState splState;
 
@@ -138,6 +140,8 @@ void SamplingInit(void)
 	
 	splcnt=0;
 	splsum=0;
+	_freq_backup=1000;
+	sys.sensors.Frequency=1000;
 }
 
 void SamplingSlowUpdate(u16 time)
@@ -175,6 +179,7 @@ void SamplingIntUpdate(void)
 void SamplingSetInternalFrequency(u32 f)
 {
 	TIM8->ARR=(1000000/f)&0xFFFF;
+	sys.sensors.Frequency=(u16)f;
 }
 
 void SamplingSetExternalClockPolarity(u8 p)
@@ -201,18 +206,22 @@ void SamplingSetClockSource(u8 t)
 		splState.ClockSource=INTERNAL;
 		TIM_ClearITPendingBit(TIM8, TIM_IT_Update);
 		TIM_Cmd(TIM8, ENABLE);
-		
+		// Recover sampling frequency
+		sys.sensors.Frequency=_freq_backup;
 	}
 	else
 	{
+		// Backup sampling frequency
+		_freq_backup=sys.sensors.Frequency;
 		//stop internal clock
 		TIM_Cmd(TIM8, DISABLE);
 		TIM_ClearITPendingBit(TIM8, TIM_IT_Update);
 		//wait adc
-		while(splState.adcBusy);
+		//while(splState.adcBusy);
 		//start external clock
 		splState.ClockSource=EXTERNAL;
 		SPL_TRIG_SEL=EXTERNAL;
+		
 	}
 }
 
@@ -254,6 +263,7 @@ void TIM1_BRK_TIM9_IRQHandler(void)
 				splState.ExternalClockFrequency=10000000/splsum*10;			
 			splcnt=0;
 			splsum=0;
+			sys.sensors.Frequency=splState.ExternalClockFrequency;
 		}
 	}
 }

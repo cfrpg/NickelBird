@@ -37,6 +37,7 @@ namespace NickelBird
 		AdvancedPortScanner portScanner;
 		SerialLink link;
 		Config config;
+		System.Threading.Timer linkMonitor;
 		bool isLogging;
 		bool isWritingFile;
 		StreamWriter logWriter;
@@ -48,13 +49,11 @@ namespace NickelBird
 		List<ObservableDataSource<Point>> graphData;
 		List<AxesRangeRestriction> graphRestrictions;
 
-
 		int graphcnt;
 
 		int trim;
 		int trimcnt;
 		double trimsum;
-		int graphSkipCnt;
 		int logcnt;
 		double plotTime;
 		int logStartTime;
@@ -99,11 +98,18 @@ namespace NickelBird
 		public MainWindow()
 		{
 			InitializeComponent();
+			System.Globalization.CultureInfo myCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+			myCulture.NumberFormat.NaNSymbol = "NaN";
+			myCulture.NumberFormat.PositiveInfinitySymbol = "inf";
+			myCulture.NumberFormat.NegativeInfinitySymbol = "-inf";
+			System.Globalization.CultureInfo.DefaultThreadCurrentCulture = myCulture;
+			System.Threading.Thread.CurrentThread.CurrentCulture = myCulture;
 
 			sensorDatas = new ObservableCollection<SensorData>();
 			buff = new List<double>();
 			syncFlag = new SyncFlag();
 			syncFlag.SkipCount = 50;
+			syncFlag.GraphSkipCnt = 10;
 			initConfig();
 			//sensorDatas.Add(new SensorData(syncFlag, config) { Name="Freq"});
 			freqData = new SensorData(syncFlag, config);
@@ -216,6 +222,7 @@ namespace NickelBird
 			portScanner = new AdvancedPortScanner(config.Baudrate, 256, 3);
 			portScanner.OnFindPort += PortScanner_OnFindPort;
 			portScanner.Start();
+			linkMonitor = new System.Threading.Timer(linkMonitorWorker, null, 0, 1000);
 		}
 
 
@@ -235,10 +242,29 @@ namespace NickelBird
 			while (true)
 			{
 				//while (linkAvilable && link.ReceivedPackageQueue.TryDequeue(out LinkPackage package))
-				while (linkAvilable && link.ReceivedPackageCollection.TryTake(out LinkPackage package, 2)) 
+				while (linkAvilable && link.ReceivedPackageCollection.TryTake(out LinkPackage package, 2))
 				{
 					analyzePackage((SBLinkPackage)package);
 					//Debug.WriteLine("[Link] Recevie package size= {0} function={1} remain={2}", package.DataSize,package.Function,link.ReceivedPackageQueue.Count);
+				}
+			}
+		}
+
+		private void linkMonitorWorker(object state)
+		{
+			if (link != null)
+			{
+				if (linkAvilable)
+				{
+					if (!link.Port.IsOpen)
+					{
+						linkAvilable = false;
+						link = null;
+						flightState.SampleRateChanged = true;
+						flightState.VerisonChanged = true;
+						flightState.CurrentVerison = -1;
+						portScanner.Start();
+					}
 				}
 			}
 		}
@@ -247,53 +273,166 @@ namespace NickelBird
 		{
 
 		}
+
+		void checkPackageVersion(SBLinkPackage package)
+		{
+			flightState.CurrentVerison = package.Function - 1;
+			if (flightState.CurrentVerison == 2)
+			{
+				byte b = package.NextByte();
+				ADCRange r1 = (ADCRange)(b & 0x07);
+				ADCRange r2 = (ADCRange)((b >> 3) & 0x07);
+				if (flightState.SamplingRange[0] != r1 || flightState.SamplingRange[1] != r2)
+				{
+					flightState.SamplingRange[0] = r1;
+					flightState.SamplingRange[1] = r2;
+					flightState.VerisonChanged = true;
+				}
+				package.NextByte();
+				flightState.SampleRate = package.NextShort();
+				if(flightState.SampleRateChanged)
+				{
+					syncFlag.SkipCount = flightState.SampleRate / 20;
+					syncFlag.GraphSkipCnt = flightState.SampleRate / 100;
+				}
+				
+			}
+			if (flightState.VerisonChanged)
+			{
+				if (flightState.CurrentVerison == 0)
+				{
+					flightState.SampleRate = 1000;
+					for (int i = 0; i < 8; i++)
+					{
+						sensorDatas[i].Factor = 10.0 / 65536;
+					}
+					for (int i = 8; i < 10; i++)
+					{
+						sensorDatas[i].Factor = 3.3 / 4096;
+					}
+				}
+				if (flightState.CurrentVerison == 1)
+				{
+					flightState.SampleRate = 1000;
+					for (int i = 0; i < 8; i++)
+					{
+						sensorDatas[i].Factor = 10.0 / 65536;
+					}
+					for (int i = 8; i < 12; i++)
+					{
+						sensorDatas[i].Factor = 3.3 / 4096;
+					}
+				}
+				if (flightState.CurrentVerison == 2)
+				{
+					
+					for (int i = 0; i < 8; i++)
+					{
+						sensorDatas[i].Factor = SensorData.RangeFactor[(int)flightState.SamplingRange[0]];
+					}
+					for (int i = 8; i < 16; i++)
+					{
+						sensorDatas[i].Factor = SensorData.RangeFactor[(int)flightState.SamplingRange[1]];
+					}
+				}
+				flightState.VerisonChanged = false;
+			}
+		}
+
+		void getPackageData(SBLinkPackage package)
+		{
+			if(flightState.CurrentVerison==0)
+			{
+				//8 x 16bit + 2 x 12bit + 4 x float
+				for (int i = 0; i < 8; i++)
+				{
+					sensorDatas[i].SetRawValue(package.NextShort());
+					buff[i]= sensorDatas[i].LpfValue;
+				}
+				for (int i = 8; i < 10; i++)
+				{
+					sensorDatas[i].SetRawValue(package.NextShort());
+					buff[i] = sensorDatas[i].LpfValue;
+				}
+				for (int i = 16; i < 20; i++)
+				{
+					sensorDatas[i].SetRawValue(package.NextSingle());
+					buff[i] = sensorDatas[i].LpfValue;
+				}
+			}
+			else if(flightState.CurrentVerison == 1)
+			{
+				//8 x 16bit + 4 x 12bit + 4 x float
+				for (int i = 0; i < 8; i++)
+				{
+					sensorDatas[i].SetRawValue(package.NextShort());
+					buff[i] = sensorDatas[i].LpfValue;
+				}
+				for (int i = 8; i < 12; i++)
+				{
+					sensorDatas[i].SetRawValue(package.NextShort());
+					buff[i] = sensorDatas[i].LpfValue;
+				}
+				for (int i = 16; i < 20; i++)
+				{
+					sensorDatas[i].SetRawValue(package.NextSingle());
+					buff[i] = sensorDatas[i].LpfValue;
+				}
+			}
+			else if (flightState.CurrentVerison == 2)
+			{
+				//16 x 16bit + 4 x float
+				for (int i = 0; i < 16; i++)
+				{
+					sensorDatas[i].SetRawValue(package.NextShort());
+					buff[i] = sensorDatas[i].LpfValue;
+				}
+				for (int i = 16; i < 20; i++)
+				{
+					sensorDatas[i].SetRawValue(package.NextSingle());
+					buff[i] = sensorDatas[i].LpfValue;
+				}
+			}
+
+		}
+
+		void transformData()
+		{
+			mat.Transform(buff, 0, buff, 20);
+			logmat.TransformLog(buff, 0, buff, 20);
+			for (int i = 20; i < buff.Count; i++)
+				sensorDatas[i].SetRawValue((float)buff[i]);
+		}
+
 		void analyzePackage(SBLinkPackage package)
 		{
 			bool stopFlag = false;
 			if (isLogging)
 				isWritingFile = true;
-			plotTime += 0.001;
-			graphSkipCnt++;
+			plotTime += flightState.SampleInterval;
+			
 			package.StartRead();
 			if (logStartTime < 0)
 				logStartTime = package.Time;
 			currentTime = (package.Time - logStartTime) / config.FilterFs;
 
-			if (package.Function == 1 || package.Function == 2)
+
+			checkPackageVersion(package);
+			
+
+			if (package.Function == 1 || package.Function == 2 || package.Function == 3)
 			{
 				int pos = 0;
 				syncFlag.UpdateFlag();
-				for (pos = 0; pos < 10; pos++)
-				{
-					sensorDatas[pos].SetRawValue(package.NextShort());
-					buff[pos] = sensorDatas[pos].LpfValue;
-				}
-				if (package.Function == 2)
-				{
-					for (; pos < 12; pos++)
-					{
-						sensorDatas[pos].SetRawValue(package.NextShort());
-						buff[pos] = sensorDatas[pos].LpfValue;
-					}
-				}
 
-				for (pos = 12; pos < 16; pos++)
-				{
-					sensorDatas[pos].SetRawValue(package.NextSingle());
-					buff[pos] = sensorDatas[pos].LpfValue;
-				}
-				for (int i = pos; i < buff.Count; i++)
-					buff[i] = 0;
-				mat.Transform(buff, 0, buff, pos);
-				logmat.TransformLog(buff, 0, buff, pos);
-				for (; pos < buff.Count; pos++)
-					sensorDatas[pos].SetRawValue((float)buff[pos]);
+				getPackageData(package);
+				transformData();
+
 				if (isLogging)
 				{
 					isWritingFile = true;
 					if (logcnt >= config.LogSkip)
 					{
-
 						logWriter.Write(currentTime.ToString());
 						for (int i = 0; i < sensorDatas.Count; i++)
 						{
@@ -336,7 +475,7 @@ namespace NickelBird
 						graphMax[i] = sensorDatas[config.PlotData[i]].ScaledValue;
 					}
 				}
-				if (graphSkipCnt >= 10)
+				if (syncFlag.UpdateGraph)
 				{
 					for (int i = 0; i < plotters.Count; i++)
 					{
@@ -365,11 +504,7 @@ namespace NickelBird
 							graphMax[i] = 0;
 						}
 						graphcnt = 0;
-					}
-
-					//sensorDatas[sensorDatas.Count - 1].SetRawValue((float)SharpBladeDAS.MathHelper.CorrFreq(freqbuff, freqHead, freqCount));
-
-					graphSkipCnt = 0;
+					}					
 				}
 				if (config.FreqEnabled)
 				{
@@ -412,7 +547,7 @@ namespace NickelBird
 						}
 					}
 				}
-				syncFlag.UpdateUI = false;
+				syncFlag.ResetFlags();
 			}
 		}
 		void initConfig()
@@ -448,7 +583,7 @@ namespace NickelBird
 				s.Close();
 
 			}
-			initMatrix(7, 14);
+			initMatrix(7, 20);
 			sensorDatas.Clear();
 
 			for (int i = 0; i < config.Offsets.Length; i++)
@@ -477,8 +612,7 @@ namespace NickelBird
 				di.Create();
 			string name = config.MatrixName;
 			FileInfo fi = new FileInfo(path + "\\" + name);
-			mat = new SimpleMatrix(r, c, false);
-			logmat = new SimpleMatrix(r, c, true);
+			
 			string str;
 			string[] strs;
 			int row, col;
@@ -490,7 +624,9 @@ namespace NickelBird
 				strs = str.Split(',');
 				row = int.Parse(strs[0]);
 				col = int.Parse(strs[1]);
-				sr.ReadLine();//skip header
+				mat = new SimpleMatrix(row, col, false);
+				logmat = new SimpleMatrix(row, col, true);
+				sr.ReadLine();//skip header				
 				for (; i < row && i < r; i++)
 				{
 					str = sr.ReadLine();
@@ -863,7 +999,7 @@ namespace NickelBird
 					fi.CopyTo(nfi.FullName, true);
 				}
 				config.MatrixName = name;
-				initMatrix(7, 14);
+				initMatrix(7, 20);
 
 				//initConfig();
 				//showMessage("重启应用程序启用新配置文件");
@@ -979,7 +1115,7 @@ namespace NickelBird
 				sw.WriteLine("Power,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1");
 				sw.Close();
 				config.MatrixName = System.IO.Path.GetFileName(sfd.FileName);
-				initMatrix(7, 14);
+				initMatrix(7, 20);
 			}
 		}
 
@@ -1077,7 +1213,7 @@ namespace NickelBird
 
 		private void tableName1_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			
+
 		}
 	}
 }

@@ -196,7 +196,7 @@ namespace SharpBladeDAS
 				s[i] = 1;
 				n[i] = "Sensor " + i.ToString();
 				if (i < 8)
-					fa[i] = 10.0 / 65535;
+					fa[i] = 10.0 / 65536;
 				else if (i < 12)
 					fa[i] = 3.3 / 4096;
 				else

@@ -1,3 +1,6 @@
+#ifndef __NICKELBIRD_H
+#define __NICKELBIRD_H
+
 #include "sys.h"
 #include "sblink.h"
 #include "sampling.h"
@@ -22,3 +25,5 @@ typedef struct
 } systemState;
 
 extern systemState sys;
+
+#endif

@@ -26,7 +26,7 @@ void PagesInit(void)
 	
 	sys.sensors.header.stx=LINKSTX;
 	sys.sensors.header.len=DataLen[SENSOR_DATA_V2];
-	sys.sensors.header.fun=SENSOR_DATA_V2;	
+	sys.sensors.header.fun=SENSOR_DATA_V2;
 	sys.sensors.header.time=0;
 	sys.slowUpdate=0;
 	sys.fastUpdate=0;

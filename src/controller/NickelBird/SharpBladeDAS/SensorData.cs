@@ -31,6 +31,8 @@ namespace SharpBladeDAS
 
 		SyncFlag syncFlag;
 
+		private static double[] rangeFactor = new double[8] { 2.5 * 2 / 65535, 5.0 * 2 / 65535, 6.25 * 2 / 65535, 10.0 * 2 / 65535, 12.5 * 2 / 65535, 20.0 * 2 / 65535, 5.0 / 65535, 10.0 / 65535 };
+
 		public double Value
 		{
 			get => value;
@@ -130,6 +132,7 @@ namespace SharpBladeDAS
 		public SyncFlag SyncFlag { get => syncFlag; set => syncFlag = value; }
 		public Filter Filter { get => filter; }
 		public int Id { get => id; set => id = value; }
+		public static double[] RangeFactor { get => rangeFactor; }
 
 		public SensorData(SyncFlag sf,Config c)
 		{

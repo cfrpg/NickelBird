@@ -30,6 +30,13 @@ namespace NickelBird
 
 		double timer;
 
+		bool sampleRateChanged;
+		bool verisonChanged;
+		int currentVerison;
+		int sampleRate;
+		ADCRange[] samplingRange;
+		double sampleInterval;
+
 		public double Airspeed
 		{
 			get => airspeed;
@@ -135,10 +142,28 @@ namespace NickelBird
 			}
 		}
 
+		public bool SampleRateChanged { get => sampleRateChanged; set => sampleRateChanged = value; }
+		public bool VerisonChanged { get => verisonChanged; set => verisonChanged = value; }
+		public int CurrentVerison { get => currentVerison; set => currentVerison = value; }
+		public int SampleRate
+		{
+			get => sampleRate;
+			set
+			{
+				if (sampleRate != value)
+					sampleRateChanged = true;
+				sampleRate = value;
+				sampleInterval = 1.0 / sampleRate;
+			}
+		}
+
+		public ADCRange[] SamplingRange { get => samplingRange; set => samplingRange = value; }
+		public double SampleInterval { get => sampleInterval; }
+
 		public FlightState(SyncFlag sf)
 		{
 			syncFlag = sf;
-			SSTime = 2000;			
+			SSTime = 2000;
 			SSEanbled = false;
 			graphData = new ObservableCollection<double>();
 			tableData = new ObservableCollection<double>();
@@ -149,6 +174,25 @@ namespace NickelBird
 				tableData.Add(0);
 				graphMaxData.Add(0);
 			}
+			verisonChanged = true;
+			sampleRateChanged = true;
+			currentVerison = -1;
+			sampleRate = 1000;
+			sampleInterval = 0.001;
+			samplingRange = new ADCRange[2] { ADCRange.Bipolar5V0, ADCRange.Bipolar5V0 };
+			
 		}
 	}
+}
+
+public enum ADCRange : byte
+{
+	Bipolar2V5 = 0,
+	Bipolar5V0,
+	Bipolar6V25,
+	Bipolar10V0,
+	Bipolar12V5,
+	Bipolar20V0,
+	Unipolar5V0,
+	Unipolar10V0
 }

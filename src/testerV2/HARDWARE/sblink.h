@@ -10,6 +10,15 @@
 #define SENSOR_DATA 0x02
 #define SENSOR_DATA_V2 0x03
 
+#define RANGE_2V5BP		0x00
+#define RANGE_5V0BP		0x01
+#define RANGE_6V25BP	0x02
+#define RANGE_10V0BP	0x03
+#define RANGE_12V5BP	0x04
+#define RANGE_20V0BP	0x05
+#define RANGE_5V0UP		0x06
+#define RANGE_10V0UP	0x07
+
 extern const u8 DataLen[];
 extern u8 recBuff[2][256];
 extern u8 recBuffLen[2];
@@ -26,13 +35,13 @@ typedef struct
 } PackageHeader;
 
 typedef struct
-{
+{	
 	PackageHeader header;
-	s16 ADCData[16];	
-	float SensorData[4];
-	u16 Frequency;
 	u8 Config;
 	u8 reserved;
+	u16 Frequency;
+	s16 ADCData[16];	
+	float SensorData[4];	
 } SensorDataPackage;
 
 
@@ -47,6 +56,7 @@ extern u8 sendBuff[SENDBUFFSIZE];
 
 void LinkInit(void);
 void LinkSendData(void* buff,u8 len);
+void LinkSendRawData(void* buff,u8 len);
 u32 LinkPackTime(void);
 
 #endif

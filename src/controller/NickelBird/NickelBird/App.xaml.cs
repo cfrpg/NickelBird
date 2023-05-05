@@ -13,5 +13,6 @@ namespace NickelBird
 	/// </summary>
 	public partial class App : Application
 	{
+
 	}
 }

@@ -85,7 +85,17 @@ int main(void)
 	
 	// Initialize sampling control
 	SamplingInit();
+	//SamplingSetClockSource(EXTERNAL);
 	LinkInit();	
+	
+//	u8 buff[100];
+//	memset(buff,0x55,100);
+//	while(1)
+//	{
+//		LinkSendRawData(buff,100);
+//		while(DMA_GetCurrDataCounter(DMA1_Stream6)!=0);
+//		delay_us(100);
+//	}
 	
 	//Initialize UI
 	PagesInit();
@@ -96,7 +106,7 @@ int main(void)
 	delay_ms(500);
 	delay_ms(500);
 	
-	printf("%d\t%d\n",sizeof(PackageHeader),sizeof(SensorDataPackage2));
+	//printf("%d\t%d\n",sizeof(PackageHeader),sizeof(SensorDataPackage));
 
 	while(1)
 	{	
