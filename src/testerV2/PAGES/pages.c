@@ -165,7 +165,17 @@ void PagesUpdate(void)
 //			sys.adcClkSource=INTERNAL;
 //			sys.ledInterval=500;
 //			AD7606FSMCSetInternalClk();
-//		}
+//		}				
+		if(splState.ClockSource==INTERNAL)
+		{
+			SamplingSetClockSource(EXTERNAL);
+			LEDSetPattern(LED_OFF,LED_OFF,LED_5Hz);
+		}
+		else
+		{
+			SamplingSetClockSource(INTERNAL);
+			LEDSetPattern(LED_OFF,LED_OFF,LED_1Hz);
+		}
 	}
 	lastKey=currKey;
 	lastWheel=currWheel;

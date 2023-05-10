@@ -9,7 +9,7 @@
 #define PARAM_TYPE_FLOAT 1
 #define PARAM_TYPE_BINARY 2
 
-#define PARAM_NUM 17
+#define PARAM_NUM 20
 
 typedef union
 {

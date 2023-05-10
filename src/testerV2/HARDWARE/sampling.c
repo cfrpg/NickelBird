@@ -3,6 +3,7 @@
 #include "ad7606fsmc.h"
 #include "sblink.h"
 #include "nickelbird.h"
+#include "parameter.h"
 
 u32 splcnt;
 u32 splsum;
@@ -17,10 +18,16 @@ void SamplingInit(void)
 	TIM_TimeBaseInitTypeDef ti;
 	TIM_OCInitTypeDef to;
 	NVIC_InitTypeDef ni;
+	EXTI_InitTypeDef ei;
 		
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD,ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE,ENABLE);
+	
+	// Get parameters
+	splState.defaultFreq=ParamGetFromName("SPL_CLK_RATE");
+	splState.defaultClkPolarity=ParamGetFromName("SPL_ECLK_POL");
+	splState.defaultEnablePolarity=ParamGetFromName("SPL_EN_POL");
 	
 	splState.ExternalClockFrequency=0;
 	splState.InternalClockFrequency=1000;
@@ -40,8 +47,8 @@ void SamplingInit(void)
 	gi.GPIO_PuPd=GPIO_PuPd_DOWN;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
 	GPIO_Init(GPIOC,&gi);
-	EXT_CLK_INV=0;
-	EXT_EN_INV=0;
+	EXT_CLK_INV=(u8)(*splState.defaultClkPolarity)&0x01;
+	EXT_EN_INV=(u8)(*splState.defaultEnablePolarity)&0x01;
 	
 	// Sampling trigger select
 	// Set 1 to use external trigger signal
@@ -68,6 +75,7 @@ void SamplingInit(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8, ENABLE);	
 	
 	ti.TIM_Period = 999; //default 1ms=1000Hz
+	ti.TIM_Period = (1000000/(*splState.defaultFreq))&0xFFFF;
 	ti.TIM_Prescaler =168-1;//1us
 	ti.TIM_ClockDivision = TIM_CKD_DIV1; 
 	ti.TIM_CounterMode = TIM_CounterMode_Up; 
@@ -136,12 +144,26 @@ void SamplingInit(void)
 	gi.GPIO_OType=GPIO_OType_PP;
 	gi.GPIO_PuPd=GPIO_PuPd_UP;
 	gi.GPIO_Speed=GPIO_Speed_100MHz;
-	GPIO_Init(GPIOE,&gi);	
+	GPIO_Init(GPIOE,&gi);
+	
+	// Enable input interrupt
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG,ENABLE);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOE,EXTI_PinSource6);
+	ei.EXTI_Line=EXTI_Line6;
+	ei.EXTI_Mode=EXTI_Mode_Interrupt;
+	ei.EXTI_Trigger=EXTI_Trigger_Rising_Falling;
+	ei.EXTI_LineCmd=ENABLE;
+	EXTI_Init(&ei);
+	ni.NVIC_IRQChannel=EXTI9_5_IRQn;
+	ni.NVIC_IRQChannelCmd=ENABLE;
+	ni.NVIC_IRQChannelPreemptionPriority=2;
+	ni.NVIC_IRQChannelSubPriority=3;
+	NVIC_Init(&ni);
 	
 	splcnt=0;
 	splsum=0;
-	_freq_backup=1000;
-	sys.sensors.Frequency=1000;
+	_freq_backup=(u16)(*splState.defaultFreq);
+	sys.sensors.Frequency=(u16)(*splState.defaultFreq);
 }
 
 void SamplingSlowUpdate(u16 time)
@@ -200,6 +222,7 @@ void SamplingSetClockSource(u8 t)
 	{
 		//stop external clock
 		SPL_TRIG_SEL=INTERNAL;
+		sys.sensors.Config|=0b10000000;
 		//wait ADC
 		while(splState.adcBusy);
 		//start internal clock
@@ -216,10 +239,13 @@ void SamplingSetClockSource(u8 t)
 		//stop internal clock
 		TIM_Cmd(TIM8, DISABLE);
 		TIM_ClearITPendingBit(TIM8, TIM_IT_Update);
+		splsum=0;
+		splcnt=0;
 		//wait adc
 		//while(splState.adcBusy);
 		//start external clock
 		splState.ClockSource=EXTERNAL;
+		SamplingCheckEnabled();	
 		SPL_TRIG_SEL=EXTERNAL;
 		
 	}
@@ -243,12 +269,19 @@ void TIM8_UP_TIM13_IRQHandler(void)
 
 void TIM1_BRK_TIM9_IRQHandler(void)
 {
-	u32 t,freq;
+	u32 t;
 	if(TIM_GetITStatus(TIM9,TIM_IT_CC1)!=RESET)
 	{
 		
 		TIM_ClearITPendingBit(TIM9,TIM_IT_CC1);
+		if(splState.ClockSource==EXTERNAL&&(!splState.adcBusy))
+		{
+			splState.adcBusy=1;
+			sys.sensors.header.time++;
+		}	
 		t=TIM_GetCapture1(TIM9);
+		if(splState.ClockSource==INTERNAL)
+			return;
 		if(t<spllast)
 			splsum+=t+0xFFFF-spllast;
 		else
@@ -266,4 +299,26 @@ void TIM1_BRK_TIM9_IRQHandler(void)
 			sys.sensors.Frequency=splState.ExternalClockFrequency;
 		}
 	}
+}
+void SamplingCheckEnabled(void)
+{
+	if(splState.ClockSource==INTERNAL)
+			return;
+	if(EXT_TRIG_EN)
+	{
+		sys.sensors.Config|=0b10000000;
+	}
+	else
+	{
+		sys.sensors.Config&=0b01111111;
+	}
+}
+
+void EXTI9_5_IRQHandler(void)
+{	
+	if(EXTI_GetITStatus(EXTI_Line6)!=RESET)
+	{	
+		EXTI_ClearITPendingBit(EXTI_Line6);
+		SamplingCheckEnabled();	
+	}	
 }

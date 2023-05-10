@@ -207,6 +207,7 @@ namespace NickelBird
 
 			timerText.DataContext = flightState;
 			freqText.DataContext = flightState;
+			samplingRateText.DataContext = flightState;
 
 			linkAvilable = false;
 			dataListenerThread = new Thread(dataListenerWorker);
@@ -274,8 +275,9 @@ namespace NickelBird
 
 		}
 
-		void checkPackageVersion(SBLinkPackage package)
+		bool checkPackageVersion(SBLinkPackage package)
 		{
+			bool res = true;
 			flightState.CurrentVerison = package.Function - 1;
 			if (flightState.CurrentVerison == 2)
 			{
@@ -288,6 +290,7 @@ namespace NickelBird
 					flightState.SamplingRange[1] = r2;
 					flightState.VerisonChanged = true;
 				}
+				res = (b & 0b10000000)!=0;
 				package.NextByte();
 				flightState.SampleRate = package.NextShort();
 				if(flightState.SampleRateChanged)
@@ -337,10 +340,11 @@ namespace NickelBird
 				}
 				flightState.VerisonChanged = false;
 			}
+			return res;
 		}
 
 		void getPackageData(SBLinkPackage package)
-		{
+		{			
 			if(flightState.CurrentVerison==0)
 			{
 				//8 x 16bit + 2 x 12bit + 4 x float
@@ -392,8 +396,7 @@ namespace NickelBird
 					sensorDatas[i].SetRawValue(package.NextSingle());
 					buff[i] = sensorDatas[i].LpfValue;
 				}
-			}
-
+			}			
 		}
 
 		void transformData()
@@ -407,6 +410,7 @@ namespace NickelBird
 		void analyzePackage(SBLinkPackage package)
 		{
 			bool stopFlag = false;
+			bool logData = true;
 			if (isLogging)
 				isWritingFile = true;
 			plotTime += flightState.SampleInterval;
@@ -414,10 +418,11 @@ namespace NickelBird
 			package.StartRead();
 			if (logStartTime < 0)
 				logStartTime = package.Time;
-			currentTime = (package.Time - logStartTime) / config.FilterFs;
+			//currentTime = (package.Time - logStartTime) / config.FilterFs;
+			currentTime = (double)(package.Time - logStartTime) / flightState.SampleRate;
 
 
-			checkPackageVersion(package);
+			logData =checkPackageVersion(package);
 			
 
 			if (package.Function == 1 || package.Function == 2 || package.Function == 3)
@@ -433,31 +438,35 @@ namespace NickelBird
 					isWritingFile = true;
 					if (logcnt >= config.LogSkip)
 					{
-						logWriter.Write(currentTime.ToString());
-						for (int i = 0; i < sensorDatas.Count; i++)
+						if (logData)
 						{
-							if (sensorDatas[i].LogEnabled)
+							logWriter.Write(currentTime.ToString());
+							for (int i = 0; i < sensorDatas.Count; i++)
 							{
-								logWriter.Write(sepChar + sensorDatas[i].ScaledValue);
-								logWriter.Write(sepChar + sensorDatas[i].RawValue);
-								if (sensorDatas[i].FilterEnabled)
+								if (sensorDatas[i].LogEnabled)
 								{
-									logWriter.Write(sepChar + sensorDatas[i].LpfValue);
+									logWriter.Write(sepChar + sensorDatas[i].ScaledValue);
+									logWriter.Write(sepChar + sensorDatas[i].RawValue);
+									if (sensorDatas[i].FilterEnabled)
+									{
+										logWriter.Write(sepChar + sensorDatas[i].LpfValue);
+									}
 								}
 							}
+							if (config.IsCsv)
+								logWriter.Write(",");
+							logWriter.Write(Environment.NewLine);
+							logWriter.Flush();
+							flightState.Timer += 1;
 						}
-						if (config.IsCsv)
-							logWriter.Write(",");
-						logWriter.Write(Environment.NewLine);
-						logWriter.Flush();
 						isWritingFile = false;
-
+						
 						logcnt = 0;
 					}
 					isWritingFile = false;
 					logcnt++;
 					//flightState.Timer += 0.001;
-					flightState.Timer += 1;
+					
 
 					if (flightState.SSEanbled)
 					{
@@ -504,7 +513,7 @@ namespace NickelBird
 							graphMax[i] = 0;
 						}
 						graphcnt = 0;
-					}					
+					}
 				}
 				if (config.FreqEnabled)
 				{
@@ -583,10 +592,31 @@ namespace NickelBird
 				s.Close();
 
 			}
-			initMatrix(7, 20);
+			initMatrix();
 			sensorDatas.Clear();
+			initSensorDataConfig();
 
-			for (int i = 0; i < config.Offsets.Length; i++)
+		}
+
+		void initSensorDataConfig()
+		{
+			int dataCnt = mat.Row + 20;// 20 * original data + transformed data
+
+			// Add more data config
+			while (config.Offsets.Count < dataCnt)
+			{
+				config.Offsets.Add(0);
+				config.Scales.Add(1);
+				config.LogEnabled.Add(false);
+				config.Names.Add("Sensor" + config.Offsets.Count.ToString());
+				config.FilterEnabled.Add(false);
+				config.Factors.Add(1);
+			}
+
+			while (sensorDatas.Count > dataCnt)
+				sensorDatas.RemoveAt(sensorDatas.Count - 1);
+
+			for (int i = sensorDatas.Count; i < dataCnt; i++)
 			{
 				sensorDatas.Add(new SensorData(syncFlag, config)
 				{
@@ -602,9 +632,22 @@ namespace NickelBird
 				buff.Add(0);
 			}
 
+			//check data reference
+			for (int i = 0; i < 6; i++)
+			{
+				if (config.PlotData[i] >= dataCnt)
+					config.PlotData[i] = i;
+			}
+			for (int i = 0; i < 2; i++)
+			{
+				if (config.TableData[i] >= dataCnt)
+					config.TableData[i] = i;
+			}
+			if (config.FreqData >= dataCnt)
+				config.FreqData = 0;
 		}
 
-		void initMatrix(int r, int c)
+		void initMatrix()
 		{
 			string path = Environment.CurrentDirectory + "\\matrices";
 			DirectoryInfo di = new DirectoryInfo(path);
@@ -627,11 +670,11 @@ namespace NickelBird
 				mat = new SimpleMatrix(row, col, false);
 				logmat = new SimpleMatrix(row, col, true);
 				sr.ReadLine();//skip header				
-				for (; i < row && i < r; i++)
+				for (; i < row ; i++)
 				{
 					str = sr.ReadLine();
 					strs = str.Split(',');
-					for (int j = 0; j < col + 1 && j < c + 1; j++)
+					for (int j = 0; j < col + 1; j++)
 					{
 						mat.Data[i, j] = double.Parse(strs[j + 1]);//skip header
 					}
@@ -640,11 +683,11 @@ namespace NickelBird
 					sr.ReadLine();
 				sr.ReadLine();//skip space line
 				sr.ReadLine();//skip header
-				for (i = 0; i < row && i < r; i++)
+				for (i = 0; i < row ; i++)
 				{
 					str = sr.ReadLine();
 					strs = str.Split(',');
-					for (int j = 0; j < col + 1 && j < c + 1; j++)
+					for (int j = 0; j < col + 1; j++)
 					{
 						logmat.Data[i, j] = double.Parse(strs[j + 1]);
 					}
@@ -654,54 +697,54 @@ namespace NickelBird
 			else
 			{
 				showMessage("处理矩阵不存在！");
-				config.MatrixName = "default" + r.ToString() + "x" + c.ToString() + ".csv";
-				StreamWriter sw = new StreamWriter(path + "\\" + config.MatrixName);
-				sw.Write(r.ToString());
-				sw.Write(",");
-				sw.Write(c.ToString());
-				for (i = 1; i <= c + 1; i++)
-					sw.Write(",");
-				sw.WriteLine();
-				//write header
-				sw.Write(",");
-				for (i = 0; i < c; i++)
-					sw.Write(i.ToString() + ",");
-				sw.Write("Offset,");
-				sw.WriteLine();
-				for (i = 0; i < r; i++)
-				{
-					sw.Write(i.ToString() + ",");//header
-					for (int j = 0; j < c + 1; j++)
-					{
-						sw.Write(mat.Data[i, j]);
-						sw.Write(",");
-					}
-					sw.WriteLine();
+				config.MatrixName = "NoMatrix.csv";
+				StreamWriter sw = new StreamWriter(path + "\\" + config.MatrixName);				
+				sw.Write("0,0");		
+				//for (i = 1; i <= c + 1; i++)
+				//	sw.Write(",");
+				//sw.WriteLine();
+				////write header
+				//sw.Write(",");
+				//for (i = 0; i < c; i++)
+				//	sw.Write(i.ToString() + ",");
+				//sw.Write("Offset,");
+				//sw.WriteLine();
+				//for (i = 0; i < r; i++)
+				//{
+				//	sw.Write(i.ToString() + ",");//header
+				//	for (int j = 0; j < c + 1; j++)
+				//	{
+				//		sw.Write(mat.Data[i, j]);
+				//		sw.Write(",");
+				//	}
+				//	sw.WriteLine();
 
-				}
-				//space line
-				for (i = 0; i <= c; i++)
-				{
-					sw.Write(",");
-				}
-				sw.WriteLine();
-				//write header
-				sw.Write(",");
-				for (i = 0; i < c; i++)
-					sw.Write(i.ToString() + ",");
-				sw.Write("Offset,");
-				sw.WriteLine();
-				for (i = 0; i < r; i++)
-				{
-					sw.Write(i.ToString() + ",");
-					for (int j = 0; j < c + 1; j++)
-					{
-						sw.Write(logmat.Data[i, j]);
-						sw.Write(",");
-					}
-					sw.WriteLine();
-				}
+				//}
+				////space line
+				//for (i = 0; i <= c; i++)
+				//{
+				//	sw.Write(",");
+				//}
+				//sw.WriteLine();
+				////write header
+				//sw.Write(",");
+				//for (i = 0; i < c; i++)
+				//	sw.Write(i.ToString() + ",");
+				//sw.Write("Offset,");
+				//sw.WriteLine();
+				//for (i = 0; i < r; i++)
+				//{
+				//	sw.Write(i.ToString() + ",");
+				//	for (int j = 0; j < c + 1; j++)
+				//	{
+				//		sw.Write(logmat.Data[i, j]);
+				//		sw.Write(",");
+				//	}
+				//	sw.WriteLine();
+				//}
 				sw.Close();
+				mat = new SimpleMatrix(0, 0, false);
+				logmat = new SimpleMatrix(0, 0, true);
 			}
 
 		}
@@ -718,7 +761,7 @@ namespace NickelBird
 
 		private void saveConfig()
 		{
-			for (int i = 0; i < config.Offsets.Length; i++)
+			for (int i = 0; i < sensorDatas.Count; i++)
 			{
 				config.Names[i] = sensorDatas[i].Name;
 				config.Offsets[i] = sensorDatas[i].Offset;
@@ -754,7 +797,6 @@ namespace NickelBird
 			else
 			{
 				startLog();
-
 			}
 		}
 
@@ -999,8 +1041,8 @@ namespace NickelBird
 					fi.CopyTo(nfi.FullName, true);
 				}
 				config.MatrixName = name;
-				initMatrix(7, 20);
-
+				initMatrix();
+				initSensorDataConfig();
 				//initConfig();
 				//showMessage("重启应用程序启用新配置文件");
 			}
@@ -1115,7 +1157,8 @@ namespace NickelBird
 				sw.WriteLine("Power,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1");
 				sw.Close();
 				config.MatrixName = System.IO.Path.GetFileName(sfd.FileName);
-				initMatrix(7, 20);
+				initMatrix();
+				initSensorDataConfig();
 			}
 		}
 

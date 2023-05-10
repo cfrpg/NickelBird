@@ -154,6 +154,7 @@ namespace NickelBird
 					sampleRateChanged = true;
 				sampleRate = value;
 				sampleInterval = 1.0 / sampleRate;
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SampleRate"));
 			}
 		}
 

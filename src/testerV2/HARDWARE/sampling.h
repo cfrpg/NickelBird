@@ -19,6 +19,9 @@
 
 typedef struct
 {
+	const s32* defaultFreq;
+	const s32* defaultClkPolarity;
+	const s32* defaultEnablePolarity;
 	u16 InternalClockFrequency;
 	u16 ExternalClockFrequency;
 	u8 ClockSource;
@@ -36,6 +39,7 @@ void SamplingSetClockSource(u8 t);
 void SamplingSetInternalFrequency(u32 f);
 void SamplingSetExternalClockPolarity(u8 p);
 void SamplingSetExternalEnabledPolarity(u8 p);
+void SamplingCheckEnabled(void);
 
 void SamplingSlowUpdate(u16 time);
 void SamplingFastUpdate(u16 time);

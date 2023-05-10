@@ -34,7 +34,7 @@ void LinkInit(void)
 	GPIO_Init(GPIOA,&gi);
 
 	USART2->CR1|=USART_CR1_OVER8;
-	ui.USART_BaudRate = 3000000;//4M;
+	ui.USART_BaudRate = 3000000;//3M;
 	ui.USART_WordLength = USART_WordLength_8b;
 	ui.USART_StopBits = USART_StopBits_1;
 	ui.USART_Parity = USART_Parity_No;

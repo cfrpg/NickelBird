@@ -11,12 +11,12 @@ namespace SharpBladeDAS
 	[Serializable]
 	public class Config : INotifyPropertyChanged
 	{
-		bool[] logEnabled;
-		bool[] filterEnabled;
-		double[] offsets;
-		double[] scales;
-		string[] names;
-		double[] factors;
+		List<bool> logEnabled;
+		List<bool> filterEnabled;
+		List<double> offsets;
+		List<double> scales;
+		List<string> names;
+		List<double> factors;
 
 		string logPath;
 		string matrixName;
@@ -42,9 +42,9 @@ namespace SharpBladeDAS
 
 		public event EventHandler OnFilterParamChanged;
 
-		public bool[] LogEnabled { get => logEnabled; set => logEnabled = value; }
-		public double[] Offsets { get => offsets; set => offsets = value; }
-		public double[] Scales { get => scales; set => scales = value; }
+		public List<bool> LogEnabled { get => logEnabled; set => logEnabled = value; }
+		public List<double> Offsets { get => offsets; set => offsets = value; }
+		public List<double> Scales { get => scales; set => scales = value; }
 		public string LogPath
 		{
 			get => logPath;
@@ -55,7 +55,7 @@ namespace SharpBladeDAS
 			}
 		}
 
-		public string[] Names 
+		public List<string> Names 
 		{
 			get => names;
 			set
@@ -66,9 +66,9 @@ namespace SharpBladeDAS
 		}
 
 
-		public bool[] FilterEnabled { get => filterEnabled; set => filterEnabled = value; }
+		public List<bool> FilterEnabled { get => filterEnabled; set => filterEnabled = value; }
 
-		public double[] Factors { get => factors; set => factors = value; }
+		public List<double> Factors { get => factors; set => factors = value; }
 
 		public double FilterFs
 		{
@@ -180,13 +180,13 @@ namespace SharpBladeDAS
 
 		public static Config Default(int ch)
 		{
-			bool[] b = new bool[ch];
-			double[] o = new double[ch];
-			double[] s = new double[ch];
-			string[] n = new string[ch];
-			bool[] f = new bool[ch];
-			double[] fa = new double[ch];
-			int[] pd = new int[] { 16, 17, 18, 19, 20, 21 };
+			List<bool> b = new List<bool>(ch);
+			List<double> o = new List<double>(ch);
+			List<double> s = new List<double>(ch);
+			List<string> n = new List<string>(ch);
+			List<bool> f = new List<bool>(ch);
+			List<double> fa = new List<double>(ch);
+			int[] pd = new int[] { 0, 1, 2, 3, 4, 5 };
 			for (int i = 0; i < ch; i++)
 			{
 				b[i] = true;
@@ -203,8 +203,9 @@ namespace SharpBladeDAS
 					fa[i] = 1;
 				//fa[i] = i < 8 ? 10.0 / 65535 : 3.3 / 4096;
 			}
-			return new Config() {
-				Baudrate = 921600,
+			return new Config()
+			{
+				Baudrate = 2000000,
 				LogEnabled = b,
 				FilterEnabled = f,
 				FilterFc = 25,
@@ -225,8 +226,8 @@ namespace SharpBladeDAS
 				LogNameBackup = new string[6],
 				isCsv = true,
 				LogSkip = 1,
-				TableData = new int[] { 8, 10 },
-				FreqData = 18,
+				TableData = new int[] { 0, 1 },
+				FreqData = 0,
 				FreqEnabled = false
 			};
 

@@ -20,4 +20,7 @@ const ParameterRecord parameterList[PARAM_NUM]=
 	5,	"STK_THRO_MAX",		{.floatValue=	1.0},	{.floatValue=	0},		{.floatValue=	1},
 	2,	"STK_INT_MAX",		{.floatValue=	10.0},	{.floatValue=	0},		{.floatValue=	1000},
 	5,	"STK_PHI_MAX",		{.floatValue=	0.74},	{.floatValue=	0},		{.floatValue=	1},
+	0,	"SPL_CLK_RATE",		{.intValue=	1000},		{.intValue=	100},		{.intValue=	4000},
+	0,	"SPL_ECLK_POL",		{.intValue=	0},			{.intValue=	0},			{.intValue=	1},
+	0,	"SPL_EN_POL",		{.intValue=	0},			{.intValue=	0},			{.intValue=	1},
 };

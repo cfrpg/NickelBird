@@ -44,7 +44,7 @@ int main(void)
 	
 	// Initialize system function
 	delay_init(168);
-	uart_init(921600);
+	uart_init(115200);
 	MainClockInit();
 	
 	// Initialize hardware
