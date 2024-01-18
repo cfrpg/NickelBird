@@ -290,7 +290,7 @@ namespace NickelBird
 					flightState.SamplingRange[1] = r2;
 					flightState.VerisonChanged = true;
 				}
-				res = (b & 0b10000000)!=0;
+				//res = (b & 0b10000000)!=0;
 				package.NextByte();
 				flightState.SampleRate = package.NextShort();
 				if(flightState.SampleRateChanged)
@@ -615,7 +615,11 @@ namespace NickelBird
 
 			while (sensorDatas.Count > dataCnt)
 				sensorDatas.RemoveAt(sensorDatas.Count - 1);
-
+			buff.Clear();
+			for (int i = 0; i < sensorDatas.Count; i++)
+			{
+				buff.Add(0);
+			}
 			for (int i = sensorDatas.Count; i < dataCnt; i++)
 			{
 				sensorDatas.Add(new SensorData(syncFlag, config)
@@ -635,12 +639,12 @@ namespace NickelBird
 			//check data reference
 			for (int i = 0; i < 6; i++)
 			{
-				if (config.PlotData[i] >= dataCnt)
+				if (config.PlotData[i] >= dataCnt || config.PlotData[i] < 0)
 					config.PlotData[i] = i;
 			}
 			for (int i = 0; i < 2; i++)
 			{
-				if (config.TableData[i] >= dataCnt)
+				if (config.TableData[i] >= dataCnt || config.TableData[i] < 0)
 					config.TableData[i] = i;
 			}
 			if (config.FreqData >= dataCnt)

@@ -164,6 +164,7 @@ void SamplingInit(void)
 	splsum=0;
 	_freq_backup=(u16)(*splState.defaultFreq);
 	sys.sensors.Frequency=(u16)(*splState.defaultFreq);
+	sys.sensors.Config|=0b10000000;
 }
 
 void SamplingSlowUpdate(u16 time)
@@ -221,8 +222,7 @@ void SamplingSetClockSource(u8 t)
 	if(t==INTERNAL)
 	{
 		//stop external clock
-		SPL_TRIG_SEL=INTERNAL;
-		sys.sensors.Config|=0b10000000;
+		SPL_TRIG_SEL=INTERNAL;		
 		//wait ADC
 		while(splState.adcBusy);
 		//start internal clock
@@ -231,6 +231,7 @@ void SamplingSetClockSource(u8 t)
 		TIM_Cmd(TIM8, ENABLE);
 		// Recover sampling frequency
 		sys.sensors.Frequency=_freq_backup;
+		sys.sensors.Config|=0b10000000;
 	}
 	else
 	{
@@ -303,7 +304,7 @@ void TIM1_BRK_TIM9_IRQHandler(void)
 void SamplingCheckEnabled(void)
 {
 	if(splState.ClockSource==INTERNAL)
-			return;
+		return;
 	if(EXT_TRIG_EN)
 	{
 		sys.sensors.Config|=0b10000000;
